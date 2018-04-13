@@ -23,12 +23,42 @@ zeus操作起来更加方便。对被阿里抛弃的zeus，感觉很可惜。决
 ![Alt text](https://github.com/jimmy401/zeus_nb/raw/master/Screenshots/jishujiagou.png)
 
 
+##安装部署
+1.zeus是可以单机部署，集群部署的。这里介绍三台机器master-A,worker-B,worker-C 的集群部署方式。这三台机器必须有大数据集群hive，hadoop的客户端。
+2.在每台linux机器上，安装dos2unix;命令 yum install dos2unix;这是因为在执行shell任务的时候，需要处理文本格式。
+3.配置权限
+  *在每台linux机器上创建用户biadmin,并给这个用户sudo -u biadmin的权限。
+  *linux机器上visudo。添加 biadmin。这里为什么是biadmin呢？
+  *因为zeus代码中硬编码了这个用户名，biadmin作为zeus-web的管理员帐号。同时需要用这个账号登录linux服务器，启动zeus。
+  *biadmin帐号必须有/tmp/zeus,/data/applogs/,/data/zeus/job_dir/下的增删改权限。zeus的工作路径是/tmp/zeus/yyyy-MM-dd，每天一个。
+  */data/applogs/是zeus的日志目录。/data/zeus/job_dir/是zeus的工作目录，每天一个。
+  */tmp/zeus/yyyy-MM-dd是zeus的临时工作目录，每天一个。
+  
+4.配置数据库：
+ 在项目文件夹db目录下。里面已经配置好了用户。biadmin/123456
+  
+5.编译源码：
+  *修改项目下resources目录下的env.sh中的java_home位置，指向A,B,C三台主机上的对应java_home路径。
+  *修改web工程下filter里的prod.properties里的数据库连接，hadoop,hive等配置，
+  *hadoop.home=/usr/lib/hadoop 可以不改变，在对应linux服务器上建软连接的方式指向真正的hadoop lib路径。<br>
+  *hive.home=/usr/lib/hive配置参考这个方法。<br>
+  *zeus的每个节点都需要有这个配置。
+  
+6.把web项目下的war上传到A,B,C三台机器上。放在tomcat的部署目录下，tomcat内存配置要大，看任务个数吧。因为zeus的很吃内存的。
+  首先启动A,接着B,C，最先启动会作为master。
+  
+7.打开浏览器，输入http://A:8080/zeus-web/login.do 输入biadmin/123456，就可以体验zeus了。
+
+#版本
+
 ##版本日期 20180413
 更新内容：
     1.jdk版本支持1.8
-    2.用mybatis代替hibernate,mybatis用的是xml方式，还不是最新的注解方式。
+    2.用mybatis代替hibernate,mybatis用的是xml方式，还不是最新的注解方式。
+    3.没有改动核心逻辑，仅仅替换了数据访问层。顺便熟悉了zeus的源代码。
+    4.经过反复调试，修改，确认，该版本在功能上与老版本一致，没有导致出现新的bug。
 
-下面是阅读源码，时做的笔记。先放在这里，后期分类整理。
+下面是阅读源码，时做的笔记。先放在这里，大部分已经整理在上面的步骤中了。
 
 ##zeus安装步骤
         1.zeus_user 表添加用户 admin is_effective=1 user_type=1<br>
