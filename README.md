@@ -38,8 +38,7 @@ zeus操作起来更加方便。对被阿里抛弃的zeus，感觉很可惜。决
          hive.home=/usr/lib/hive配置参考这个方法。
          zeus的每个节点都需要有这个配置。
         4.修改resources下的env.sh中的java_home位置。
-        5.GWTEnvironment.java重修改文件id。重新部署。
-
+        5.GWTEnvironment.java重修改文件id。重新部署. 
         6.zeus_group表里的最小的id所在的作为调度中心的根目录。
         7.zeus_host_group必须初始化，zeus_host_relation也许要初始化。
         8./data/applogs/zeus 下的日志，zeus.log是master和worker的一般性日志，socket.log是master和worker的通信日志。
