@@ -4,5 +4,5 @@
 添加测试dev.properties & 生产prod.properties 编译 mvn clean package -Pprod
 2. Zeus的架构设计
 软件架构设计 
-![Alt text](https://github.com/jimmy401/zeus_nb/tree/master/Screenshots/ruanjianjiagou.png)
+![Alt text](https://github.com/jimmy401/zeus_nb/raw/master/Screenshots/ruanjianjiagou.png)
 设定worker并发运行数，添加running queue dump监控
