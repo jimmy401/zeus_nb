@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.taobao.zeus.dal.mapper.ZeusWorkerMapper" >
+  <resultMap id="BaseResultMap" type="com.taobao.zeus.dal.model.ZeusWorker" >
+    <id column="host" property="host" jdbcType="VARCHAR" />
+    <result column="rate" property="rate" jdbcType="REAL" />
+    <result column="timestamp" property="timestamp" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    host, rate, timestamp
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from zeus_worker
+    where host = #{host,jdbcType=VARCHAR}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select
+    <include refid="Base_Column_List" />
+    from zeus_worker
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from zeus_worker
+    where host = #{host,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.taobao.zeus.dal.model.ZeusWorker" >
+    insert into zeus_worker (host, rate, timestamp
+      )
+    values (#{host,jdbcType=VARCHAR}, #{rate,jdbcType=REAL}, #{timestamp,jdbcType=BIGINT}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.taobao.zeus.dal.model.ZeusWorker" >
+    insert into zeus_worker
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="host != null" >
+        host,
+      </if>
+      <if test="rate != null" >
+        rate,
+      </if>
+      <if test="timestamp != null" >
+        timestamp,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="host != null" >
+        #{host,jdbcType=VARCHAR},
+      </if>
+      <if test="rate != null" >
+        #{rate,jdbcType=REAL},
+      </if>
+      <if test="timestamp != null" >
+        #{timestamp,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.taobao.zeus.dal.model.ZeusWorker" >
+    update zeus_worker
+    <set >
+      <if test="rate != null" >
+        rate = #{rate,jdbcType=REAL},
+      </if>
+      <if test="timestamp != null" >
+        timestamp = #{timestamp,jdbcType=BIGINT},
+      </if>
+    </set>
+    where host = #{host,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.taobao.zeus.dal.model.ZeusWorker" >
+    update zeus_worker
+    set rate = #{rate,jdbcType=REAL},
+      timestamp = #{timestamp,jdbcType=BIGINT}
+    where host = #{host,jdbcType=VARCHAR}
+  </update>
+</mapper>

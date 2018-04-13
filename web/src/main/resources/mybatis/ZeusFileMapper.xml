@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.taobao.zeus.dal.mapper.ZeusFileMapper" >
+  <resultMap id="BaseResultMap" type="com.taobao.zeus.dal.model.ZeusFile" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP" />
+    <result column="gmt_modified" property="gmtModified" jdbcType="TIMESTAMP" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="owner" property="owner" jdbcType="VARCHAR" />
+    <result column="parent" property="parent" jdbcType="BIGINT" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="host_group_id" property="hostGroupId" jdbcType="INTEGER" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.taobao.zeus.dal.model.ZeusFile" extends="BaseResultMap" >
+    <result column="content" property="content" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, gmt_create, gmt_modified, name, owner, parent, type, host_group_id
+  </sql>
+  <sql id="Blob_Column_List" >
+    content
+  </sql>
+  <sql id="common_where_if">
+    <if test="name != null">
+      name = #{name,jdbcType=VARCHAR}
+    </if>
+    <if test="owner != null">
+      and owner = #{owner,jdbcType=VARCHAR}
+    </if>
+    <if test="parent != null">
+      and parent = #{parent,jdbcType=BIGINT}
+    </if>
+    <if test="type != null">
+      and type = #{type,jdbcType=INTEGER}
+    </if>
+    <if test="hostGroupId != null">
+      and host_group_id = #{hostGroupId,jdbcType=INTEGER}
+    </if>
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_file
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectByParams" resultMap="ResultMapWithBLOBs" parameterType="java.util.Map" >
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_file
+    <where>
+      <include refid="common_where_if"/>
+    </where>
+  </select>
+  <select id="findByParent" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_file
+    <where>
+      <if test="parent!=null and parent!=''">
+        parent =#{parent,jdbcType=BIGINT}
+      </if>
+    </where>
+    order by id desc
+  </select>
+  <select id="findByOwner" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_file
+   where parent is null and owner=#{owner,jdbcType=VARCHAR}
+    order by id desc
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from zeus_file
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.taobao.zeus.dal.model.ZeusFile" >
+    insert into zeus_file (id, gmt_create, gmt_modified, 
+      name, owner, parent, 
+      type, host_group_id, content
+      )
+    values (#{id,jdbcType=BIGINT}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, 
+      #{name,jdbcType=VARCHAR}, #{owner,jdbcType=VARCHAR}, #{parent,jdbcType=BIGINT}, 
+      #{type,jdbcType=INTEGER}, #{hostGroupId,jdbcType=INTEGER}, #{content,jdbcType=LONGVARCHAR}
+      )
+  </insert>
+  <insert id="insertBatch" parameterType="java.util.List" >
+    insert into zeus_file (
+    name, owner, type
+    )
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.name}, #{item.owner}, #{item.type})
+    </foreach>
+  </insert>
+  <insert id="insertSelective" parameterType="com.taobao.zeus.dal.model.ZeusFile" >
+    insert into zeus_file
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create,
+      </if>
+      <if test="gmtModified != null" >
+        gmt_modified,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="owner != null" >
+        owner,
+      </if>
+      <if test="parent != null" >
+        parent,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="hostGroupId != null" >
+        host_group_id,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="gmtCreate != null" >
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null" >
+        #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="owner != null" >
+        #{owner,jdbcType=VARCHAR},
+      </if>
+      <if test="parent != null" >
+        #{parent,jdbcType=BIGINT},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="hostGroupId != null" >
+        #{hostGroupId,jdbcType=INTEGER},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.taobao.zeus.dal.model.ZeusFile" >
+    update zeus_file
+    <set >
+      <if test="gmtCreate != null" >
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null" >
+        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="owner != null" >
+        owner = #{owner,jdbcType=VARCHAR},
+      </if>
+      <if test="parent != null" >
+        parent = #{parent,jdbcType=BIGINT},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="hostGroupId != null" >
+        host_group_id = #{hostGroupId,jdbcType=INTEGER},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

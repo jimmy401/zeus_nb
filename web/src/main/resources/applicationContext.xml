@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd"
+	   default-autowire="byName">
+
+	<import resource="mybatis-config.xml"/>
+	<context:component-scan base-package="com.taobao.zeus"/>
+
+	<!--<bean name="placeholder" lazy-init="false" class="com.dianping.lion.client.InitializeConfig">-->
+		<!--&lt;!&ndash;<property name="order" value="2"/>&ndash;&gt;-->
+		<!--<property name="propertiesPath" value="antx.properties"/>-->
+		<!--<property name="includeLocalProps" value="true"/>-->
+	<!--</bean>-->
+<!--	<bean id="T1" class="com.taobao.zeus.web.Tbean">
+		<property name="f1" value="${ds.zeus-m1-write.jdbc.url}"/>
+	</bean>-->
+
+	<!--<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">-->
+	 <!--<property name="locations">-->
+	            <!--<list>-->
+	                <!--<value>classpath:antx.properties</value>-->
+	            <!--</list>-->
+	 <!--</property>-->
+		<!--&lt;!&ndash;<property name="order" value="1"/>&ndash;&gt;-->
+	<!--</bean>-->
+
+	<bean id="environment" class="com.taobao.zeus.util.Environment" >
+		<constructor-arg index="0">
+			<value>${zeus.env}</value>
+		</constructor-arg>
+		<constructor-arg index="1">
+			<value>${zeus.schedule.group}</value>
+		</constructor-arg>
+		<constructor-arg index="2">
+			<value>${zeus.localdata.dir}</value>
+		</constructor-arg>
+		<constructor-arg index="3">
+			<value>${hadoop.home}</value>
+		</constructor-arg>
+		<constructor-arg index="4">
+			<value>${hadoop.conf.dir}</value>
+		</constructor-arg>
+		<constructor-arg index="5">
+			<value>${hive.home}</value>
+		</constructor-arg>
+		<constructor-arg index="6">
+			<value>${hive.conf.dir}</value>
+		</constructor-arg>
+		<constructor-arg index="7">
+			<value>${email.host}</value>
+		</constructor-arg>
+		<constructor-arg index="8">
+			<value>${email.port}</value>
+		</constructor-arg>
+		<constructor-arg index="9">
+			<value>${email.username}</value>
+		</constructor-arg>
+		<constructor-arg index="10">
+			<value>${email.password}</value>
+		</constructor-arg>
+		<constructor-arg index="11">
+			<value>${email.sendFrom}</value>
+		</constructor-arg>
+		<constructor-arg index="12">
+			<value>${noc.notifyUrl}</value>
+		</constructor-arg>
+		<constructor-arg index="13">
+			<value>${noc.accessToken}</value>
+		</constructor-arg>
+		<constructor-arg index="14">
+			<value>${dos2unix.exclude.file}</value>
+		</constructor-arg>
+		<constructor-arg index="15">
+			<value>${zeus.defaultWorkerGroup.id}</value>
+		</constructor-arg>
+		<constructor-arg index="16">
+			<value>${zeus.preemptionMasterGroup.id}</value>
+		</constructor-arg>
+		<constructor-arg index="17">
+			<value>${zeus.maxMemRate}</value>
+		</constructor-arg>
+		<constructor-arg index="18">
+			<value>${zeus.cpuLoadPerCore}</value>
+		</constructor-arg>
+		<constructor-arg index="19">
+			<value>${zeus.scanRate}</value>
+		</constructor-arg>
+		<constructor-arg index="20">
+			<value>${zeus.scanExceptionRate}</value>
+		</constructor-arg>
+		<constructor-arg index="21">
+			<value>${zeus.worker.tasks.max}</value>
+		</constructor-arg>
+	</bean>
+
+	<bean id="distributeLocker" class="com.taobao.zeus.schedule.DistributeLocker" init-method="init" depends-on="environment">
+		<constructor-arg>
+			<value>${zeus.connect.port}</value>
+		</constructor-arg>
+	</bean>
+	<bean id="mailAlarm" class="com.taobao.zeus.broadcast.alarm.MailAlarm" />
+	<bean id="smsAlarm" class="com.taobao.zeus.broadcast.alarm.SMSAlarm" />
+
+	<bean id="zkResultNotify" class="com.taobao.zeus.broadcast.notify.ZKResultNotify" >
+		<property name="host" value="${zeus.zookeeper.host}"></property>
+	</bean>
+</beans>

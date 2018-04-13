@@ -1,0 +1,39 @@
+.idea/*
+*.iml
+*/*.iml
+deploy/target
+deploy/.project
+client/target
+client/.classpath
+client/.project
+client/.settings
+schedule/target
+schedule/bin
+schedule/.classpath
+schedule/.project
+schedule/.settings
+schedule/velocity.log*
+web/bin
+web/target
+web/.classpath
+web/.project
+web/.settings
+/web/src/main/webapp/zeus_platform
+/web/src/main/webapp/gwt-unitCache
+/web/.gwt
+zeus_platform
+.gwt
+/web/*.log
+=======
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+# *.jar
+*.war
+*.ear
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*

@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.taobao.zeus.dal.mapper.ZeusUserMapper">
+  <resultMap id="BaseResultMap" type="com.taobao.zeus.dal.model.ZeusUser">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+    <result column="uid" jdbcType="VARCHAR" property="uid" />
+    <result column="wangwang" jdbcType="VARCHAR" property="wangwang" />
+    <result column="is_effective" jdbcType="INTEGER" property="isEffective" />
+    <result column="user_type" jdbcType="INTEGER" property="userType" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, email, gmt_create, gmt_modified, name, phone, uid, wangwang, is_effective, user_type, 
+    description, password
+  </sql>
+  <sql id="common_where_if">
+    <if test="uid != null">
+      uid = #{uid,jdbcType=VARCHAR}
+    </if>
+    <if test="isEffective != null">
+      and is_effective = #{isEffective,jdbcType=INTEGER}
+    </if>
+    <if test="userType != null">
+      and user_type = #{userType,jdbcType=INTEGER}
+    </if>
+  </sql>
+  <sql id="uid_where_if">
+    <if test="uidString != null">
+      uid in (#{uidString,jdbcType=VARCHAR})
+    </if>
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+  select
+  <include refid="Base_Column_List" />
+  from zeus_user
+  where id = #{id,jdbcType=BIGINT}
+</select>
+  <select id="selectByParams" parameterType="java.util.Map" resultMap="BaseResultMap">
+  select
+  <include refid="Base_Column_List" />
+  from zeus_user
+  <where>
+    <include refid="common_where_if" />
+  </where>
+</select>
+  <select id="selectAll" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from zeus_user
+    order by #{sortField} #{sortOrder}
+  </select>
+  <select id="selectByFilter" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from zeus_user
+    where uid like #{uid} or name like #{name} or email like #{email}
+    order by #{sortField} #{sortOrder}
+  </select>
+  <select id="selectByUids" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from zeus_user
+    <where>
+      <include refid="uid_where_if" />
+    </where>
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from zeus_user
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.taobao.zeus.dal.model.ZeusUser">
+    insert into zeus_user (id, email, gmt_create, 
+      gmt_modified, name, phone, 
+      uid, wangwang, is_effective, 
+      user_type, description, password
+      )
+    values (#{id,jdbcType=BIGINT}, #{email,jdbcType=VARCHAR}, #{gmtCreate,jdbcType=TIMESTAMP}, 
+      #{gmtModified,jdbcType=TIMESTAMP}, #{name,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, 
+      #{uid,jdbcType=VARCHAR}, #{wangwang,jdbcType=VARCHAR}, #{isEffective,jdbcType=INTEGER}, 
+      #{userType,jdbcType=INTEGER}, #{description,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.taobao.zeus.dal.model.ZeusUser">
+    insert into zeus_user
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="email != null">
+        email,
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create,
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="phone != null">
+        phone,
+      </if>
+      <if test="uid != null">
+        uid,
+      </if>
+      <if test="wangwang != null">
+        wangwang,
+      </if>
+      <if test="isEffective != null">
+        is_effective,
+      </if>
+      <if test="userType != null">
+        user_type,
+      </if>
+      <if test="description != null">
+        description,
+      </if>
+      <if test="password != null">
+        password,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="email != null">
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="gmtCreate != null">
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null">
+        #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="uid != null">
+        #{uid,jdbcType=VARCHAR},
+      </if>
+      <if test="wangwang != null">
+        #{wangwang,jdbcType=VARCHAR},
+      </if>
+      <if test="isEffective != null">
+        #{isEffective,jdbcType=INTEGER},
+      </if>
+      <if test="userType != null">
+        #{userType,jdbcType=INTEGER},
+      </if>
+      <if test="description != null">
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        #{password,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.taobao.zeus.dal.model.ZeusUser">
+    update zeus_user
+    <set>
+      <if test="email != null">
+        email = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="name != null">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null">
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="uid != null">
+        uid = #{uid,jdbcType=VARCHAR},
+      </if>
+      <if test="wangwang != null">
+        wangwang = #{wangwang,jdbcType=VARCHAR},
+      </if>
+      <if test="isEffective != null">
+        is_effective = #{isEffective,jdbcType=INTEGER},
+      </if>
+      <if test="userType != null">
+        user_type = #{userType,jdbcType=INTEGER},
+      </if>
+      <if test="description != null">
+        description = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.taobao.zeus.dal.model.ZeusUser">
+    update zeus_user
+    set email = #{email,jdbcType=VARCHAR},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      name = #{name,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR},
+      uid = #{uid,jdbcType=VARCHAR},
+      wangwang = #{wangwang,jdbcType=VARCHAR},
+      is_effective = #{isEffective,jdbcType=INTEGER},
+      user_type = #{userType,jdbcType=INTEGER},
+      description = #{description,jdbcType=VARCHAR},
+      password = #{password,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

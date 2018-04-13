@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.taobao.zeus.dal.mapper.ZeusGroupMapper" >
+  <resultMap id="BaseResultMap" type="com.taobao.zeus.dal.model.ZeusGroup" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="descr" property="descr" jdbcType="VARCHAR" />
+    <result column="directory" property="directory" jdbcType="INTEGER" />
+    <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP" />
+    <result column="gmt_modified" property="gmtModified" jdbcType="TIMESTAMP" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="owner" property="owner" jdbcType="VARCHAR" />
+    <result column="parent" property="parent" jdbcType="INTEGER" />
+    <result column="existed" property="existed" jdbcType="INTEGER" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.taobao.zeus.dal.model.ZeusGroupWithBLOBs" extends="BaseResultMap" >
+    <result column="configs" property="configs" jdbcType="LONGVARCHAR" />
+    <result column="resources" property="resources" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <resultMap id="GroupStatisticResultMap" type="com.taobao.zeus.dal.model.ZeusGroupStatistic" >
+    <id column="cnt" property="cnt" jdbcType="INTEGER" />
+    <result column="id" property="id" jdbcType="BIGINT" />
+    <result column="gmt_modified" property="gmtModified" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, descr, directory, gmt_create, gmt_modified, name, owner, parent, existed
+  </sql>
+  <sql id="Blob_Column_List" >
+    configs, resources
+  </sql>
+  <sql id="common_where_if">
+    <if test="owner != null">
+      owner = #{owner,jdbcType=VARCHAR}
+    </if>
+    <if test="name != null">
+      and name = #{name,jdbcType=VARCHAR}
+    </if>
+    <if test="parent != null">
+     and parent = #{parent,jdbcType=INTEGER}
+    </if>
+    <if test="directory != null">
+      and directory = #{directory,jdbcType=INTEGER}
+    </if>
+    <if test="existed != null">
+      and existed = #{existed,jdbcType=INTEGER}
+    </if>
+    <if test="gmtCreate != null">
+      and gmt_create = #{gmtCreate,jdbcType=TIMESTAMP}
+    </if>
+    <if test="gmtModified != null">
+      and gmt_modified = #{gmtModified,jdbcType=TIMESTAMP}
+    </if>
+  </sql>
+  <select id="selectByParams" parameterType="java.util.Map" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_group
+    <where>
+      <include refid="common_where_if"/>
+    </where>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_group
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectGreatThanModified" resultMap="ResultMapWithBLOBs" parameterType="java.util.Map" >
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_group
+    <![CDATA[
+    where gmt_modified > #{gmtModified,jdbcType=TIMESTAMP}
+    ]]>
+  </select>
+  <select id="selectFirstOne" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_group
+    order by id asc limit 1;
+  </select>
+  <select id="selectGroupStatistic" resultMap="GroupStatisticResultMap"  >
+    select
+    count(*) cnt,max(id) id,max(gmt_modified) gmt_modified
+    from zeus_group
+  </select>
+  <select id="findByParent" parameterType="java.util.Map" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_group
+    <where>
+      <if test="parent!=null and parent!=''">
+        parent =#{parent,jdbcType=INTEGER}
+      </if>
+    </where>
+    order by id desc
+  </select>
+  <select id="findByRoot" parameterType="java.util.Map" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_group
+    where existed=1 and parent=#{parent,jdbcType=INTEGER}
+    order by id desc
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from zeus_group
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.taobao.zeus.dal.model.ZeusGroupWithBLOBs" >
+    insert into zeus_group (id, descr, directory, 
+      gmt_create, gmt_modified, name, 
+      owner, parent, existed, 
+      configs, resources)
+    values (#{id,jdbcType=INTEGER}, #{descr,jdbcType=VARCHAR}, #{directory,jdbcType=INTEGER}, 
+      #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, #{name,jdbcType=VARCHAR}, 
+      #{owner,jdbcType=VARCHAR}, #{parent,jdbcType=INTEGER}, #{existed,jdbcType=INTEGER}, 
+      #{configs,jdbcType=LONGVARCHAR}, #{resources,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.taobao.zeus.dal.model.ZeusGroupWithBLOBs" >
+    insert into zeus_group
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="descr != null" >
+        descr,
+      </if>
+      <if test="directory != null" >
+        directory,
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create,
+      </if>
+      <if test="gmtModified != null" >
+        gmt_modified,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="owner != null" >
+        owner,
+      </if>
+      <if test="parent != null" >
+        parent,
+      </if>
+      <if test="existed != null" >
+        existed,
+      </if>
+      <if test="configs != null" >
+        configs,
+      </if>
+      <if test="resources != null" >
+        resources,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="descr != null" >
+        #{descr,jdbcType=VARCHAR},
+      </if>
+      <if test="directory != null" >
+        #{directory,jdbcType=INTEGER},
+      </if>
+      <if test="gmtCreate != null" >
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null" >
+        #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="owner != null" >
+        #{owner,jdbcType=VARCHAR},
+      </if>
+      <if test="parent != null" >
+        #{parent,jdbcType=INTEGER},
+      </if>
+      <if test="existed != null" >
+        #{existed,jdbcType=INTEGER},
+      </if>
+      <if test="configs != null" >
+        #{configs,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="resources != null" >
+        #{resources,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.taobao.zeus.dal.model.ZeusGroupWithBLOBs" >
+    update zeus_group
+    <set >
+      <if test="descr != null" >
+        descr = #{descr,jdbcType=VARCHAR},
+      </if>
+      <if test="directory != null" >
+        directory = #{directory,jdbcType=INTEGER},
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null" >
+        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="owner != null" >
+        owner = #{owner,jdbcType=VARCHAR},
+      </if>
+      <if test="parent != null" >
+        parent = #{parent,jdbcType=INTEGER},
+      </if>
+      <if test="existed != null" >
+        existed = #{existed,jdbcType=INTEGER},
+      </if>
+      <if test="configs != null" >
+        configs = #{configs,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="resources != null" >
+        resources = #{resources,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.taobao.zeus.dal.model.ZeusGroupWithBLOBs" >
+    update zeus_group
+    set descr = #{descr,jdbcType=VARCHAR},
+      directory = #{directory,jdbcType=INTEGER},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      name = #{name,jdbcType=VARCHAR},
+      owner = #{owner,jdbcType=VARCHAR},
+      parent = #{parent,jdbcType=INTEGER},
+      existed = #{existed,jdbcType=INTEGER},
+      configs = #{configs,jdbcType=LONGVARCHAR},
+      resources = #{resources,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.taobao.zeus.dal.model.ZeusGroup" >
+    update zeus_group
+    set descr = #{descr,jdbcType=VARCHAR},
+      directory = #{directory,jdbcType=INTEGER},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      name = #{name,jdbcType=VARCHAR},
+      owner = #{owner,jdbcType=VARCHAR},
+      parent = #{parent,jdbcType=INTEGER},
+      existed = #{existed,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

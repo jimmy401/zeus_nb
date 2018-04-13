@@ -1,0 +1,79 @@
+package com.taobao.zeus.dal.logic;
+
+import com.taobao.zeus.model.ZeusFollow;
+
+import java.util.List;
+
+
+public interface FollowManagerWithJob {
+	/**
+	 * 新增一个关注
+	 * @param uid
+	 * @param type
+	 * @param targetId
+	 * @return
+	 */
+	ZeusFollow addFollow(String uid, Integer type, String targetId) ;
+	/**
+	 * 删除一个关注
+	 * @param uid
+	 * @param type
+	 * @param targetId
+	 * @return
+	 */
+	void deleteFollow(String uid, Integer type, String targetId);
+	/**
+	 * 查询用户的所有关注
+	 * @param uid
+	 * @return
+	 */
+	List<ZeusFollow> findAllTypeFollows(String uid);
+	/**
+	 * 查询关注的所有Group
+	 * @param uid
+	 * @return
+	 */
+	List<ZeusFollow> findFollowedGroups(String uid);
+	/**
+	 * 查询关注的所有Job
+	 * @param uid
+	 * @return
+	 */
+	List<ZeusFollow> findFollowedJobs(String uid);
+	/**
+	 * 查询关注该Job的人员名单
+	 * @param jobId
+	 * @return
+	 */
+	List<ZeusFollow> findJobFollowers(String jobId);
+	/**
+	 * 查询关注该group的人员名单
+	 * @param groupId
+	 * @return
+	 */
+	List<ZeusFollow> findGroupFollowers(List<String> groupIds);
+	/**
+	 * 查询实际关注该job的人
+	 * 综合考虑了job自身被关注的人，以及上层group被关注的人
+	 * @param jobId
+	 * @return
+	 */
+	List<String> findActualJobFollowers(String jobId);
+	/**
+	 * 查询所有关注该job的人
+	 * 综合考虑了job自身被关注的人，以及上层group被关注的人
+	 * @param jobId
+	 * @return
+	 */
+	List<ZeusFollow> findAllFollowers(String jobId);
+	/**
+	 * 添加zeusfollow重要联系人
+	 * @param targetId jobid
+	 * @param uid
+	 * @param isFirst
+	 */
+	void grantImportantContact(String jobId, String uid);
+	
+	void revokeImportantContact(String jobId, String uid);
+
+}

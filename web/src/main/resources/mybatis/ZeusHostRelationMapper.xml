@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.taobao.zeus.dal.mapper.ZeusHostRelationMapper" >
+  <resultMap id="BaseResultMap" type="com.taobao.zeus.dal.model.ZeusHostRelation" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="host" property="host" jdbcType="VARCHAR" />
+    <result column="host_group_id" property="hostGroupId" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, host, host_group_id
+  </sql>
+  <select id="selectAll" resultMap="BaseResultMap"  >
+    select
+    <include refid="Base_Column_List" />
+    from zeus_host_relation
+  </select>
+  <select id="selectByHostGroupId" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select
+    <include refid="Base_Column_List" />
+    from zeus_host_relation
+    where host_group_id = #{hostGroupId,jdbcType=INTEGER}
+  </select>
+</mapper>

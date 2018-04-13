@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.taobao.zeus.dal.mapper.ZeusDebugHistoryMapper" >
+  <resultMap id="BaseResultMap" type="com.taobao.zeus.dal.model.ZeusDebugHistory" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+    <result column="execute_host" property="executeHost" jdbcType="VARCHAR" />
+    <result column="file_id" property="fileId" jdbcType="BIGINT" />
+    <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP" />
+    <result column="gmt_modified" property="gmtModified" jdbcType="TIMESTAMP" />
+    <result column="runtype" property="runtype" jdbcType="VARCHAR" />
+    <result column="start_time" property="startTime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="owner" property="owner" jdbcType="VARCHAR" />
+    <result column="host_group_id" property="hostGroupId" jdbcType="INTEGER" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.taobao.zeus.dal.model.ZeusDebugHistoryWithBLOBs" extends="BaseResultMap" >
+    <result column="log" property="log" jdbcType="LONGVARCHAR" />
+    <result column="script" property="script" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, end_time, execute_host, file_id, gmt_create, gmt_modified, runtype, start_time, 
+    status, owner, host_group_id
+  </sql>
+  <sql id="Blob_Column_List" >
+    log, script
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_debug_history
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="pagingTotal" resultType="java.lang.Integer" parameterType="java.lang.Long" >
+    select
+    count(*)
+    from zeus_debug_history
+    where file_id = #{fileId,jdbcType=BIGINT}
+  </select>
+  <select id="find" parameterType="java.util.Map" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_debug_history
+    <where>
+      <if test="fileId!=null and fileId!=''">
+        file_id =#{fileId,jdbcType=BIGINT}
+      </if>
+    </where>
+    order by id desc
+    <if test="limitStart != null and limitEnd != null">limit #{limitStart}, #{limitEnd}</if>
+  </select>
+  <insert id="insertSelective" parameterType="com.taobao.zeus.dal.model.ZeusDebugHistoryWithBLOBs" >
+    insert into zeus_debug_history
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="endTime != null" >
+        end_time,
+      </if>
+      <if test="executeHost != null" >
+        execute_host,
+      </if>
+      <if test="fileId != null" >
+        file_id,
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create,
+      </if>
+      <if test="gmtModified != null" >
+        gmt_modified,
+      </if>
+      <if test="runtype != null" >
+        runtype,
+      </if>
+      <if test="startTime != null" >
+        start_time,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="owner != null" >
+        owner,
+      </if>
+      <if test="hostGroupId != null" >
+        host_group_id,
+      </if>
+      <if test="log != null" >
+        log,
+      </if>
+      <if test="script != null" >
+        script,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="endTime != null" >
+        #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="executeHost != null" >
+        #{executeHost,jdbcType=VARCHAR},
+      </if>
+      <if test="fileId != null" >
+        #{fileId,jdbcType=BIGINT},
+      </if>
+      <if test="gmtCreate != null" >
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null" >
+        #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="runtype != null" >
+        #{runtype,jdbcType=VARCHAR},
+      </if>
+      <if test="startTime != null" >
+        #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="owner != null" >
+        #{owner,jdbcType=VARCHAR},
+      </if>
+      <if test="hostGroupId != null" >
+        #{hostGroupId,jdbcType=INTEGER},
+      </if>
+      <if test="log != null" >
+        #{log,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="script != null" >
+        #{script,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.taobao.zeus.dal.model.ZeusDebugHistoryWithBLOBs" >
+    update zeus_debug_history
+    <set >
+      <if test="endTime != null" >
+        end_time = #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="executeHost != null" >
+        execute_host = #{executeHost,jdbcType=VARCHAR},
+      </if>
+      <if test="fileId != null" >
+        file_id = #{fileId,jdbcType=BIGINT},
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null" >
+        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="runtype != null" >
+        runtype = #{runtype,jdbcType=VARCHAR},
+      </if>
+      <if test="startTime != null" >
+        start_time = #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="owner != null" >
+        owner = #{owner,jdbcType=VARCHAR},
+      </if>
+      <if test="hostGroupId != null" >
+        host_group_id = #{hostGroupId,jdbcType=INTEGER},
+      </if>
+      <if test="log != null" >
+        log = #{log,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="script != null" >
+        script = #{script,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="java.util.Map" >
+    update zeus_debug_history
+    set
+      log = #{log,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

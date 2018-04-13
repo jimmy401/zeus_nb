@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.taobao.zeus.dal.mapper.ZeusJobMapper" >
+  <resultMap id="BaseResultMap" type="com.taobao.zeus.dal.model.ZeusJob" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="auto" property="auto" jdbcType="INTEGER" />
+    <result column="cron_expression" property="cronExpression" jdbcType="VARCHAR" />
+    <result column="cycle" property="cycle" jdbcType="VARCHAR" />
+    <result column="dependencies" property="dependencies" jdbcType="VARCHAR" />
+    <result column="descr" property="descr" jdbcType="VARCHAR" />
+    <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP" />
+    <result column="gmt_modified" property="gmtModified" jdbcType="TIMESTAMP" />
+    <result column="group_id" property="groupId" jdbcType="INTEGER" />
+    <result column="history_id" property="historyId" jdbcType="BIGINT" />
+    <result column="host" property="host" jdbcType="VARCHAR" />
+    <result column="last_end_time" property="lastEndTime" jdbcType="TIMESTAMP" />
+    <result column="last_result" property="lastResult" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="offset" property="offset" jdbcType="INTEGER" />
+    <result column="owner" property="owner" jdbcType="VARCHAR" />
+    <result column="post_processers" property="postProcessers" jdbcType="VARCHAR" />
+    <result column="pre_processers" property="preProcessers" jdbcType="VARCHAR" />
+    <result column="ready_dependency" property="readyDependency" jdbcType="VARCHAR" />
+    <result column="run_type" property="runType" jdbcType="VARCHAR" />
+    <result column="schedule_type" property="scheduleType" jdbcType="INTEGER" />
+    <result column="start_time" property="startTime" jdbcType="TIMESTAMP" />
+    <result column="start_timestamp" property="startTimestamp" jdbcType="BIGINT" />
+    <result column="statis_end_time" property="statisEndTime" jdbcType="TIMESTAMP" />
+    <result column="statis_start_time" property="statisStartTime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="timezone" property="timezone" jdbcType="VARCHAR" />
+    <result column="host_group_id" property="hostGroupId" jdbcType="INTEGER" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.taobao.zeus.dal.model.ZeusJobWithBLOBs" extends="BaseResultMap" >
+    <result column="configs" property="configs" jdbcType="LONGVARCHAR" />
+    <result column="resources" property="resources" jdbcType="LONGVARCHAR" />
+    <result column="script" property="script" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <resultMap id="StatisticResultMap" type="com.taobao.zeus.dal.model.ZeusJobStatistic" >
+    <result column="cnt" property="cnt" jdbcType="INTEGER" />
+    <result column="job_id" property="jobId" jdbcType="BIGINT" />
+    <result column="gmt_modified" property="gmtModified" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, auto, cron_expression, cycle, dependencies, descr, gmt_create, gmt_modified, 
+    group_id, history_id, host, last_end_time, last_result, name, offset, owner, post_processers, 
+    pre_processers, ready_dependency, run_type, schedule_type, start_time, start_timestamp, 
+    statis_end_time, statis_start_time, status, timezone, host_group_id
+  </sql>
+  <sql id="Blob_Column_List" >
+    configs, resources, script
+  </sql>
+  <sql id="common_where_if">
+    <if test="owner != null">
+      owner = #{owner,jdbcType=VARCHAR}
+    </if>
+    <if test="name != null">
+      and name = #{name,jdbcType=VARCHAR}
+    </if>
+    <if test="groupId != null">
+      and group_id = #{groupId,jdbcType=INTEGER}
+    </if>
+    <if test="runType != null">
+      and run_type = #{runType,jdbcType=VARCHAR}
+    </if>
+    <if test="gmtCreate != null">
+      and gmt_create = #{gmtCreate,jdbcType=TIMESTAMP}
+    </if>
+    <if test="gmtModified != null">
+      and gmt_modified = #{gmtModified,jdbcType=TIMESTAMP}
+    </if>
+    <if test="groupId != null">
+      and group_id = #{groupId,jdbcType=INTEGER}
+    </if>
+  </sql>
+  <select id="selectAll" resultMap="ResultMapWithBLOBs" >
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_job
+  </select>
+  <select id="selectJobStatistic" resultMap="StatisticResultMap">
+    select
+    count(*) cnt,max(id) job_id,max(gmt_modified) gmt_modified
+    from zeus_job
+  </select>
+  <select id="selectByParams" resultMap="ResultMapWithBLOBs" parameterType="java.util.Map" >
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_job
+    <where>
+      <include refid="common_where_if"/>
+    </where>
+  </select>
+  <select id="selectGreatThanGmtModified" resultMap="ResultMapWithBLOBs" parameterType="java.util.Map" >
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_job
+    <![CDATA[
+    where gmt_modified > #{gmtModified,jdbcType=TIMESTAMP}
+    ]]>
+  </select>
+  <select id="findJobWithIds" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_job
+    <where>
+      <if test="list!=null">
+        id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+          #{item}
+        </foreach>
+      </if>
+    </where>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_job
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from zeus_job
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.taobao.zeus.dal.model.ZeusJobWithBLOBs" >
+    insert into zeus_job (id, auto, cron_expression, 
+      cycle, dependencies, descr, 
+      gmt_create, gmt_modified, group_id, 
+      history_id, host, last_end_time, 
+      last_result, name, offset, 
+      owner, post_processers, pre_processers, 
+      ready_dependency, run_type, schedule_type, 
+      start_time, start_timestamp, statis_end_time, 
+      statis_start_time, status, timezone, 
+      host_group_id, configs, resources, 
+      script)
+    values (#{id,jdbcType=BIGINT}, #{auto,jdbcType=INTEGER}, #{cronExpression,jdbcType=VARCHAR}, 
+      #{cycle,jdbcType=VARCHAR}, #{dependencies,jdbcType=VARCHAR}, #{descr,jdbcType=VARCHAR}, 
+      #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, #{groupId,jdbcType=INTEGER}, 
+      #{historyId,jdbcType=BIGINT}, #{host,jdbcType=VARCHAR}, #{lastEndTime,jdbcType=TIMESTAMP}, 
+      #{lastResult,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{offset,jdbcType=INTEGER}, 
+      #{owner,jdbcType=VARCHAR}, #{postProcessers,jdbcType=VARCHAR}, #{preProcessers,jdbcType=VARCHAR}, 
+      #{readyDependency,jdbcType=VARCHAR}, #{runType,jdbcType=VARCHAR}, #{scheduleType,jdbcType=INTEGER}, 
+      #{startTime,jdbcType=TIMESTAMP}, #{startTimestamp,jdbcType=BIGINT}, #{statisEndTime,jdbcType=TIMESTAMP}, 
+      #{statisStartTime,jdbcType=TIMESTAMP}, #{status,jdbcType=VARCHAR}, #{timezone,jdbcType=VARCHAR}, 
+      #{hostGroupId,jdbcType=INTEGER}, #{configs,jdbcType=LONGVARCHAR}, #{resources,jdbcType=LONGVARCHAR}, 
+      #{script,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.taobao.zeus.dal.model.ZeusJobWithBLOBs" >
+    insert into zeus_job
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="auto != null" >
+        auto,
+      </if>
+      <if test="cronExpression != null" >
+        cron_expression,
+      </if>
+      <if test="cycle != null" >
+        cycle,
+      </if>
+      <if test="dependencies != null" >
+        dependencies,
+      </if>
+      <if test="descr != null" >
+        descr,
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create,
+      </if>
+      <if test="gmtModified != null" >
+        gmt_modified,
+      </if>
+      <if test="groupId != null" >
+        group_id,
+      </if>
+      <if test="historyId != null" >
+        history_id,
+      </if>
+      <if test="host != null" >
+        host,
+      </if>
+      <if test="lastEndTime != null" >
+        last_end_time,
+      </if>
+      <if test="lastResult != null" >
+        last_result,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="offset != null" >
+        offset,
+      </if>
+      <if test="owner != null" >
+        owner,
+      </if>
+      <if test="postProcessers != null" >
+        post_processers,
+      </if>
+      <if test="preProcessers != null" >
+        pre_processers,
+      </if>
+      <if test="readyDependency != null" >
+        ready_dependency,
+      </if>
+      <if test="runType != null" >
+        run_type,
+      </if>
+      <if test="scheduleType != null" >
+        schedule_type,
+      </if>
+      <if test="startTime != null" >
+        start_time,
+      </if>
+      <if test="startTimestamp != null" >
+        start_timestamp,
+      </if>
+      <if test="statisEndTime != null" >
+        statis_end_time,
+      </if>
+      <if test="statisStartTime != null" >
+        statis_start_time,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="timezone != null" >
+        timezone,
+      </if>
+      <if test="hostGroupId != null" >
+        host_group_id,
+      </if>
+      <if test="configs != null" >
+        configs,
+      </if>
+      <if test="resources != null" >
+        resources,
+      </if>
+      <if test="script != null" >
+        script,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="auto != null" >
+        #{auto,jdbcType=INTEGER},
+      </if>
+      <if test="cronExpression != null" >
+        #{cronExpression,jdbcType=VARCHAR},
+      </if>
+      <if test="cycle != null" >
+        #{cycle,jdbcType=VARCHAR},
+      </if>
+      <if test="dependencies != null" >
+        #{dependencies,jdbcType=VARCHAR},
+      </if>
+      <if test="descr != null" >
+        #{descr,jdbcType=VARCHAR},
+      </if>
+      <if test="gmtCreate != null" >
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null" >
+        #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="groupId != null" >
+        #{groupId,jdbcType=INTEGER},
+      </if>
+      <if test="historyId != null" >
+        #{historyId,jdbcType=BIGINT},
+      </if>
+      <if test="host != null" >
+        #{host,jdbcType=VARCHAR},
+      </if>
+      <if test="lastEndTime != null" >
+        #{lastEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lastResult != null" >
+        #{lastResult,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="offset != null" >
+        #{offset,jdbcType=INTEGER},
+      </if>
+      <if test="owner != null" >
+        #{owner,jdbcType=VARCHAR},
+      </if>
+      <if test="postProcessers != null" >
+        #{postProcessers,jdbcType=VARCHAR},
+      </if>
+      <if test="preProcessers != null" >
+        #{preProcessers,jdbcType=VARCHAR},
+      </if>
+      <if test="readyDependency != null" >
+        #{readyDependency,jdbcType=VARCHAR},
+      </if>
+      <if test="runType != null" >
+        #{runType,jdbcType=VARCHAR},
+      </if>
+      <if test="scheduleType != null" >
+        #{scheduleType,jdbcType=INTEGER},
+      </if>
+      <if test="startTime != null" >
+        #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="startTimestamp != null" >
+        #{startTimestamp,jdbcType=BIGINT},
+      </if>
+      <if test="statisEndTime != null" >
+        #{statisEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="statisStartTime != null" >
+        #{statisStartTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="timezone != null" >
+        #{timezone,jdbcType=VARCHAR},
+      </if>
+      <if test="hostGroupId != null" >
+        #{hostGroupId,jdbcType=INTEGER},
+      </if>
+      <if test="configs != null" >
+        #{configs,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="resources != null" >
+        #{resources,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="script != null" >
+        #{script,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.taobao.zeus.dal.model.ZeusJobWithBLOBs" >
+    update zeus_job
+    <set >
+      <if test="auto != null" >
+        auto = #{auto,jdbcType=INTEGER},
+      </if>
+      <if test="cronExpression != null" >
+        cron_expression = #{cronExpression,jdbcType=VARCHAR},
+      </if>
+      <if test="cycle != null" >
+        cycle = #{cycle,jdbcType=VARCHAR},
+      </if>
+      <if test="dependencies != null" >
+        dependencies = #{dependencies,jdbcType=VARCHAR},
+      </if>
+      <if test="descr != null" >
+        descr = #{descr,jdbcType=VARCHAR},
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null" >
+        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="groupId != null" >
+        group_id = #{groupId,jdbcType=INTEGER},
+      </if>
+      <if test="historyId != null" >
+        history_id = #{historyId,jdbcType=BIGINT},
+      </if>
+      <if test="host != null" >
+        host = #{host,jdbcType=VARCHAR},
+      </if>
+      <if test="lastEndTime != null" >
+        last_end_time = #{lastEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lastResult != null" >
+        last_result = #{lastResult,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="offset != null" >
+        offset = #{offset,jdbcType=INTEGER},
+      </if>
+      <if test="owner != null" >
+        owner = #{owner,jdbcType=VARCHAR},
+      </if>
+      <if test="postProcessers != null" >
+        post_processers = #{postProcessers,jdbcType=VARCHAR},
+      </if>
+      <if test="preProcessers != null" >
+        pre_processers = #{preProcessers,jdbcType=VARCHAR},
+      </if>
+      <if test="readyDependency != null" >
+        ready_dependency = #{readyDependency,jdbcType=VARCHAR},
+      </if>
+      <if test="runType != null" >
+        run_type = #{runType,jdbcType=VARCHAR},
+      </if>
+      <if test="scheduleType != null" >
+        schedule_type = #{scheduleType,jdbcType=INTEGER},
+      </if>
+      <if test="startTime != null" >
+        start_time = #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="startTimestamp != null" >
+        start_timestamp = #{startTimestamp,jdbcType=BIGINT},
+      </if>
+      <if test="statisEndTime != null" >
+        statis_end_time = #{statisEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="statisStartTime != null" >
+        statis_start_time = #{statisStartTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="timezone != null" >
+        timezone = #{timezone,jdbcType=VARCHAR},
+      </if>
+      <if test="hostGroupId != null" >
+        host_group_id = #{hostGroupId,jdbcType=INTEGER},
+      </if>
+      <if test="configs != null" >
+        configs = #{configs,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="resources != null" >
+        resources = #{resources,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="script != null" >
+        script = #{script,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.taobao.zeus.dal.model.ZeusJobWithBLOBs" >
+    update zeus_job
+    set auto = #{auto,jdbcType=INTEGER},
+      cron_expression = #{cronExpression,jdbcType=VARCHAR},
+      cycle = #{cycle,jdbcType=VARCHAR},
+      dependencies = #{dependencies,jdbcType=VARCHAR},
+      descr = #{descr,jdbcType=VARCHAR},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      group_id = #{groupId,jdbcType=INTEGER},
+      history_id = #{historyId,jdbcType=BIGINT},
+      host = #{host,jdbcType=VARCHAR},
+      last_end_time = #{lastEndTime,jdbcType=TIMESTAMP},
+      last_result = #{lastResult,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      offset = #{offset,jdbcType=INTEGER},
+      owner = #{owner,jdbcType=VARCHAR},
+      post_processers = #{postProcessers,jdbcType=VARCHAR},
+      pre_processers = #{preProcessers,jdbcType=VARCHAR},
+      ready_dependency = #{readyDependency,jdbcType=VARCHAR},
+      run_type = #{runType,jdbcType=VARCHAR},
+      schedule_type = #{scheduleType,jdbcType=INTEGER},
+      start_time = #{startTime,jdbcType=TIMESTAMP},
+      start_timestamp = #{startTimestamp,jdbcType=BIGINT},
+      statis_end_time = #{statisEndTime,jdbcType=TIMESTAMP},
+      statis_start_time = #{statisStartTime,jdbcType=TIMESTAMP},
+      status = #{status,jdbcType=VARCHAR},
+      timezone = #{timezone,jdbcType=VARCHAR},
+      host_group_id = #{hostGroupId,jdbcType=INTEGER},
+      configs = #{configs,jdbcType=LONGVARCHAR},
+      resources = #{resources,jdbcType=LONGVARCHAR},
+      script = #{script,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.taobao.zeus.dal.model.ZeusJob" >
+    update zeus_job
+    set auto = #{auto,jdbcType=INTEGER},
+      cron_expression = #{cronExpression,jdbcType=VARCHAR},
+      cycle = #{cycle,jdbcType=VARCHAR},
+      dependencies = #{dependencies,jdbcType=VARCHAR},
+      descr = #{descr,jdbcType=VARCHAR},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      group_id = #{groupId,jdbcType=INTEGER},
+      history_id = #{historyId,jdbcType=BIGINT},
+      host = #{host,jdbcType=VARCHAR},
+      last_end_time = #{lastEndTime,jdbcType=TIMESTAMP},
+      last_result = #{lastResult,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      offset = #{offset,jdbcType=INTEGER},
+      owner = #{owner,jdbcType=VARCHAR},
+      post_processers = #{postProcessers,jdbcType=VARCHAR},
+      pre_processers = #{preProcessers,jdbcType=VARCHAR},
+      ready_dependency = #{readyDependency,jdbcType=VARCHAR},
+      run_type = #{runType,jdbcType=VARCHAR},
+      schedule_type = #{scheduleType,jdbcType=INTEGER},
+      start_time = #{startTime,jdbcType=TIMESTAMP},
+      start_timestamp = #{startTimestamp,jdbcType=BIGINT},
+      statis_end_time = #{statisEndTime,jdbcType=TIMESTAMP},
+      statis_start_time = #{statisStartTime,jdbcType=TIMESTAMP},
+      status = #{status,jdbcType=VARCHAR},
+      timezone = #{timezone,jdbcType=VARCHAR},
+      host_group_id = #{hostGroupId,jdbcType=INTEGER}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

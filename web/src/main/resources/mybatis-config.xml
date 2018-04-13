@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="GBK" ?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns="http://www.springframework.org/schema/beans"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd"
+>
+
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+		<property name="url" value="${ds.zeus-m1-write.jdbc.url}"/>
+		<property name="username" value="${ds.zeus-m1-write.jdbc.username}"/>
+		<property name="password" value="${ds.zeus-m1-write.jdbc.password}"/>
+		<property name="maxTotal" value="100" />
+		<property name="initialSize" value="10" />
+		<property name="maxWaitMillis" value="60000" />
+		<property name="maxIdle" value="30" />
+		<property name="minIdle" value="10" />
+		<property name="removeAbandonedOnBorrow" value="true" />
+		<property name="removeAbandonedTimeout" value="180" />
+        <property name="validationQuery" value="SELECT 1" />
+        <property name="testOnBorrow" value="true" />
+	</bean>
+	<bean id="mysqlSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:/mybatis/Configuration.xml" />
+		<property name="mapperLocations" value="classpath:/mybatis/*Mapper.xml" />
+	</bean>
+
+	<bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="addToConfig" value="true" />
+		<property name="basePackage" value="com.taobao.zeus.dal.mapper" />
+		<property name="annotationClass" value="com.taobao.zeus.annotation.MybatisMapper" />
+		<property name="sqlSessionFactoryBeanName" value="mysqlSqlSessionFactory" />
+	</bean>
+</beans>
