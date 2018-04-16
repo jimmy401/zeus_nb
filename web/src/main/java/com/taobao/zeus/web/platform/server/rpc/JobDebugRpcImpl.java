@@ -1,11 +1,11 @@
 package com.taobao.zeus.web.platform.server.rpc;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import com.taobao.zeus.dal.logic.DebugHistoryManager;
 import com.taobao.zeus.dal.logic.FileManager;
 import com.taobao.zeus.dal.tool.Super;
+import com.taobao.zeus.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,19 +45,29 @@ public class JobDebugRpcImpl implements JobDebugService {
 			return "您无权操作";
 			//throw new RuntimeException("您无权操作");
 		}
-
+		Date now = new Date();
 		DebugHistory history = new DebugHistory();
 		history.setFileId(fileId);
 		history.setOwner(uid);
 		history.setJobRunType(JobRunType.parser(mode));
 		history.setScript(script);
 		history.setHostGroupId(hostGroupId);
+		history.setGmtCreate(now);
+		history.setGmtModified(now);
 		debugHistoryManager.addDebugHistory(history);
 
-		String debugId = history.getId();
+		Map<String,Object> params=new HashMap<String,Object>();
+		params.put("fileId",fileId);
+		params.put("runtype",mode);
+		params.put("owner",uid);
+		params.put("hostGroupId",hostGroupId);
+		params.put("gmtCreate", DateUtil.date2String(now));
+		params.put("gmtModified",DateUtil.date2String(now));
+		DebugHistory newHistory = debugHistoryManager.selectByParams(params);
+		String debugId = newHistory.getId();
 
 		try {
-			worker.executeJobFromWeb(ExecuteKind.DebugKind, history.getId());
+			worker.executeJobFromWeb(ExecuteKind.DebugKind, debugId);
 		} catch (Exception e) {
 			throw new GwtException(e.getMessage());
 		}

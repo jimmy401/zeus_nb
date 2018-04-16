@@ -25,6 +25,12 @@ public class MysqlDebugHistoryManager implements DebugHistoryManager{
 		return history;
 	}
 
+	public DebugHistory selectByParams(Map<String,Object> params){
+		ZeusDebugHistoryWithBLOBs result = zeusDebugHistory.selectByParams(params);
+		DebugHistory history= PersistenceAndBeanConvertWithAction.convert(result);
+		return history;
+	}
+
 	@Override
 	public DebugHistory findDebugHistory(String id) {
 		ZeusDebugHistoryWithBLOBs persist= zeusDebugHistory.selectByPrimaryKey( Long.valueOf(id));

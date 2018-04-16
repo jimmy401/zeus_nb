@@ -14,6 +14,8 @@ public interface ZeusDebugHistoryMapper {
 
     ZeusDebugHistoryWithBLOBs selectByPrimaryKey(Long id);
 
+    ZeusDebugHistoryWithBLOBs selectByParams(Map<String,Object> params);
+
     List<ZeusDebugHistoryWithBLOBs> find(Map<String,Object> map);
 
     int pagingTotal(Long fileId);

@@ -25,6 +25,29 @@
   <sql id="Blob_Column_List" >
     log, script
   </sql>
+  <sql id="common_where_if">
+    <if test="fileId != null">
+      file_id = #{fileId,jdbcType=BIGINT}
+    </if>
+    <if test="runtype != null">
+      and runtype = #{runtype,jdbcType=VARCHAR}
+    </if>
+    <if test="owner != null">
+      and owner = #{owner,jdbcType=VARCHAR}
+    </if>
+    <if test="script != null">
+      and script = #{script,jdbcType=LONGVARCHAR}
+    </if>
+    <if test="hostGroupId != null">
+      and host_group_id = #{hostGroupId,jdbcType=INTEGER}
+    </if>
+    <if test="gmtCreate != null">
+      and gmt_create = #{gmtCreate,jdbcType=TIMESTAMP}
+    </if>
+    <if test="gmtModified != null">
+      and gmt_modified = #{gmtModified,jdbcType=TIMESTAMP}
+    </if>
+  </sql>
   <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
     select 
     <include refid="Base_Column_List" />
@@ -32,6 +55,16 @@
     <include refid="Blob_Column_List" />
     from zeus_debug_history
     where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectByParams" resultMap="ResultMapWithBLOBs" parameterType="java.util.Map" >
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zeus_debug_history
+    <where>
+      <include refid="common_where_if"/>
+    </where>
   </select>
   <select id="pagingTotal" resultType="java.lang.Integer" parameterType="java.lang.Long" >
     select

@@ -131,8 +131,7 @@ public class Master {
 								}
 							}
 							log.info("roll back lost job ok");
-							log.info("roll back action count:"+actionDetailsNew.size());
-							
+
 							//清理schedule
 							List<Controller> controllers = dispatcher.getControllers();
 							if(controllers!=null && controllers.size()>0){
@@ -456,9 +455,7 @@ public class Master {
 	
  	//扫描可用的worker，给worker分配JOB任务
 	private void scan() {
-log.info("scan context.getQueue() size : "+ context.getQueue().size());
 		if (!context.getQueue().isEmpty()) {
-			log.info("schedule queue :" +context.getQueue().size());
 //			final JobElement e = context.getQueue().poll();
 			final JobElement e = context.getQueue().peek();
 			log.info("priority level :"+e.getPriorityLevel()+"; JobID :"+e.getActionId());
@@ -466,7 +463,6 @@ log.info("scan context.getQueue() size : "+ context.getQueue().size());
 		}
 
 		if (!context.getManualQueue().isEmpty()) {
-			log.info("manual queue :" +context.getManualQueue().size());
 			final JobElement e = context.getManualQueue().poll();
 			log.info("priority level: "+e.getPriorityLevel()+"; JobID:"+e.getActionId());
 			MasterWorkerHolder selectWorker = getRunableWorker(e.getHostGroupId(),2);
