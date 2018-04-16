@@ -1,10 +1,7 @@
 package com.taobao.zeus.web.platform.server.rpc;
 
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import com.taobao.zeus.dal.logic.FileManager;
@@ -257,13 +254,17 @@ public class FileManagerRpcImpl implements FileManagerService{
 	private String RenderHomePage(String in, Map<String, Object> params){
 		try {
 			VelocityEngine engine = new VelocityEngine();
+			Properties props = new Properties();
+			props.put("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.SimpleLog4JLogSystem");
+			props.put("runtime.log.logsystem.log4j.category", "velocity");
+			props.put("runtime.log.logsystem.log4j.logger", "velocity");
 			VelocityContext context = new VelocityContext();
 			
 			for(Entry<String, Object> entry : params.entrySet()){
 				context.put(entry.getKey(), entry.getValue());
 			}
 			StringWriter out = new StringWriter();
-			engine.init();
+			engine.init(props);
 			engine.evaluate(context, out, "", in);
 			return out.toString();
 		} catch (Exception e) {
