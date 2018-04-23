@@ -44,7 +44,8 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
 	UserManager userManager;
 
 	@Autowired
-	private JobValidate jobValidate;
+	private JobValidateWithJob jobValidateWithJob;
+
 	@Override
 	public void deleteGroup(String user, String groupId) throws ZeusException {
 		GroupBean group = getDownstreamGroupBean(groupId);
@@ -311,17 +312,15 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
 				&& job.getDependencies().size() != 0) {
 			List<JobDescriptor> list = this.getJobDescriptors(job
 					.getDependencies());
-			jobValidateOld.checkCycleJob(job, list);
+			jobValidateWithJob.checkCycleJob(job, list);
 		}
 
-		if (jobValidateOld.valide(job)) {
+		if (jobValidateWithJob.valide(job)) {
 			zeusJobMapper.updateByPrimaryKeySelective(persist);
 		}
 
 	}
 
-	@Autowired
-	private JobValidate jobValidateOld;
 
 	@Override
 	public GroupDescriptor createGroup(String user, String groupName,

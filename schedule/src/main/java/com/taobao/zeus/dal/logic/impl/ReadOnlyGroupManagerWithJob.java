@@ -257,10 +257,12 @@ public class ReadOnlyGroupManagerWithJob{
 
 	public synchronized GroupBean getGlobeGroupBean() {
 		if(globe!=null){
+			log.info("globe is not null");
 			if(!isJobsAndGroupsChanged()){
 				return globe;
 			}
 		}
+		log.info("born a new globe");
 		globe=new ReadOnlyGroupManagerAssemblyWithJob(groupManagerWithJob).getGlobeGroupBean();
 		return globe;
 	}
