@@ -12,6 +12,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.taobao.zeus.dal.model.ZeusActionWithBLOBs;
+import com.taobao.zeus.dal.model.ZeusJob;
 import com.taobao.zeus.dal.model.ZeusJobWithBLOBs;
 import com.taobao.zeus.schedule.mvc.*;
 import com.taobao.zeus.util.*;
@@ -1135,7 +1136,7 @@ public class Master {
 	public void runScheduleJobToAction(List<ZeusJobWithBLOBs> jobDetails, Date now, SimpleDateFormat dfDate, Map<Long, ZeusActionWithBLOBs> actionDetails, String currentDateStr){
 		for(ZeusJobWithBLOBs jobDetail : jobDetails){
 			//ScheduleType: 0 独立任务; 1依赖任务; 2周期任务
-			if(jobDetail.getScheduleType() != null && jobDetail.getScheduleType()==0){
+			if(jobDetail.getScheduleType() != null && jobDetail.getScheduleType()== ZeusJob.ScheduleType.SCHEDULE.getValue()){
 				try{
 					String jobCronExpression = jobDetail.getCronExpression();
 					String cronDate= dfDate.format(now);
@@ -1225,8 +1226,8 @@ public class Master {
 //		System.out.println("loopCount："+loopCount);
 		for(ZeusJobWithBLOBs jobDetail : jobDetails){
 			//ScheduleType: 0 独立任务; 1依赖任务; 2周期任务
-			if((jobDetail.getScheduleType() != null && jobDetail.getScheduleType()==1) 
-					|| (jobDetail.getScheduleType() != null && jobDetail.getScheduleType()==2)){
+			if((jobDetail.getScheduleType() != null && jobDetail.getScheduleType()==ZeusJob.ScheduleType.DEPENDENT.getValue())
+					|| (jobDetail.getScheduleType() != null && jobDetail.getScheduleType()==ZeusJob.ScheduleType.CYCLE.getValue())){
 				try{
 					String jobDependencies = jobDetail.getDependencies();
 					String actionDependencies = "";
