@@ -12,6 +12,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.taobao.zeus.dal.model.ZeusActionWithBLOBs;
+import com.taobao.zeus.dal.model.ZeusJob;
 import com.taobao.zeus.dal.model.ZeusJobWithBLOBs;
 import com.taobao.zeus.schedule.mvc.*;
 import com.taobao.zeus.util.*;
@@ -122,11 +123,9 @@ public class Master {
 							//增加controller，并修改event
 							List<Long> rollBackActionId = new ArrayList<Long>();
 							for (Long id : actionDetailsNew.keySet()) {
-								log.info("to roll back with atciontId : "+ id +" than "+ (Long.parseLong(currentDateStr)-15000000));
 								if(id < (Long.parseLong(currentDateStr)-15000000)){
 									//当前时间15分钟之前JOB的才检测漏跑
 									int loopCount = 0;
-									log.info("roll back with atciontId : "+ id);
 									rollBackLostJob(id, actionDetailsNew, loopCount, rollBackActionId);
 								}
 							}
@@ -141,7 +140,6 @@ public class Master {
 									String actionId = jobc.getActionId();
 									if(Long.parseLong(actionId) < (Long.parseLong(currentDateStr)-15000000)){
 										try {
-											log.info("clear scheduler delete actionId :" +actionId );
 											context.getScheduler().deleteJob(actionId, "zeus");
 										} catch (SchedulerException e) {
 											e.printStackTrace();
@@ -1135,7 +1133,7 @@ public class Master {
 	public void runScheduleJobToAction(List<ZeusJobWithBLOBs> jobDetails, Date now, SimpleDateFormat dfDate, Map<Long, ZeusActionWithBLOBs> actionDetails, String currentDateStr){
 		for(ZeusJobWithBLOBs jobDetail : jobDetails){
 			//ScheduleType: 0 独立任务; 1依赖任务; 2周期任务
-			if(jobDetail.getScheduleType() != null && jobDetail.getScheduleType()==0){
+			if(jobDetail.getScheduleType() != null && jobDetail.getScheduleType()==ZeusJob.ScheduleType.SCHEDULE.getValue()){
 				try{
 					String jobCronExpression = jobDetail.getCronExpression();
 					String cronDate= dfDate.format(now);
@@ -1225,8 +1223,8 @@ public class Master {
 //		System.out.println("loopCount："+loopCount);
 		for(ZeusJobWithBLOBs jobDetail : jobDetails){
 			//ScheduleType: 0 独立任务; 1依赖任务; 2周期任务
-			if((jobDetail.getScheduleType() != null && jobDetail.getScheduleType()==1) 
-					|| (jobDetail.getScheduleType() != null && jobDetail.getScheduleType()==2)){
+			if((jobDetail.getScheduleType() != null && jobDetail.getScheduleType()== ZeusJob.ScheduleType.DEPENDENT.getValue())
+					|| (jobDetail.getScheduleType() != null && jobDetail.getScheduleType()== ZeusJob.ScheduleType.CYCLE.getValue())){
 				try{
 					String jobDependencies = jobDetail.getDependencies();
 					String actionDependencies = "";
@@ -1235,24 +1233,24 @@ public class Master {
 						//计算这些依赖任务的版本数
 						Map<String,List<ZeusActionWithBLOBs>> dependActionList = new HashMap<String,List<ZeusActionWithBLOBs>>();
 						String[] dependStrs = jobDependencies.split(",");
-						for(String deps : dependStrs){
+						for(String depJobId : dependStrs){
 							List<ZeusActionWithBLOBs> dependActions = new ArrayList<ZeusActionWithBLOBs>();
 							Iterator<ZeusActionWithBLOBs> actionIt = actionDetails.values().iterator();
 							while(actionIt.hasNext()){
 								ZeusActionWithBLOBs action = actionIt.next();
-								if(action.getJobId().toString().equals(deps)){
+								if(action.getJobId().toString().equals(depJobId)){
 									dependActions.add(action);
 								}
 							}
-							dependActionList.put(deps, dependActions);
+							dependActionList.put(depJobId, dependActions);
 							if(loopCount > 20){
 								if(!jobDetail.getConfigs().contains("sameday")){
-									if(dependActionList.get(deps).size()==0){
-										List<ZeusActionWithBLOBs> lastJobActions = context.getGroupManagerWithAction().getLastJobAction(deps);
+									if(dependActionList.get(depJobId).size()==0){
+										List<ZeusActionWithBLOBs> lastJobActions = context.getGroupManagerWithAction().getLastJobAction(depJobId);
 										if(lastJobActions != null && lastJobActions.size()>0){
 											actionDetails.put(lastJobActions.get(0).getId(),lastJobActions.get(0));
 											dependActions.add(lastJobActions.get(0));
-											dependActionList.put(deps, dependActions);
+											dependActionList.put(depJobId, dependActions);
 										}else{
 											break;
 										}
@@ -1263,20 +1261,20 @@ public class Master {
 						//判断是否有未完成的
 						boolean isComplete = true;
 						String actionMostDeps = "";
-						for(String deps : dependStrs){
-							if(dependActionList.get(deps).size()==0){
+						for(String depJobId : dependStrs){
+							if(dependActionList.get(depJobId).size()==0){
 								isComplete = false;
 								noCompleteCount ++;
 								break;
 							}
 							if(actionMostDeps.trim().length()==0){
-								actionMostDeps = deps;
+								actionMostDeps = depJobId;
 							}
-							if(dependActionList.get(deps).size()>dependActionList.get(actionMostDeps).size()){
-								actionMostDeps = deps;
-							}else if(dependActionList.get(deps).size()==dependActionList.get(actionMostDeps).size()){
-								if(dependActionList.get(deps).get(0).getId()<dependActionList.get(actionMostDeps).get(0).getId()){
-									actionMostDeps = deps;
+							if(dependActionList.get(depJobId).size()>dependActionList.get(actionMostDeps).size()){
+								actionMostDeps = depJobId;
+							}else if(dependActionList.get(depJobId).size()==dependActionList.get(actionMostDeps).size()){
+								if(dependActionList.get(depJobId).get(0).getId()<dependActionList.get(actionMostDeps).get(0).getId()){
+									actionMostDeps = depJobId;
 								}
 							}
 						}
@@ -1286,12 +1284,15 @@ public class Master {
 							List<ZeusActionWithBLOBs> actions = dependActionList.get(actionMostDeps);
 							if(actions != null && actions.size()>0){
 								for(ZeusActionWithBLOBs actionModel : actions){
+									//下面这行表示，该job的频率跟随他依赖的任务中频率最高的任务。
 									actionDependencies = String.valueOf(actionModel.getId());
-									for(String deps : dependStrs){
-										if(!deps.equals(actionMostDeps)){
-											List<ZeusActionWithBLOBs> actionOthers = dependActionList.get(deps);
+									for(String depJobId : dependStrs){
+										if(!depJobId.equals(actionMostDeps)){
+											List<ZeusActionWithBLOBs> actionOthers = dependActionList.get(depJobId);
 											Long actionOtherId = actionOthers.get(0).getId();
 											for(ZeusActionWithBLOBs actionOtherModel : actionOthers){
+												//因为dependActionList存的actionid是从小到大的顺序，下面的意思是说，从最小的actionid开始找，找到距离actionModel
+												//最近的actionid,就是要依赖的actionid
 												if(Math.abs((actionOtherModel.getId()-actionModel.getId()))<Math.abs((actionOtherId-actionModel.getId()))){
 													actionOtherId = actionOtherModel.getId();
 												}
@@ -1299,7 +1300,7 @@ public class Master {
 											if(actionDependencies.trim().length()>0){
 												actionDependencies += ",";
 											}
-											actionDependencies += String.valueOf((actionOtherId/1000000)*1000000 + Long.parseLong(deps));
+											actionDependencies += String.valueOf((actionOtherId/1000000)*1000000 + Long.parseLong(depJobId));
 										}
 									}
 									//保存多版本的action

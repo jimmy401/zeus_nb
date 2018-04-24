@@ -110,7 +110,6 @@ public class JobController extends Controller {
 	}
 
 	private void initializeEventHandle() {
-		log.info("initializeEventHandle with actionId : " + actionId);
 		JobStatus jobStatus = groupManager.getActionStatus(actionId);
 //		System.out.println("actionId: "+actionId+" jobStatus:"+jobStatus.getStatus());
 		if (jobStatus != null) {

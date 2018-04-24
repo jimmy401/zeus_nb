@@ -123,7 +123,10 @@ public class MysqlFollowManagerWithJob implements FollowManagerWithJob {
 		persist.setTargetId(Long.valueOf(targetId));
 		persist.setType(type);
 		persist.setUid(uid);
+		persist.setImportant(0);
 		zeusFollowUpMapper.insertSelective(persist);
+
+		persist = zeusFollowUpMapper.selectByParams(params).get(0);
 
 		return PersistenceAndBeanConvertWithAction.convert(persist);
 	}

@@ -25,7 +25,7 @@ public class TreeServiceImpl implements TreeService{
 	@Autowired
 	private ReadOnlyGroupManagerWithJob readOnlyGroupManagerWithJob;
 	@Autowired
-	private FollowManagerWithJob followManagerOld;
+	private FollowManagerWithJob followManagerWithJob;
 	@Autowired
 	private JobHistoryManager jobHistoryManager;
 	
@@ -84,7 +84,7 @@ public class TreeServiceImpl implements TreeService{
 	}
 	private GroupJobTreeModel getTreeData(GroupBean rootGroup) {
 		String uid=LoginUser.getUser().getUid();
-		List<ZeusFollow> list=followManagerOld.findAllTypeFollows(uid);
+		List<ZeusFollow> list=followManagerWithJob.findAllTypeFollows(uid);
 		Map<String, Boolean> groupFollow=new HashMap<String, Boolean>();
 		Map<String, Boolean> jobFollow=new HashMap<String, Boolean>();
 		for(ZeusFollow f:list){
@@ -161,12 +161,12 @@ public class TreeServiceImpl implements TreeService{
 
 	@Override
 	public void follow(int type, String targetId) {
-		followManagerOld.addFollow(LoginUser.getUser().getUid(), type, targetId);
+		followManagerWithJob.addFollow(LoginUser.getUser().getUid(), type, targetId);
 	}
 
 	@Override
 	public void unfollow(int type, String targetId) {
-		followManagerOld.deleteFollow(LoginUser.getUser().getUid(), type, targetId);
+		followManagerWithJob.deleteFollow(LoginUser.getUser().getUid(), type, targetId);
 	}
 
 	@Override

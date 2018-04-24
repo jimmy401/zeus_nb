@@ -90,7 +90,13 @@ zeus操作起来更加方便。对被阿里抛弃的zeus，感觉很可惜。决
         16.zeus没有补跑action的原因是 Master里有清理scheduler的模块，小于当前时间往前追15分钟的actionId会被清理掉。<br>
         17.手动触发后，在运行日志中可以看到两个实例，一条是手动触发的，如果执行成功后，状态一直保持成running，而原来的实例会变成success。<br>
         18.每一个小时，会进行漏跑检测。<br>
-        19.启动后，每60秒钟扫描一次zeus_lock表，尝试更新记录，谁占有记录，谁就是master.<br>
+        19.启动后，每60秒钟扫描一次zeus_lock表，尝试更新记录，谁占有记录，谁就是master.<br>
+        20.zeus的任务依赖是跟随最小的父节点的周期的，例如，C是依赖任务，依赖A,B,A是每半小时调度一次，B是每小时调度一次，
+        那么C会跟随A的节奏，每半小时调度一次。
+        21.${zdt.format("yyyyMMdd")} 昨日时间：${zdt.addDay(-1).format("yyyyMMdd hh:mm:ss")},
+        ${yesterday}会被替换成昨天的日期，格式是yyyyMMdd，是任务时间的昨天。
+        22.http://ip:port/zeus-web/dump.do查看任务状态
+        23.
 
 ##志同道合的朋友可以联系我
 --
