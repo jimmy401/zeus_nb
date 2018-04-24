@@ -5,19 +5,16 @@ import com.taobao.zeus.dal.logic.impl.ReadOnlyGroupManagerWithJob;
 import com.taobao.zeus.model.JobDescriptor;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.CronTrigger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.text.ParseException;
 import java.util.*;
+
 @Repository
 public class JobValidateWithJob {
 	@Autowired
 	private ReadOnlyGroupManagerWithJob readOnlyGroupManager;
-
-	private static final Logger log = LoggerFactory.getLogger(JobValidateWithJob.class);
 
 	public boolean valide(JobDescriptor job) throws ZeusException {
 		if(job.getJobType()==null){

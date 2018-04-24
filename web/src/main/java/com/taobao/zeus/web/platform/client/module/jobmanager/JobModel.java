@@ -1,5 +1,8 @@
 package com.taobao.zeus.web.platform.client.module.jobmanager;
 
+import com.google.gwt.user.client.ui.Label;
+import com.taobao.zeus.web.common.JobConfig;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,6 +48,10 @@ public class JobModel implements Serializable {
 	private String jobCycle;
 	private String host;
 	private String hostGroupId;
+	private String runPriorityLevel;
+	private String rollBackWaitTime;
+	private String rollBackTimes;
+	private String maxTime;
 
 	public static final String MapReduce = "MapReduce程序";
 	public static final String SHELL = "shell 脚本";
@@ -56,6 +63,43 @@ public class JobModel implements Serializable {
 	
 	public static final String JOB_CYCLE_HOUR="小时任务";
 	public static final String JOB_CYCLE_DAY="天任务";
+
+	public String getRunPriorityLevel() {
+		String level=localProperties.get(JobConfig.PRIORITY_LEVEL);
+		if ("1".equals(level)) {
+			runPriorityLevel="low";
+		}
+		if ("2".equals(level)) {
+			runPriorityLevel="medium";
+		}
+		if ("3".equals(level)) {
+			runPriorityLevel="high";
+		}
+		return runPriorityLevel;
+	}
+
+	public String getRollBackWaitTime() {
+		if(localProperties.get(JobConfig.ROLL_INTERVAL)!=null){
+			rollBackWaitTime= localProperties.get(JobConfig.ROLL_INTERVAL) + "分钟";
+		}
+		return rollBackWaitTime;
+	}
+
+	public String getRollBackTimes() {
+		if (localProperties.get(JobConfig.ROLL_TIMES)!=null) {
+			rollBackTimes = localProperties.get(JobConfig.ROLL_TIMES);
+		}
+		return rollBackTimes;
+	}
+
+	public String getMaxTime() {
+		if (localProperties.get(JobConfig.MAX_TIME)!=null) {
+			maxTime = localProperties.get(JobConfig.MAX_TIME) +"分钟";
+		}else{
+			return "无预计";
+		}
+		return maxTime;
+	}
 
 	public JobModel copy() {
 		JobModel model = new JobModel();

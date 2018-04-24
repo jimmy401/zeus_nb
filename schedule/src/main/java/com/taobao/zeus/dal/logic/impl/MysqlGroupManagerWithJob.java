@@ -43,9 +43,9 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
 	@Autowired
 	UserManager userManager;
 
+
 	@Autowired
 	private JobValidateWithJob jobValidateWithJob;
-
 	@Override
 	public void deleteGroup(String user, String groupId) throws ZeusException {
 		GroupBean group = getDownstreamGroupBean(groupId);

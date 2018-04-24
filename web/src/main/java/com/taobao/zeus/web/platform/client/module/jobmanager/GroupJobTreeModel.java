@@ -1,8 +1,12 @@
 package com.taobao.zeus.web.platform.client.module.jobmanager;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -14,7 +18,7 @@ import java.util.List;
 public class GroupJobTreeModel implements Serializable{
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private String name;
 	private String id;
 	private boolean group;
@@ -22,9 +26,31 @@ public class GroupJobTreeModel implements Serializable{
 	private boolean job;
 	private boolean follow;
 	private String owner;
-	
 	private List<GroupJobTreeModel> children=new ArrayList<GroupJobTreeModel>();
-	
+
+	private String text;
+	private String state;
+	public String getText() {
+		return name+"(" + id+")";
+	}
+
+	public String getState() {
+		return "closed";
+	}
+
+	@JSONField(name = "attributes")
+	private HashMap<String, Object> attributes = new HashMap<String, Object>();
+
+	public HashMap<String, Object> getAttributes() {
+		HashMap<String, Object> ret =new HashMap<String, Object>();
+		ret.put("owner", this.owner);
+		ret.put("group", this.group);
+		ret.put("directory", this.directory);
+		ret.put("job", this.job);
+		ret.put("follow", this.follow);
+		return ret;
+	}
+
 	public String getName() {
 		return name;
 	}

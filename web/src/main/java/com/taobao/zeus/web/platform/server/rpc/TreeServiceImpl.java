@@ -84,7 +84,7 @@ public class TreeServiceImpl implements TreeService{
 	}
 	private GroupJobTreeModel getTreeData(GroupBean rootGroup) {
 		String uid=LoginUser.getUser().getUid();
-		List<ZeusFollow> list=followManagerWithJob.findAllTypeFollows(uid);
+		List<ZeusFollow> list= followManagerWithJob.findAllTypeFollows(uid);
 		Map<String, Boolean> groupFollow=new HashMap<String, Boolean>();
 		Map<String, Boolean> jobFollow=new HashMap<String, Boolean>();
 		for(ZeusFollow f:list){

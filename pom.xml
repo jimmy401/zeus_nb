@@ -23,6 +23,7 @@
 		<jetty-version>6.1.22</jetty-version>
 		<gwt-version>2.5.0</gwt-version>
 		<spring-version>4.3.0.RELEASE</spring-version>
+		<fastjson.version>1.2.7</fastjson.version>
 		<local.highcharts>${basedir}/libs/highcharts-1.4.0.jar</local.highcharts>
 	</properties>
 	<dependencies>

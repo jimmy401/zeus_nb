@@ -14,7 +14,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.taobao.zeus.dal.logic.UserManager;
 import com.taobao.zeus.dal.model.ZeusUser;
+import com.taobao.zeus.web.common.CurrentUser;
 import com.taobao.zeus.web.util.LoginUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -24,12 +27,12 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  *
  */
 public class LoginFilter implements Filter {
-
+	private static final Logger log = LoggerFactory.getLogger(LoginFilter.class);
 
 	private UserManager userManager;
 	private SSOLogin login=new SSOLogin() {
 		public String getUid(HttpServletRequest req) {
-		
+
 			return ZeusUser.USER.getUid();
 		}
 		public String getPhone(HttpServletRequest req) {
@@ -46,15 +49,15 @@ public class LoginFilter implements Filter {
 	public void destroy() {
 		// do nothing
 	}
-	
-	
+
+
 	public interface SSOLogin{
 		String getUid(HttpServletRequest req);
 		String getEmail(HttpServletRequest req);
 		String getName(HttpServletRequest req);
 		String getPhone(HttpServletRequest req);
 	}
-	
+
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response,
@@ -64,25 +67,25 @@ public class LoginFilter implements Filter {
 		HttpServletResponse httpResponse=(HttpServletResponse)response;
 		httpResponse.setCharacterEncoding("utf-8");
 		String uri=httpRequest.getRequestURI();
-
+log.info("request url : " + uri);
 		//线上服务器检测
 
 		if(uri.equals("/zeus.check")){
 			response.getWriter().write("success");
 			return;
 		}
-		
+
 		ZeusUser zeusUser=null;
 
 		if(uri.endsWith(".taobao") || uri.endsWith(".js") || uri.endsWith(".css") || uri.endsWith(".gif") ||
-				uri.endsWith(".jpg") || uri.endsWith(".png") || uri.endsWith(".do")|| uri.endsWith(".jsp")|| 
-				uri.endsWith("login.html")|| uri.endsWith("userInfo.html")|| uri.endsWith("userEdit.html")||
-				uri.endsWith(".ico")){
+				uri.endsWith(".jpg") || uri.endsWith(".png") || uri.endsWith(".do")|| uri.endsWith(".jsp")||
+				uri.endsWith("loginold.html")||uri.endsWith("loginold.html")|| uri.endsWith("userInfo.html")|| uri.endsWith("userEdit.html")||
+				uri.endsWith(".ico")||uri.endsWith("logon")||uri.endsWith("login")){
 			chain.doFilter(request, response);
 			return;
 		}
 
-		String uid=(String) httpRequest.getSession().getAttribute("user");//login.getUid(httpRequest);
+		String uid= CurrentUser.getUser().getUid();
 
 
 		if(null!=uid){//如果存在session
@@ -98,18 +101,18 @@ public class LoginFilter implements Filter {
             			LoginUser.user.set(zeusUser);
             		}
             	}
- 
+
             }
            if(!check){
 			   httpResponse.sendRedirect("/zeus-web/login.do");
-        	   return;  
+        	   return;
            }
-			
+
 		}else{//不存在user
 			 httpResponse.sendRedirect("/zeus-web/login.do");
-			 return;  
+			 return;
 		}
-		
+
 		chain.doFilter(request, response);
 	}
 

@@ -5,31 +5,6 @@ import java.util.Date;
 
 public class ZeusJob  implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    public enum ScheduleType{
-        SCHEDULE(0),DEPENDENT(1),CYCLE(2);
-
-        private final int id;
-        ScheduleType(int id){
-            this.id=id;
-        }
-        @Override
-        public String toString() {
-            return String.valueOf(id);
-        }
-        public static ZeusJob.ScheduleType parser(int v){
-            for(ZeusJob.ScheduleType s: ZeusJob.ScheduleType.values()){
-                if(s.id==v){
-                    return s;
-                }
-            }
-            return null;
-        }
-        public int getValue() {
-            return id;
-        }
-    }
-
     private Long id;
 
     /**
@@ -80,6 +55,9 @@ public class ZeusJob  implements Serializable {
      */
     private String runType;
 
+    /**
+     * 1:独立Job 2：有依赖的Job
+     */
     private Integer scheduleType;
 
     private Date startTime;
