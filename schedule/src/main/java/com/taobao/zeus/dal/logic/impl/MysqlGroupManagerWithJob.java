@@ -346,7 +346,7 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
 		params.put("owner",user);
 		params.put("name",groupName);
 		params.put("parent",parentGroup);
-		params.put("directory",isDirectory);
+		params.put("directory",isDirectory?0:1);
 		params.put("existed",1);
 		List<ZeusGroupWithBLOBs> result = zeusGroupMapper.selectByParams(params);
 		return PersistenceAndBeanConvertWithJob.convert(result.get(0));
