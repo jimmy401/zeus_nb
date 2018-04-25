@@ -1,5 +1,8 @@
 package com.taobao.zeus.web.controller;
 
+import com.sencha.gxt.data.shared.loader.PagingLoadConfig;
+import com.sencha.gxt.data.shared.loader.PagingLoadResult;
+import com.sencha.gxt.data.shared.loader.PagingLoadResultBean;
 import com.taobao.zeus.dal.logic.*;
 import com.taobao.zeus.dal.logic.impl.ReadOnlyGroupManagerWithJob;
 import com.taobao.zeus.dal.model.ZeusHostGroup;
@@ -7,15 +10,21 @@ import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.dal.tool.GroupBean;
 import com.taobao.zeus.dal.tool.JobBean;
 import com.taobao.zeus.model.JobDescriptor;
+import com.taobao.zeus.model.JobHistory;
+import com.taobao.zeus.model.JobStatus;
 import com.taobao.zeus.model.ZeusFollow;
 import com.taobao.zeus.model.processer.Processer;
 import com.taobao.zeus.util.DateUtil;
+import com.taobao.zeus.util.Tuple;
 import com.taobao.zeus.web.controller.response.CommonResponse;
+import com.taobao.zeus.web.controller.response.GridContent;
 import com.taobao.zeus.web.controller.response.ReturnCode;
 import com.taobao.zeus.web.platform.client.module.jobmanager.JobModel;
+import com.taobao.zeus.web.platform.client.module.jobmanager.JobModelAction;
 import com.taobao.zeus.web.platform.client.util.ZUser;
 import com.taobao.zeus.web.platform.client.util.ZUserContactTuple;
 import com.taobao.zeus.web.util.LoginUser;
+import com.taobao.zeus.web.util.PermissionGroupManagerWithAction;
 import com.taobao.zeus.web.util.PermissionGroupManagerWithJob;
 import net.sf.json.JSONObject;
 import org.slf4j.Logger;
@@ -26,8 +35,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @RestController
 @RequestMapping("/job")
@@ -43,6 +52,8 @@ public class JobController extends BaseController {
 
     @Autowired
     private PermissionGroupManagerWithJob permissionGroupManagerWithJob;
+    @Autowired
+    private PermissionGroupManagerWithAction permissionGroupManagerWithAction;
     @Autowired
     private FollowManagerWithJob followManager;
     @Autowired
@@ -292,5 +303,110 @@ public class JobController extends BaseController {
             result = persist.getName();
         }
         return result;
+    }
+
+    @RequestMapping(value = "/get_job_status_by_groupId", method = RequestMethod.GET)
+    public GridContent getSubJobStatus(
+            @RequestParam(value = "groupId", defaultValue = "", required = false) String groupId,
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "rows", required = false) Integer rows,
+            @RequestParam(value = "startDate", required = false) Date startDate,
+            @RequestParam(value = "endDate", required = false) Date endDate) {
+        GridContent gridcontent = new GridContent();
+        try {
+            int start = (page - 1) * rows;
+            int limit = rows;
+            GroupBean gb = permissionGroupManagerWithAction.getDownstreamGroupBean(groupId);
+            Map<String, JobBean> map = gb.getAllSubJobBeans();
+            List<Tuple<JobDescriptor, JobStatus>> allJobs = new ArrayList<Tuple<JobDescriptor, JobStatus>>();
+            if (startDate != null && endDate != null) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+                Integer startInt = Integer.parseInt(dateFormat.format(startDate));
+                Integer endInt = Integer.parseInt(dateFormat.format(endDate)) + 1;
+                for (String key : map.keySet()) {
+                    Integer subkeyInt = Integer.parseInt(key.substring(0, 8));
+                    if (subkeyInt < endInt && subkeyInt >= startInt) {
+                        Tuple<JobDescriptor, JobStatus> tuple = new Tuple<JobDescriptor, JobStatus>(
+                                map.get(key).getJobDescriptor(), map.get(key)
+                                .getJobStatus());
+                        allJobs.add(tuple);
+                    }
+                }
+            }
+            // 按名次排序
+            Collections.sort(allJobs,
+                    new Comparator<Tuple<JobDescriptor, JobStatus>>() {
+                        @Override
+                        public int compare(Tuple<JobDescriptor, JobStatus> o1,
+                                           Tuple<JobDescriptor, JobStatus> o2) {
+                            return o1.getX().getName()
+                                    .compareToIgnoreCase(o2.getX().getName());
+                        }
+                    });
+
+            int total = allJobs.size();
+            if (start >= allJobs.size()) {
+                start = 0;
+            }
+            allJobs = allJobs.subList(start,
+                    Math.min(start + limit, allJobs.size()));
+
+            List<String> jobIds = new ArrayList<String>();
+            for (Tuple<JobDescriptor, JobStatus> tuple : allJobs) {
+                jobIds.add(tuple.getX().getId());
+                if (tuple.getX().getDependencies() != null) {
+                    for (String deps : tuple.getX().getDependencies()) {
+                        if (!jobIds.contains(deps)) {
+                            jobIds.add(deps);
+                        }
+                    }
+                }
+            }
+            Map<String, JobHistory> jobHisMap = jobHistoryManager
+                    .findLastHistoryByList(jobIds);
+            List<JobModelAction> result = new ArrayList<JobModelAction>();
+            for (Tuple<JobDescriptor, JobStatus> job : allJobs) {
+                JobStatus status = job.getY();
+                JobDescriptor jd = job.getX();
+                JobModelAction model = new JobModelAction();
+                model.setId(status.getJobId());
+                Map<String, String> dep = new HashMap<String, String>();
+                for (String jobId : job.getX().getDependencies()) {
+                    if (jobId != null && !"".equals(jobId)) {
+                        // dep.put(jobId, null);
+                        if (jobHisMap.get(jobId) != null && jobHisMap.get(jobId).getEndTime() != null) {
+                            // System.out.println(new
+                            // SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(jobHisMap.get(jobId).getEndTime()));
+                            dep.put(jobId,
+                                    String.valueOf(jobHisMap.get(jobId)
+                                            .getEndTime().getTime()));
+                        } else {
+                            dep.put(jobId, null);
+                        }
+                    }
+                }
+                dep.putAll(status.getReadyDependency());
+                model.setReadyDependencies(dep);
+                model.setStatus(status.getStatus() == null ? null : status
+                        .getStatus().getId());
+                model.setName(jd.getName());
+                model.setAuto(jd.getAuto());
+                model.setToJobId(jd.getJobId());
+                JobHistory his = jobHisMap.get(jd.getId());
+                if (his != null && his.getStartTime() != null) {
+                    SimpleDateFormat format = new SimpleDateFormat("MM-dd HH:mm:ss");
+                    model.setLastStatus(format.format(his.getStartTime())
+                            + " "
+                            + (his.getStatus() == null ? "" : his.getStatus()
+                            .getId()));
+                }
+                result.add(model);
+            }
+            gridcontent.rows = result;
+            gridcontent.total = total;
+        } catch (Exception e) {
+            log.error("get group whole view failed.", e);
+        }
+        return gridcontent;
     }
 }

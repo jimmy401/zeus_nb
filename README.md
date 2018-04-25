@@ -90,13 +90,37 @@ zeus操作起来更加方便。对被阿里抛弃的zeus，感觉很可惜。决
         16.zeus没有补跑action的原因是 Master里有清理scheduler的模块，小于当前时间往前追15分钟的actionId会被清理掉。<br>
         17.手动触发后，在运行日志中可以看到两个实例，一条是手动触发的，如果执行成功后，状态一直保持成running，而原来的实例会变成success。<br>
         18.每一个小时，会进行漏跑检测。<br>
-        19.启动后，每60秒钟扫描一次zeus_lock表，尝试更新记录，谁占有记录，谁就是master.<br>
-        20.zeus的任务依赖是跟随最小的父节点的周期的，例如，C是依赖任务，依赖A,B,A是每半小时调度一次，B是每小时调度一次，
-        那么C会跟随A的节奏，每半小时调度一次。
-        21.${zdt.format("yyyyMMdd")} 昨日时间：${zdt.addDay(-1).format("yyyyMMdd hh:mm:ss")},
-        ${yesterday}会被替换成昨天的日期，格式是yyyyMMdd，是任务时间的昨天。
-        22.http://ip:port/zeus-web/dump.do查看任务状态
-        23.
+      19.启动后，每60秒钟扫描一次zeus_lock表，尝试更新记录，谁占有记录，谁就是master.<br>
+        20.开发中心->同步任务的功能是把当前打开的文件中的内容，选择的hostGroupId，owner跟新到调度中心的一个任务里，替换里面的内容。
+前端调用的rpc地址，
+1.login.do登录系统
+2.登录后，首页里 调用 
+每分钟调用一次：user.rpc,UserService|getUser;
+file.rpc,FileManagerService|getHomeFile;
+file.rpc,FileManagerService|getFile;
+3.开发中心里，
+每分钟调用一次：user.rpc,UserService|getUser;
+file.rpc,FileManagerService|getUserFiles
+file.rpc,FileManagerService|getCommonFiles
+profile.rpc,ProfileManagerService|getProfile
+关闭文件时候
+profile.rpc,ProfileManagerService|getProfile
+profile.rpc,ProfileManagerService|updateHadoopConf
+双击打开.sh文件时候，会显示菜单目录‘运行’，‘运行选中代码’（灰色），同步任务，扩展功能，datax配置工具，全局配置
+会调用以下rpc
+file.rpc,FileManagerService|getFile
+job.rpc,JobService|getHostGroupNameById
+profile.rpc,ProfileManagerService|getProfile两次
+profile.rpc,ProfileManagerService|updateHadoopConf两次
+debug.rpc,JobDebugService|getDebugHistory
+4.调度中心里
+点击组名调用rpc group.rpc,GroupService|getUpstreamGroup两次
+小目录里可以添加任务，大目录里可以添加组。
+点击任务后，job.rpc,JobService|getUpstreamJob
+JobService|getHostGroupNameById
+点击小目录后
+group.rpc,GroupService|getUpstreamGroup
+
 
 ##志同道合的朋友可以联系我
 --

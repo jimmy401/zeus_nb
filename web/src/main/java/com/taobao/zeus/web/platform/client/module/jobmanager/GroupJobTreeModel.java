@@ -43,6 +43,7 @@ public class GroupJobTreeModel implements Serializable{
 
 	public HashMap<String, Object> getAttributes() {
 		HashMap<String, Object> ret =new HashMap<String, Object>();
+		ret.put("id", this.id);
 		ret.put("owner", this.owner);
 		ret.put("group", this.group);
 		ret.put("directory", this.directory);
