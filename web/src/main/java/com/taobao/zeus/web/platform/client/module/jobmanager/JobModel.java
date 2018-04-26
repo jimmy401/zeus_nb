@@ -1,6 +1,5 @@
 package com.taobao.zeus.web.platform.client.module.jobmanager;
 
-import com.google.gwt.user.client.ui.Label;
 import com.taobao.zeus.web.common.JobConfig;
 
 import java.io.Serializable;

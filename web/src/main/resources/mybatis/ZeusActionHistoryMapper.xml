@@ -4,7 +4,7 @@
   <resultMap id="BaseResultMap" type="com.taobao.zeus.dal.model.ZeusActionHistory">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="action_id" jdbcType="BIGINT" property="actionId" />
-    <result column="job_id" jdbcType="BIGINT" property="jobId" />
+    <result column="job_id" jdbcType="BIGINT" property="actionId" />
     <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
     <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
     <result column="execute_host" jdbcType="VARCHAR" property="executeHost" />
@@ -49,8 +49,8 @@
     <if test="actionId != null">
       action_id = #{actionId,jdbcType=BIGINT}
     </if>
-    <if test="jobId != null">
-      and job_id = #{jobId,jdbcType=BIGINT}
+    <if test="actionId != null">
+      and job_id = #{actionId,jdbcType=BIGINT}
     </if>
     <if test="gmtCreate != null">
       and gmt_create = #{gmtCreate,jdbcType=TIMESTAMP}
@@ -82,8 +82,8 @@
     <include refid="Blob_Column_List" />
     from zeus_action_history
     <where>
-      <if test="jobId!=null and jobId!=''">
-        job_id =#{jobId,jdbcType=BIGINT}
+      <if test="actionId!=null and actionId!=''">
+        job_id =#{actionId,jdbcType=BIGINT}
       </if>
       <if test="actionId!=null and actionId!=''">
         and action_id =#{actionId,jdbcType=BIGINT}
@@ -97,8 +97,8 @@
     count(*)
     from zeus_action_history
     <where>
-      <if test="jobId!=null and jobId!=''">
-        job_id =#{jobId,jdbcType=BIGINT}
+      <if test="actionId!=null and actionId!=''">
+        job_id =#{actionId,jdbcType=BIGINT}
       </if>
     </where>
   </select>
@@ -191,7 +191,7 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
       properties, statis_end_time, timezone, 
       host_group_id, cycle, log
       )
-    values (#{id,jdbcType=BIGINT}, #{actionId,jdbcType=BIGINT}, #{jobId,jdbcType=BIGINT},
+    values (#{id,jdbcType=BIGINT}, #{actionId,jdbcType=BIGINT}, #{actionId,jdbcType=BIGINT},
       #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, #{executeHost,jdbcType=VARCHAR}, 
       #{operator,jdbcType=VARCHAR}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, 
       #{triggerType,jdbcType=INTEGER}, #{status,jdbcType=VARCHAR}, #{illustrate,jdbcType=VARCHAR}, 
@@ -208,7 +208,7 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
       <if test="actionId != null">
         action_id,
       </if>
-      <if test="jobId != null">
+      <if test="actionId != null">
         job_id,
       </if>
       <if test="startTime != null">
@@ -264,8 +264,8 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
       <if test="actionId != null">
         #{actionId,jdbcType=BIGINT},
       </if>
-      <if test="jobId != null">
-        #{jobId,jdbcType=BIGINT},
+      <if test="actionId != null">
+        #{actionId,jdbcType=BIGINT},
       </if>
       <if test="startTime != null">
         #{startTime,jdbcType=TIMESTAMP},
@@ -320,8 +320,8 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
       <if test="actionId != null">
         action_id = #{actionId,jdbcType=BIGINT},
       </if>
-      <if test="jobId != null">
-        job_id = #{jobId,jdbcType=BIGINT},
+      <if test="actionId != null">
+        job_id = #{actionId,jdbcType=BIGINT},
       </if>
       <if test="startTime != null">
         start_time = #{startTime,jdbcType=TIMESTAMP},
@@ -374,7 +374,7 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
   <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.taobao.zeus.dal.model.ZeusActionHistory">
     update zeus_action_history
     set action_id = #{actionId,jdbcType=BIGINT},
-      job_id = #{jobId,jdbcType=BIGINT},
+      job_id = #{actionId,jdbcType=BIGINT},
       start_time = #{startTime,jdbcType=TIMESTAMP},
       end_time = #{endTime,jdbcType=TIMESTAMP},
       execute_host = #{executeHost,jdbcType=VARCHAR},
@@ -395,7 +395,7 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
   <update id="updateByPrimaryKey" parameterType="com.taobao.zeus.dal.model.ZeusActionHistory">
     update zeus_action_history
     set action_id = #{actionId,jdbcType=BIGINT},
-      job_id = #{jobId,jdbcType=BIGINT},
+      job_id = #{actionId,jdbcType=BIGINT},
       start_time = #{startTime,jdbcType=TIMESTAMP},
       end_time = #{endTime,jdbcType=TIMESTAMP},
       execute_host = #{executeHost,jdbcType=VARCHAR},

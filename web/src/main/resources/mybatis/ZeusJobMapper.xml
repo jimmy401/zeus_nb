@@ -38,7 +38,7 @@
   </resultMap>
   <resultMap id="StatisticResultMap" type="com.taobao.zeus.dal.model.ZeusJobStatistic" >
     <result column="cnt" property="cnt" jdbcType="INTEGER" />
-    <result column="job_id" property="jobId" jdbcType="BIGINT" />
+    <result column="job_id" property="actionId" jdbcType="BIGINT" />
     <result column="gmt_modified" property="gmtModified" jdbcType="TIMESTAMP" />
   </resultMap>
   <sql id="Base_Column_List" >

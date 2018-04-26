@@ -7,8 +7,8 @@ public class JobHistoryModel implements Serializable{
 	private static final long serialVersionUID = 1L;
 
 	private String id;
+	private String actionId;
 	private String jobId;
-	private String toJobId;
 	private String name;
 	private String owner;
 	private Date startTime;
@@ -30,17 +30,17 @@ public class JobHistoryModel implements Serializable{
 	public void setId(String id) {
 		this.id = id;
 	}
+	public String getActionId() {
+		return actionId;
+	}
+	public void setActionId(String actionId) {
+		this.actionId = actionId;
+	}
 	public String getJobId() {
 		return jobId;
 	}
 	public void setJobId(String jobId) {
 		this.jobId = jobId;
-	}
-	public String getToJobId() {
-		return toJobId;
-	}
-	public void setToJobId(String toJobId) {
-		this.toJobId = toJobId;
 	}
 	public String getName() {
 		return name;

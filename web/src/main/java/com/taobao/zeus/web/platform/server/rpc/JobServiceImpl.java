@@ -544,8 +544,8 @@ public class JobServiceImpl implements JobService {
 		JobHistory his = jobHistoryManager.findJobHistory(id);
 		JobHistoryModel d = new JobHistoryModel();
 		d.setId(his.getId());
-		d.setJobId(his.getActionId());
-		d.setToJobId(his.getJobId());
+		d.setActionId(his.getActionId());
+		d.setJobId(his.getJobId());
 		d.setStartTime(his.getStartTime());
 		d.setEndTime(his.getEndTime());
 		d.setExecuteHost(his.getExecuteHost());
@@ -582,8 +582,8 @@ public class JobServiceImpl implements JobService {
 		for (JobHistory his : list) {
 			JobHistoryModel d = new JobHistoryModel();
 			d.setId(his.getId());
-			d.setJobId(his.getActionId());
-			d.setToJobId(his.getJobId());
+			d.setActionId(his.getActionId());
+			d.setJobId(his.getJobId());
 			d.setStartTime(his.getStartTime());
 			d.setEndTime(his.getEndTime());
 			d.setExecuteHost(his.getExecuteHost());
@@ -894,8 +894,8 @@ public class JobServiceImpl implements JobService {
 						.getJobDescriptor().getName());
 				d.setOwner(gb.getAllSubJobBeans().get(his.getActionId())
 						.getJobDescriptor().getOwner());
-				d.setJobId(his.getActionId());
-				d.setToJobId(his.getJobId());
+				d.setActionId(his.getActionId());
+				d.setJobId(his.getJobId());
 				d.setStartTime(his.getStartTime());
 				d.setEndTime(his.getEndTime());
 				d.setExecuteHost(his.getExecuteHost());
@@ -957,8 +957,8 @@ public class JobServiceImpl implements JobService {
 						.getJobDescriptor().getName());
 				d.setOwner(gb.getAllSubJobBeans().get(his.getActionId())
 						.getJobDescriptor().getOwner());
-				d.setJobId(his.getActionId());
-				d.setToJobId(his.getJobId());
+				d.setActionId(his.getActionId());
+				d.setJobId(his.getJobId());
 				d.setStartTime(his.getStartTime());
 				d.setEndTime(his.getEndTime());
 				d.setExecuteHost(his.getExecuteHost());

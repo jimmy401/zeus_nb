@@ -122,7 +122,7 @@ public class CardRunning extends CenterTemplate implements Refreshable<GroupMode
 						AnchorElement ae=t.cast();
 						if("查看日志".equals(ae.getInnerText())){
 							LogWindow win=new LogWindow();
-							win.refreshId(value.getJobId(),value.getId());
+							win.refreshId(value.getActionId(),value.getId());
 						}else if("取消任务".equals(ae.getInnerText())){
 							ConfirmMessageBox box=new ConfirmMessageBox("取消任务", "你确认取消该任务吗?");
 							box.addHideHandler(new HideHandler() {
@@ -167,7 +167,7 @@ public class CardRunning extends CenterTemplate implements Refreshable<GroupMode
 				int row=event.getRowIndex();
 				JobHistoryModel model=grid.getStore().get(row);
 				if(model!=null){
-					TreeNodeSelectEvent te=new TreeNodeSelectEvent(TreeKeyProviderTool.genJobProviderKey(model.getJobId()));
+					TreeNodeSelectEvent te=new TreeNodeSelectEvent(TreeKeyProviderTool.genJobProviderKey(model.getActionId()));
 					presenter.getPlatformContext().getPlatformBus().fireEvent(te);
 				}
 			}

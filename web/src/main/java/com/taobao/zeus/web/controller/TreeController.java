@@ -180,6 +180,7 @@ public class TreeController extends BaseController{
                         job.setJob(true);
                         Boolean jFollow = jobFollow.get(job.getId());
                         job.setFollow(jFollow == null ? false : (jFollow ? true : false));
+                        job.setScheduleType(jb.getJobDescriptor().getScheduleType().getType());
                         group.getChildren().add(job);
                     }
                 }

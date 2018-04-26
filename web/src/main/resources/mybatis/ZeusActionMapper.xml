@@ -31,7 +31,7 @@
     <result column="statis_start_time" property="statisStartTime" jdbcType="TIMESTAMP" />
     <result column="status" property="status" jdbcType="VARCHAR" />
     <result column="timezone" property="timezone" jdbcType="VARCHAR" />
-    <result column="job_id" property="jobId" jdbcType="BIGINT" />
+    <result column="job_id" property="actionId" jdbcType="BIGINT" />
   </resultMap>
   <resultMap id="ResultMapWithBLOBs" type="com.taobao.zeus.dal.model.ZeusActionWithBLOBs" extends="BaseResultMap" >
     <result column="configs" property="configs" jdbcType="LONGVARCHAR" />
@@ -39,7 +39,7 @@
   </resultMap>
   <resultMap id="StatisticResultMap" type="com.taobao.zeus.dal.model.ZeusJobStatistic" >
     <result column="cnt" property="cnt" jdbcType="INTEGER" />
-    <result column="job_id" property="jobId" jdbcType="BIGINT" />
+    <result column="job_id" property="actionId" jdbcType="BIGINT" />
     <result column="gmt_modified" property="gmtModified" jdbcType="TIMESTAMP" />
   </resultMap>
   <sql id="Base_Column_List" >
@@ -104,7 +104,7 @@
     ,
     <include refid="Blob_Column_List" />
     from zeus_action
-    where job_id = #{jobId,jdbcType=BIGINT}
+    where job_id = #{actionId,jdbcType=BIGINT}
     order by id desc
   </select>
   <select id="selectByActionId" resultMap="ResultMapWithBLOBs" parameterType="java.util.Map" >
@@ -155,7 +155,7 @@
       #{postProcessers,jdbcType=VARCHAR}, #{preProcessers,jdbcType=VARCHAR}, #{readyDependency,jdbcType=VARCHAR}, 
       #{runType,jdbcType=VARCHAR}, #{scheduleType,jdbcType=INTEGER}, #{startTime,jdbcType=TIMESTAMP}, 
       #{startTimestamp,jdbcType=BIGINT}, #{statisEndTime,jdbcType=TIMESTAMP}, #{statisStartTime,jdbcType=TIMESTAMP}, 
-      #{status,jdbcType=VARCHAR}, #{timezone,jdbcType=VARCHAR}, #{jobId,jdbcType=BIGINT},
+      #{status,jdbcType=VARCHAR}, #{timezone,jdbcType=VARCHAR}, #{actionId,jdbcType=BIGINT},
       #{configs,jdbcType=LONGVARCHAR}, #{resources,jdbcType=LONGVARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.taobao.zeus.dal.model.ZeusActionWithBLOBs" >
@@ -248,7 +248,7 @@
       <if test="timezone != null" >
         timezone,
       </if>
-      <if test="jobId != null" >
+      <if test="actionId != null" >
         job_id,
       </if>
       <if test="configs != null" >
@@ -346,8 +346,8 @@
       <if test="timezone != null" >
         #{timezone,jdbcType=VARCHAR},
       </if>
-      <if test="jobId != null" >
-        #{jobId,jdbcType=BIGINT},
+      <if test="actionId != null" >
+        #{actionId,jdbcType=BIGINT},
       </if>
       <if test="configs != null" >
         #{configs,jdbcType=LONGVARCHAR},
@@ -444,8 +444,8 @@
       <if test="timezone != null" >
         timezone = #{timezone,jdbcType=VARCHAR},
       </if>
-      <if test="jobId != null" >
-        job_id = #{jobId,jdbcType=BIGINT},
+      <if test="actionId != null" >
+        job_id = #{actionId,jdbcType=BIGINT},
       </if>
       <if test="configs != null" >
         configs = #{configs,jdbcType=LONGVARCHAR},
@@ -486,7 +486,7 @@
       statis_start_time = #{statisStartTime,jdbcType=TIMESTAMP},
       status = #{status,jdbcType=VARCHAR},
       timezone = #{timezone,jdbcType=VARCHAR},
-      job_id = #{jobId,jdbcType=BIGINT},
+      job_id = #{actionId,jdbcType=BIGINT},
       configs = #{configs,jdbcType=LONGVARCHAR},
       resources = #{resources,jdbcType=LONGVARCHAR}
     where id = #{id,jdbcType=BIGINT}
@@ -521,7 +521,7 @@
       statis_start_time = #{statisStartTime,jdbcType=TIMESTAMP},
       status = #{status,jdbcType=VARCHAR},
       timezone = #{timezone,jdbcType=VARCHAR},
-      job_id = #{jobId,jdbcType=BIGINT}
+      job_id = #{actionId,jdbcType=BIGINT}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

@@ -247,7 +247,7 @@ public class CardHistory extends CenterTemplate implements
 						AnchorElement ae = t.cast();
 						if ("查看日志".equals(ae.getInnerText())) {
 							LogWindow win = new LogWindow();
-							win.refreshId(value.getJobId(),value.getId());
+							win.refreshId(value.getActionId(),value.getId());
 						} else if ("取消任务".equals(ae.getInnerText())) {
 							ConfirmMessageBox box = new ConfirmMessageBox(
 									"取消任务", "你确认取消该任务吗?");

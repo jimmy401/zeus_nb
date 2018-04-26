@@ -26,6 +26,7 @@ public class GroupJobTreeModel implements Serializable{
 	private boolean job;
 	private boolean follow;
 	private String owner;
+	private Integer scheduleType;
 	private List<GroupJobTreeModel> children=new ArrayList<GroupJobTreeModel>();
 
 	private String text;
@@ -49,6 +50,7 @@ public class GroupJobTreeModel implements Serializable{
 		ret.put("directory", this.directory);
 		ret.put("job", this.job);
 		ret.put("follow", this.follow);
+		ret.put("scheduleType",this.scheduleType);
 		return ret;
 	}
 
@@ -99,5 +101,13 @@ public class GroupJobTreeModel implements Serializable{
 	}
 	public void setChildren(List<GroupJobTreeModel> children) {
 		this.children = children;
+	}
+
+	public Integer getScheduleType() {
+		return scheduleType;
+	}
+
+	public void setScheduleType(Integer scheduleType) {
+		this.scheduleType = scheduleType;
 	}
 }
