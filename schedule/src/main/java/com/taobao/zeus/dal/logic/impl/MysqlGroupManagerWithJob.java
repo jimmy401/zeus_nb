@@ -487,7 +487,9 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
 	public List<String> getHosts() throws ZeusException {
 		List<ZeusWorker> list = zeusWorkerMapper.selectAll();
 		final List<String> results = new ArrayList<String>();
-		list.stream().forEach(o -> results.add(o.getHost()));
+		for (ZeusWorker item:list ) {
+			results.add(item.getHost());
+		}
 		return results;
 	}
 

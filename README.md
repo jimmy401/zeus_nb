@@ -40,11 +40,15 @@ zeus操作起来更加方便。对被阿里抛弃的zeus，感觉很可惜。决
   
 4.配置数据库：<br/>
  在项目文件夹db目录下。里面已经配置好了用户。biadmin/123456<br/>
+ 如果java_home环境变量需要设置：
+ export JAVA_HOME=/usr/java/jdk1.7.0_67-cloudera  
+ export PATH=$JAVA_HOME/bin:$PATH
   
 5.编译源码：<br/>
   * 修改项目下resources目录下的env.sh中的java_home位置，指向A,B,C三台主机上的对应java_home路径。<br/>
   * 修改web工程下filter里的prod.properties里的数据库连接，hadoop,hive等配置。<br/>
   * hadoop.home=/usr/lib/hadoop 可以不改变，在对应linux服务器上建软连接的方式指向真正的hadoop lib路径。<br><br/>
+   * ln -s /opt/cloudera/parcels/CDH-5.10.0-1.cdh5.10.0.p0.41/lib/hadoop /usr/lib/hadoop
   * hive.home=/usr/lib/hive配置参考这个方法。<br>
   * zeus的每个节点都需要有这个配置。
   
@@ -52,6 +56,11 @@ zeus操作起来更加方便。对被阿里抛弃的zeus，感觉很可惜。决
   首先启动A,接着B,C，最先启动会作为master。<br/>
   
 7.打开浏览器，输入http://A:8080/zeus-web/login.do 输入biadmin/123456，就可以体验zeus了。<br/>
+
+8.master-A启动后，会在zeus_lock表里插入一条记录，标识自己是master.
+worker-B启动后，会判断zeus_lock表里是否有记录，如果有记录，就像master注册自己。不然插入记录，标识自己是master。
+worker-C跟worker-B一样。
+在master分配任务的时候，会在zeus_host_group，zeus_host_relation中遍历host,选择注册表里活跃的host作为worker,执行任务。
 
 版本
 ----

@@ -364,7 +364,7 @@ public class Master {
 
 			if (hostGroupCache != null && hostGroupCache.getHosts()!=null && hostGroupCache.getHosts().size()>0) {
 				int size = hostGroupCache.getHosts().size();
-				for (int i = 0; i < size && selectWorker == null; i++) {
+				for (int hostGroup = 0; hostGroup < size && selectWorker == null; hostGroup++) {
 					String host = hostGroupCache.selectHost();
 					log.info("hostGroupCache` host  `````````````````````" + host);
 
