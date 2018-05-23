@@ -39,7 +39,7 @@
       and script = #{script,jdbcType=LONGVARCHAR}
     </if>
     <if test="hostGroupId != null">
-      and host_group_id = #{hostGroupId,jdbcType=INTEGER}
+      and host_group_id = #{hostGroupId,jdbcType=VARCHAR}
     </if>
     <if test="gmtCreate != null">
       and gmt_create = #{gmtCreate,jdbcType=VARCHAR}
