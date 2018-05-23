@@ -32,6 +32,7 @@ public class FileManagerRpcImpl implements FileManagerService{
 	private UserManager userManager;
 	@Override
 	public FileModel addFile(String parentId, String name, boolean folder) {
+		log.info("add file info,parent id :" + parentId + "name :" +name +"folder："+folder);
 		String uid=LoginUser.getUser().getUid();
 		FileDescriptor parent=fileManager.getFile(parentId);
 		if(Super.getSupers().contains(uid)|| parent.getOwner().equalsIgnoreCase(uid)){
