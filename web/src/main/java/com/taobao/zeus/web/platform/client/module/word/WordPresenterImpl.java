@@ -1,8 +1,5 @@
 package com.taobao.zeus.web.platform.client.module.word;
 
-import java.util.List;
-import java.util.Map;
-
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.taobao.zeus.web.platform.client.app.PlacePath;
@@ -19,8 +16,11 @@ import com.taobao.zeus.web.platform.client.util.async.PlatformAsyncCallback;
 import com.taobao.zeus.web.platform.client.util.filesystem.FileUpdateEvent;
 import com.taobao.zeus.web.platform.client.util.filesystem.FileUpdateEvent.FileUpdateHandler;
 import com.taobao.zeus.web.platform.client.util.place.PlatformPlaceChangeEvent;
-public class WordPresenterImpl implements WordPresenter{
 
+import java.util.List;
+import java.util.Map;
+
+public class WordPresenterImpl implements WordPresenter{
 	private final PlatformContext context;
 	private WordView wordView;
 	public WordPresenterImpl(PlatformContext context){
@@ -34,7 +34,7 @@ public class WordPresenterImpl implements WordPresenter{
 			}
 		});
 		context.getPlatformBus().registPlaceHandler(this);
-		// 打开上传关闭时打开的文档
+		// 打开上次关闭时打开的文档
 		RPCS.getProfileService().getProfile(new AbstractAsyncCallback<ProfileModel>() {
 			@Override
 			public void onSuccess(ProfileModel result) {

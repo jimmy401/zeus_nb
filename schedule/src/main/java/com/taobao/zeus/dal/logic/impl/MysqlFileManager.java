@@ -29,7 +29,15 @@ public class MysqlFileManager implements
 		fp.setParent(Long.valueOf(parentId));
 		fp.setType(folder ? ZeusFile.FOLDER : ZeusFile.FILE);
 		zeusFileMapper.insertSelective(fp);
-		return PersistenceAndBeanConvertWithAction.convert(fp);
+
+		HashMap<String,Object> params = new HashMap<>();
+		params.put("name",name);
+		params.put("owner",uid);
+		params.put("parent",Long.valueOf(parentId));
+		params.put("type",folder ? ZeusFile.FOLDER : ZeusFile.FILE);
+
+		ZeusFile result = zeusFileMapper.selectByParams(params);
+		return PersistenceAndBeanConvertWithAction.convert(result);
 	}
 
 	@Override
