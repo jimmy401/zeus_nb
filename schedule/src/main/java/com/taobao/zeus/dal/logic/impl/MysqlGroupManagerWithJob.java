@@ -610,11 +610,9 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
 		String host = persist.getHost();
 		Integer workGroupId = persist.getHostGroupId();
 		Integer auto = persist.getAuto();
-		log.info("begin updateActionList.");
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("jobId", jobId);
 		List<ZeusActionWithBLOBs> actionList =zeusActionMapper.selectByJobId(params);
-		log.info("finish query.");
 		if (actionList != null && actionList.size() > 0 ){
 			for(ZeusActionWithBLOBs actionPer : actionList){
 //				if(!"running".equalsIgnoreCase(actionPer.getStatus())){
