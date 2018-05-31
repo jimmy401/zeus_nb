@@ -3,6 +3,7 @@ package com.taobao.zeus.socket.master;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.jboss.netty.channel.Channel;
 
@@ -35,13 +36,13 @@ public class MasterWorkerHolder{
 	public HeartBeatInfo getHeart() {
 		return heart;
 	}
-	public ConcurrentHashMap<String, Boolean> getRunnings() {
+	public ConcurrentMap<String, Boolean> getRunnings() {
 		return runnings;
 	}
-	public ConcurrentHashMap<String, Boolean> getDebugRunnings() {
+	public ConcurrentMap<String, Boolean> getDebugRunnings() {
 		return debugRunnings;
 	}
-	public ConcurrentHashMap<String, Boolean> getManualRunnings() {
+	public ConcurrentMap<String, Boolean> getManualRunnings() {
 		return manualRunnings;
 	}
 }

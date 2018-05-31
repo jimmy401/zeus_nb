@@ -21,6 +21,8 @@ public interface ZeusActionMapper {
 
     List<ZeusActionWithBLOBs> selectByParams(Map<String,Object> params);
 
+    void updateByJobId(Map<String,Object> params);
+
     List<ZeusActionWithBLOBs> findActionWithIds(List<Long> list);
 
     List<ZeusActionWithBLOBs> selectByJobId(Map<String,Object> params);

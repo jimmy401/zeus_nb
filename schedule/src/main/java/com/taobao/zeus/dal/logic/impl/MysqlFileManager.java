@@ -37,7 +37,10 @@ public class MysqlFileManager implements
 		params.put("type",folder ? ZeusFile.FOLDER : ZeusFile.FILE);
 
 		ZeusFile result = zeusFileMapper.selectByParams(params);
+<<<<<<< HEAD
 
+=======
+>>>>>>> migu
 		return PersistenceAndBeanConvertWithAction.convert(result);
 	}
 

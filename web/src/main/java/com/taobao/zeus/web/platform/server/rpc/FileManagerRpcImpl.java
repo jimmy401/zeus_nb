@@ -90,7 +90,7 @@ public class FileManagerRpcImpl implements FileManagerService{
 
 	@Override
 	public FileModel getFile(String id) {
-		log.info("getFile by param id : ",id);
+		log.info("getFile by param id :{}",id);
 		FileDescriptor fd=fileManager.getFile(id);
 		return convert(fd);
 	}

@@ -371,7 +371,9 @@
 				<env>dev</env>
 				<skipTests>true</skipTests>
 			</properties>
-
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 		</profile>
 
 		<profile>
@@ -380,9 +382,6 @@
 				<env>prod</env>
 				<skipTests>true</skipTests>
 			</properties>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 		</profile>
 
 		<profile>

@@ -53,10 +53,10 @@
       and job_id = #{jobId,jdbcType=BIGINT}
     </if>
     <if test="gmtCreate != null">
-      and gmt_create = #{gmtCreate,jdbcType=TIMESTAMP}
+      and gmt_create = #{gmtCreate,jdbcType=VARCHAR}
     </if>
     <if test="gmtModified != null">
-      and gmt_modified = #{gmtModified,jdbcType=TIMESTAMP}
+      and gmt_modified = #{gmtModified,jdbcType=VARCHAR}
     </if>
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
@@ -280,10 +280,10 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
         #{operator,jdbcType=VARCHAR},
       </if>
       <if test="gmtCreate != null">
-        #{gmtCreate,jdbcType=TIMESTAMP},
+        #{gmtCreate,jdbcType=VARCHAR},
       </if>
       <if test="gmtModified != null">
-        #{gmtModified,jdbcType=TIMESTAMP},
+        #{gmtModified,jdbcType=VARCHAR},
       </if>
       <if test="triggerType != null">
         #{triggerType,jdbcType=INTEGER},
@@ -336,10 +336,10 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
         operator = #{operator,jdbcType=VARCHAR},
       </if>
       <if test="gmtCreate != null">
-        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+        gmt_create = #{gmtCreate,jdbcType=VARCHAR},
       </if>
       <if test="gmtModified != null">
-        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+        gmt_modified = #{gmtModified,jdbcType=VARCHAR},
       </if>
       <if test="triggerType != null">
         trigger_type = #{triggerType,jdbcType=INTEGER},
