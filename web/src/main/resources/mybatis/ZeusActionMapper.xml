@@ -109,10 +109,6 @@
   </select>
   <select id="selectByActionId" resultMap="ResultMapWithBLOBs" parameterType="java.util.Map" >
     select
-    <include refid="Base_Column_List" />
-    ,
-    <include refid="Blob_Column_List" />
-    from zeus_action
     where id = #{actionId,jdbcType=BIGINT}
   </select>
   <select id="findActionWithIds" resultMap="ResultMapWithBLOBs">
@@ -357,6 +353,16 @@
       </if>
     </trim>
   </insert>
+  <update id="updateByJobId" parameterType="java.util.Map" >
+    update zeus_action
+    set auto = #{auto,jdbcType=INTEGER},
+      gmt_modified = #{gmtModified,jdbcType=VARCHAR},
+      host = #{host,jdbcType=VARCHAR},
+      host_group_id = #{hostGroupId,jdbcType=INTEGER},
+      configs = #{configs,jdbcType=LONGVARCHAR},
+      resources = #{resources,jdbcType=LONGVARCHAR}
+    where job_id = #{jobId,jdbcType=BIGINT}
+  </update>
   <update id="updateByPrimaryKeySelective" parameterType="com.taobao.zeus.dal.model.ZeusActionWithBLOBs" >
     update zeus_action
     <set >

@@ -25,6 +25,8 @@ import com.taobao.zeus.util.Environment;
 import com.taobao.zeus.util.Tuple;
 import org.jboss.netty.channel.Channel;
 import org.quartz.SchedulerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -48,7 +50,7 @@ import java.util.*;
  */
 @Service
 public class ScheduleDump extends HttpServlet {
-
+    private static Logger log = LoggerFactory.getLogger(ScheduleDump.class);
     @Autowired
     ZeusActionMapper zeusActionMapper;
 
