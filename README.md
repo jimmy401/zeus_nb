@@ -105,7 +105,7 @@ worker-C跟worker-B一样。
         21.${zdt.format("yyyyMMdd")} 昨日时间：${zdt.addDay(-1).format("yyyyMMdd hh:mm:ss")},
         ${yesterday}会被替换成昨天的日期，格式是yyyyMMdd，是任务时间的昨天。
         22.http://ip:port/zeus-web/dump.do查看任务状态
-        23.
+        23.任务失败后，会发送给重要联系人，然后是job本身的owner，最后是关注者。
 
 ##志同道合的朋友可以联系我
 --

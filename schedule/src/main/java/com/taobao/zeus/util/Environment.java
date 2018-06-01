@@ -44,10 +44,12 @@ public class Environment {
     private static Integer scanRate = Integer.valueOf(3000);
     private static Integer scanExceptionRate = Integer.valueOf(3000);
     private static Integer zeusWorkerTasksMax = Integer.valueOf(5);
+    private static Boolean kerberosAuth=false;
 	
     public Environment(String env,String scheduleGroup,String downloadPath,String hadoopHome,String hadoopConfDir,String hiveHome,String hiveConfDir,
 			String host,String port,String username,String password,String sendFrom,String notifyUrl,String accessToken,String excludeFile, String defaultWorkerGroupId, String defaultMasterGroupId
-			,String maxMemRate, String maxCpuLoadPerCore, String scanRate,String scanExceptionRate,String zeusWorkerTasksMax){
+			,String maxMemRate, String maxCpuLoadPerCore, String scanRate,String scanExceptionRate,String zeusWorkerTasksMax
+	,Boolean kerberosAuth){
 		Environment.env=env.trim();
 		Environment.scheduleGroup=scheduleGroup.trim();
 		Environment.downloadPath=downloadPath.trim();
@@ -69,6 +71,7 @@ public class Environment {
 		Environment.excludeFile=excludeFile.trim();
 		Environment.defaultWorkerGroupId=defaultWorkerGroupId.trim();
 		Environment.defaultMasterGroupId=defaultMasterGroupId.trim();
+		Environment.kerberosAuth=kerberosAuth;
 		try {
 			Environment.maxMemRate=Float.valueOf(maxMemRate.trim());
 		} catch (Exception e) {
@@ -116,6 +119,7 @@ public class Environment {
 		log.info("the scanRate is " + scanRate.trim().toString());
 		log.info("the scanExceptionRate is " + scanExceptionRate.trim().toString());
 		log.info("the zeusWorkerTasksMax is " + zeusWorkerTasksMax.trim().toString());
+		log.info("the kerberosAuth is " + kerberosAuth);
 	}
 	
 	public static String getNotifyUrl() {
@@ -230,5 +234,13 @@ public class Environment {
 
 	public static void setZeusWorkerTasksMax(Integer zeusWorkerTasksMax) {
 		Environment.zeusWorkerTasksMax = zeusWorkerTasksMax;
+	}
+
+	public static Boolean getKerberosAuth() {
+		return kerberosAuth;
+	}
+
+	public static void setKerberosAuth(Boolean kerberosAuth) {
+		Environment.kerberosAuth = kerberosAuth;
 	}
 }

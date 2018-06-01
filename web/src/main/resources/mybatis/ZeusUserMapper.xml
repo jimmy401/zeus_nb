@@ -14,10 +14,11 @@
     <result column="user_type" jdbcType="INTEGER" property="userType" />
     <result column="description" jdbcType="VARCHAR" property="description" />
     <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="kerberos_user" jdbcType="VARCHAR" property="kerberosUser" />
   </resultMap>
   <sql id="Base_Column_List">
     id, email, gmt_create, gmt_modified, name, phone, uid, wangwang, is_effective, user_type, 
-    description, password
+    description, password,kerberos_user
   </sql>
   <sql id="common_where_if">
     <if test="uid != null">
