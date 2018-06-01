@@ -60,7 +60,6 @@ public class JobDebugRpcImpl implements JobDebugService {
 		params.put("fileId",fileId);
 		params.put("runtype",mode);
 		params.put("owner",uid);
-		params.put("hostGroupId",hostGroupId);
 		params.put("gmtCreate", DateUtil.date2String(now));
 		params.put("gmtModified",DateUtil.date2String(now));
 		DebugHistory newHistory = debugHistoryManager.selectByParams(params);
