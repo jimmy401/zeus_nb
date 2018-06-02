@@ -103,7 +103,12 @@ public class HiveJob extends ProcessJob {
 		}else{
 			log("没有RunType=" + jobContext.getRunType() + " 的执行类别");
 		}
-		
+
+		if (Environment.getKerberosAuth()){
+			user=Environment.getKerberosUser();
+			shellPrefix= "sudo -u " + user;
+		}
+
 		//格式转换
 		String[] excludeFiles = Environment.getExcludeFile().split(";");
 		boolean isDos2unix = true;

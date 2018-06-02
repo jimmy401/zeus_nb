@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.taobao.zeus.dal.tool.HierarchyProperties;
+import com.taobao.zeus.util.Environment;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -82,7 +83,7 @@ public class FileUploadServlet extends HttpServlet{
 					suffix=name.substring(index+1);
 				}
 				try {
-					temp=new File("/tmp/zeus/"+name+"-"+new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date())+"."+suffix);
+					temp=new File(Environment.getZeusTempWorkPath() + "/"+name+"-"+new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date())+"."+suffix);
 					temp.createNewFile();
 					temp.deleteOnExit();
 					out = new BufferedOutputStream(new FileOutputStream(temp));

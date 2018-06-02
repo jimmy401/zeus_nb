@@ -97,6 +97,12 @@
 		<constructor-arg index="22">
 			<value>${kerberos.auth}</value>
 		</constructor-arg>
+		<constructor-arg index="23">
+			<value>${kerberos.user}</value>
+		</constructor-arg>
+		<constructor-arg index="24">
+			<value>${zeus.tempWorkPath}</value>
+		</constructor-arg>
 	</bean>
 
 	<bean id="distributeLocker" class="com.taobao.zeus.schedule.DistributeLocker" init-method="init" depends-on="environment">

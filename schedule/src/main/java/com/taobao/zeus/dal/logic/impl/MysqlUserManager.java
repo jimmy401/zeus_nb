@@ -3,7 +3,10 @@ package com.taobao.zeus.dal.logic.impl;
 import com.taobao.zeus.dal.logic.UserManager;
 import com.taobao.zeus.dal.mapper.ZeusUserMapper;
 import com.taobao.zeus.dal.model.ZeusUser;
+import com.taobao.zeus.socket.master.Master;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -15,7 +18,7 @@ public class MysqlUserManager implements UserManager{
 
 	@Autowired
 	ZeusUserMapper zeusUserMapper;
-
+	private static Logger log = LoggerFactory.getLogger(MysqlUserManager.class);
 	public List<ZeusUser> getAllUsers(){
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("isEffective", 1);
@@ -40,11 +43,7 @@ public class MysqlUserManager implements UserManager{
 		if(uids.isEmpty()){
 			return new ArrayList<ZeusUser>();
 		}
-
-		String uidString = StringUtils.join(uids.toArray(),",");
-		Map<String,Object> params = new HashMap<String,Object>();
-		params.put("uidString", uidString);
-		List<ZeusUser> list = zeusUserMapper.selectByUids(params);
+		List<ZeusUser> list = zeusUserMapper.selectByUids(uids);
 		return list;
 	} 
 	

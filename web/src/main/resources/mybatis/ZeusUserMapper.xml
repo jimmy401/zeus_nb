@@ -31,11 +31,6 @@
       and user_type = #{userType,jdbcType=INTEGER}
     </if>
   </sql>
-  <sql id="uid_where_if">
-    <if test="uidString != null">
-      uid in (#{uidString,jdbcType=VARCHAR})
-    </if>
-  </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
   select
   <include refid="Base_Column_List" />
@@ -63,13 +58,14 @@
     where uid like #{uid} or name like #{name} or email like #{email}
     order by #{sortField} #{sortOrder}
   </select>
-  <select id="selectByUids" parameterType="java.util.Map" resultMap="BaseResultMap">
+  <select id="selectByUids" parameterType="java.util.List" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
     from zeus_user
-    <where>
-      <include refid="uid_where_if" />
-    </where>
+    where uid in
+      <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+        #{item}
+      </foreach>
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from zeus_user

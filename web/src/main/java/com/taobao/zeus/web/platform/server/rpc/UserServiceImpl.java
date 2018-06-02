@@ -182,9 +182,9 @@ public class UserServiceImpl extends RemoteServiceServlet implements
         List<ZUser> result = new ArrayList<ZUser>();
         List<ZeusUser> list = userManager.getAllUsers();
         for (ZeusUser u : list) {
-            if (u.getUserType() == 0) {
+            //if (u.getUserType() == 0) {
                 result.add(transform(u));
-            }
+            //}
         }
         return result;
     }
@@ -286,9 +286,9 @@ public class UserServiceImpl extends RemoteServiceServlet implements
                                 "\r\n	请确认，谢谢！");
             }
             //3.给用户增加Kerberos权限
-            if (Environment.getKerberosAuth()){
-                giveKerberosAuth(user);
-            }
+//            if (Environment.getKerberosAuth()){
+//                giveKerberosAuth(user);
+//            }
         }
     }
 

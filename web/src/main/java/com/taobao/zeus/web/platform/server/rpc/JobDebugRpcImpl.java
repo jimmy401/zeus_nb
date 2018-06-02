@@ -37,7 +37,7 @@ public class JobDebugRpcImpl implements JobDebugService {
 
 	@Override
 	public String debug(String fileId, String mode, String script, String hostGroupId)
-			throws GwtException {
+			throws Exception {
 
 		String uid = LoginUser.getUser().getUid();
 		FileDescriptor fd = fileManager.getFile(fileId);
@@ -45,23 +45,23 @@ public class JobDebugRpcImpl implements JobDebugService {
 			return "您无权操作";
 			//throw new RuntimeException("您无权操作");
 		}
-		Date now = new Date();
+		String now = DateUtil.date2String(new Date());
 		DebugHistory history = new DebugHistory();
 		history.setFileId(fileId);
 		history.setOwner(uid);
 		history.setJobRunType(JobRunType.parser(mode));
 		history.setScript(script);
 		history.setHostGroupId(hostGroupId);
-		history.setGmtCreate(now);
-		history.setGmtModified(now);
+		history.setGmtCreate(DateUtil.string2Date(now));
+		history.setGmtModified(DateUtil.string2Date(now));
 		debugHistoryManager.addDebugHistory(history);
 
 		Map<String,Object> params=new HashMap<String,Object>();
 		params.put("fileId",fileId);
 		params.put("runtype",mode);
 		params.put("owner",uid);
-		params.put("gmtCreate", DateUtil.date2String(now));
-		params.put("gmtModified",DateUtil.date2String(now));
+		params.put("gmtCreate", now);
+		params.put("gmtModified",now);
 		DebugHistory newHistory = debugHistoryManager.selectByParams(params);
 		String debugId = newHistory.getId();
 
