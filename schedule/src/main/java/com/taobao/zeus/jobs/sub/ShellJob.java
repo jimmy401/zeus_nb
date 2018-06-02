@@ -85,7 +85,7 @@ public class ShellJob extends ProcessJob{
 		}else{
 			log("没有RunType=" + jobContext.getRunType() + " 的执行类别");
 		}
-
+        //所有的用户统一用一个用户提交任务
 		if (Environment.getKerberosAuth()){
 			user=Environment.getKerberosUser();
 			shellPrefix= "sudo -u " + user;
