@@ -72,6 +72,21 @@
       and gmt_modified = #{gmtModified,jdbcType=VARCHAR}
     </if>
   </sql>
+  <select id="selectActionStatistic" resultMap="StatisticResultMap">
+     select count(*) cnt,max(job_id) job_id,max(gmt_modified) gmt_modified
+     from zeus_action
+     <![CDATA[
+     where id>=date_format(now(),'20%y%m%d0000000000')
+     ]]>
+  </select>
+  <select id="selectGreatThanGmtModified" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select
+    <include refid="Base_Column_List" />
+    from zeus_action
+    <![CDATA[
+    where gmt_modified > #{gmtModified,jdbcType=VARCHAR}
+    ]]>
+  </select>
   <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
     select 
     <include refid="Base_Column_List" />
@@ -133,6 +148,10 @@
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from zeus_action
     where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByJobId" parameterType="java.lang.Long" >
+    delete from zeus_action
+    where job_id = #{jobId,jdbcType=BIGINT}
   </delete>
   <insert id="insert" parameterType="com.taobao.zeus.dal.model.ZeusActionWithBLOBs" >
     insert into zeus_action (id, auto, cron_expression, 

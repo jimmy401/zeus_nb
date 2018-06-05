@@ -88,6 +88,7 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
                     + "依赖，无法删除");
         }
         zeusJobMapper.deleteByPrimaryKey(Long.valueOf(jobId));
+        zeusActionMapper.deleteByJobId(Long.valueOf(jobId));
     }
 
     @Override
