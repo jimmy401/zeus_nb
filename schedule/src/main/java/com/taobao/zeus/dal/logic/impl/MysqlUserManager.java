@@ -18,6 +18,7 @@ public class MysqlUserManager implements UserManager{
 
 	@Autowired
 	ZeusUserMapper zeusUserMapper;
+
 	private static Logger log = LoggerFactory.getLogger(MysqlUserManager.class);
 	public List<ZeusUser> getAllUsers(){
 		Map<String,Object> params = new HashMap<String,Object>();
@@ -26,7 +27,15 @@ public class MysqlUserManager implements UserManager{
 
 		return list;
 	}
+	@Override
+	public List<ZeusUser> getAllJobsNeedAlertUsers(){
+		Map<String,Object> params = new HashMap<String,Object>();
+		params.put("isEffective", 1);
+		params.put("isAllJobsNeedAlert", 1);
+		List<ZeusUser> list = zeusUserMapper.selectByParams(params);
 
+		return list;
+	}
 	
 	public ZeusUser findByUid(String uid){
 		Map<String,Object> params = new HashMap<String,Object>();

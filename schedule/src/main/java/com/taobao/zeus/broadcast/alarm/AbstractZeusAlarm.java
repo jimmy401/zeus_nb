@@ -3,6 +3,8 @@ package com.taobao.zeus.broadcast.alarm;
 import com.taobao.zeus.dal.logic.FollowManagerWithJob;
 import com.taobao.zeus.dal.logic.GroupManagerWithJob;
 import com.taobao.zeus.dal.logic.JobHistoryManager;
+import com.taobao.zeus.dal.logic.impl.MysqlUserManager;
+import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.model.JobHistory;
 import com.taobao.zeus.model.JobStatus.TriggerType;
 import com.taobao.zeus.model.ZeusFollow;
@@ -11,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +28,9 @@ public abstract class AbstractZeusAlarm implements ZeusAlarm{
 	@Autowired
 	@Qualifier("mysqlGroupManagerWithJob")
 	protected GroupManagerWithJob groupManagerWithJob;
+	@Autowired
+	@Qualifier("mysqlUserManager")
+	MysqlUserManager mysqlUserManager;
 /*	
 	@Override
 	public void alarm(String historyId, String title, String content,ChainException chain)
@@ -71,12 +77,12 @@ public abstract class AbstractZeusAlarm implements ZeusAlarm{
 		JobHistory history=jobHistoryManager.findJobHistory(historyId);
 		TriggerType type=history.getTriggerType();
 		//获得action_id
-		String jobId=history.getActionId();
+		String actionId=history.getActionId();
 		//获得job_id
-		String tojobId=history.getJobId();
+		String jobId=history.getJobId();
 		List<String> users=new ArrayList<String>();
 		if(type==TriggerType.SCHEDULE){
-			List<ZeusFollow> zeusFollowers = followManagerWithJob.findAllFollowers(tojobId);
+			List<ZeusFollow> zeusFollowers = followManagerWithJob.findAllFollowers(jobId);
 			List<ZeusFollow> importantContacts = new ArrayList<ZeusFollow>();
 			List<ZeusFollow> otherFollowers = new ArrayList<ZeusFollow>();
 			for(ZeusFollow zf : zeusFollowers){
@@ -86,7 +92,7 @@ public abstract class AbstractZeusAlarm implements ZeusAlarm{
 					otherFollowers.add(zf);
 				}
 			}
-			String owner = groupManagerWithJob.getJobDescriptor(tojobId).getX().getOwner();
+			String owner = groupManagerWithJob.getJobDescriptor(jobId).getX().getOwner();
 			
 			//首先添加重要联系人，然后是job本身的owner，最后是关注者。
 			for(ZeusFollow person : importantContacts){
@@ -102,8 +108,14 @@ public abstract class AbstractZeusAlarm implements ZeusAlarm{
 					users.add(other.getUid());
 				}
 			}
+			List<ZeusUser> needAlertUsers = mysqlUserManager.getAllJobsNeedAlertUsers();
+			for (ZeusUser item:needAlertUsers){
+				if (!users.contains(item.getUid())) {
+					users.add(item.getUid());
+				}
+			}
 		}else{
-			users.add(groupManagerWithJob.getJobDescriptor(tojobId).getX().getOwner());
+			users.add(groupManagerWithJob.getJobDescriptor(jobId).getX().getOwner());
 			if(history.getOperator()!=null){
 				if(!users.contains(history.getOperator())){
 					users.add(history.getOperator());
@@ -126,7 +138,7 @@ public abstract class AbstractZeusAlarm implements ZeusAlarm{
 				}
 			}
 		}
-		alarm(jobId, result, title, content);
+		alarm(actionId, result, title, content);
 	}
 	
 	@Override

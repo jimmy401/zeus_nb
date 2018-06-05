@@ -27,6 +27,9 @@
     <if test="isEffective != null">
       and is_effective = #{isEffective,jdbcType=INTEGER}
     </if>
+    <if test="isAllJobsNeedAlert != null">
+      and is_all_jobs_need_alert = #{isAllJobsNeedAlert,jdbcType=INTEGER}
+    </if>
     <if test="userType != null">
       and user_type = #{userType,jdbcType=INTEGER}
     </if>
