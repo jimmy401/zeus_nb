@@ -84,9 +84,9 @@ public class ReadOnlyGroupManagerWithAction {
 		List<JobDescriptor> changedJobs=new ArrayList<JobDescriptor>();
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("gmtModified", DateUtil.date2String(ignoreContentJobJudge.lastModified));
-		List<ZeusActionWithBLOBs> list =zeusActionMapper.selectGreatThanGmtModified(params);
+		List<ZeusAction> list =zeusActionMapper.selectGreatThanGmtModified(params);
 
-		for(ZeusActionWithBLOBs o:list){
+		for(ZeusAction o:list){
 			JobDescriptor jd=new JobDescriptor();
 			jd.setId(String.valueOf(o.getId()));
 			jd.setGroupId(String.valueOf(o.getGroupId()));

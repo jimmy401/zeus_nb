@@ -33,7 +33,7 @@ public interface ZeusActionMapper {
 
     ZeusJobStatistic selectActionStatistic();
 
-    List<ZeusActionWithBLOBs> selectGreatThanGmtModified(Map<String,Object> params);
+    List<ZeusAction> selectGreatThanGmtModified(Map<String,Object> params);
 
     int updateByPrimaryKeySelective(ZeusActionWithBLOBs record);
 
