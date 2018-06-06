@@ -6,8 +6,10 @@ import java.util.Map.Entry;
 
 import com.taobao.zeus.dal.logic.FileManager;
 import com.taobao.zeus.dal.logic.UserManager;
+import com.taobao.zeus.dal.logic.impl.MysqlLogManager;
 import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.dal.tool.Super;
+import com.taobao.zeus.model.LogDescriptor;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
@@ -30,6 +32,11 @@ public class FileManagerRpcImpl implements FileManagerService{
 	@Autowired
 	@Qualifier("mysqlUserManager")
 	private UserManager userManager;
+
+	@Autowired
+	@Qualifier("mysqlLogManager")
+	private MysqlLogManager mysqlLogManager;
+
 	@Override
 	public FileModel addFile(String parentId, String name, boolean folder) {
 		log.info("add file info,parent id :" + parentId + "name :" +name +"folder："+folder);
@@ -72,6 +79,13 @@ public class FileManagerRpcImpl implements FileManagerService{
 				throw new RuntimeException("此目录不得删除");
 			}
 			recursionDelete(fd);
+			LogDescriptor log = new LogDescriptor();
+			log.setCreateTime(new Date());
+			log.setUserName(user);
+			log.setLogType("delete_file");
+			log.setUrl(fd.getName());
+
+			mysqlLogManager.addLog(log);
 		}else{
 			throw new RuntimeException("权限不足");
 		}

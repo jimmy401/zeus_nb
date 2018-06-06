@@ -75,7 +75,7 @@
     <include refid="Blob_Column_List" />
     from zeus_group
     <![CDATA[
-    where gmt_modified > #{gmtModified,jdbcType=TIMESTAMP}
+    where gmt_modified > #{gmtModified,jdbcType=VARCHAR}
     ]]>
   </select>
   <select id="selectFirstOne" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer" >

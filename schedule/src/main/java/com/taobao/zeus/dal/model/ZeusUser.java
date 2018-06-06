@@ -62,6 +62,8 @@ public class ZeusUser {
 
     private String password;
 
+    private String kerberosUser;
+
     public Long getId() {
         return id;
     }
@@ -156,5 +158,13 @@ public class ZeusUser {
 
     public void setPassword(String password) {
         this.password = password == null ? null : password.trim();
+    }
+
+    public String getKerberosUser() {
+        return kerberosUser;
+    }
+
+    public void setKerberosUser(String kerberosUser) {
+        this.kerberosUser = kerberosUser;
     }
 }

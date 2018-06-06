@@ -13,6 +13,7 @@ import com.taobao.zeus.model.JobDescriptor.JobRunType;
 import com.taobao.zeus.model.JobStatus;
 import com.taobao.zeus.model.processer.Processer;
 import com.taobao.zeus.schedule.mvc.DebugInfoLog;
+import com.taobao.zeus.util.DateUtil;
 import com.taobao.zeus.util.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +72,7 @@ public class ReadOnlyGroupManagerWithAction {
 
 		boolean jobChanged;
 		Judge jobrealtime=null;
-		ZeusJobStatistic statistic = zeusJobMapper.selectJobStatistic();
+		ZeusJobStatistic statistic = zeusActionMapper.selectActionStatistic();
 		if (statistic!=null){
 			jobrealtime=new Judge();
 			jobrealtime.count=statistic.getCnt();
@@ -82,10 +83,10 @@ public class ReadOnlyGroupManagerWithAction {
 
 		List<JobDescriptor> changedJobs=new ArrayList<JobDescriptor>();
 		Map<String,Object> params = new HashMap<String,Object>();
-		params.put("gmtModified", ignoreContentJobJudge.lastModified);
-		List<ZeusJobWithBLOBs> list =zeusJobMapper.selectGreatThanGmtModified(params);
+		params.put("gmtModified", DateUtil.date2String(ignoreContentJobJudge.lastModified));
+		List<ZeusAction> list =zeusActionMapper.selectGreatThanGmtModified(params);
 
-		for(ZeusJobWithBLOBs o:list){
+		for(ZeusAction o:list){
 			JobDescriptor jd=new JobDescriptor();
 			jd.setId(String.valueOf(o.getId()));
 			jd.setGroupId(String.valueOf(o.getGroupId()));
@@ -115,7 +116,7 @@ public class ReadOnlyGroupManagerWithAction {
 		}
 
 		Map<String,Object> groupParams = new HashMap<String,Object>();
-		groupParams.put("gmtModified", ignoreContentGroupJudge.lastModified);
+		groupParams.put("gmtModified", DateUtil.date2String(ignoreContentGroupJudge.lastModified));
 		List<ZeusGroupWithBLOBs> zeusGroups = zeusGroupMapper.selectGreatThanModified(groupParams);
 		List<GroupDescriptor> changedGroups=new ArrayList<GroupDescriptor>();
 		for(ZeusGroupWithBLOBs p:zeusGroups){
@@ -123,7 +124,7 @@ public class ReadOnlyGroupManagerWithAction {
 		}
 
 		if(grouprealtime!=null && grouprealtime.count.equals(ignoreContentGroupJudge.count) && grouprealtime.maxId.equals(ignoreContentGroupJudge.maxId)
-				&& isAllGroupsNotChangeThese(ignoreGlobe, changedGroups)){
+				&& isAllGroupsNotChangeParent(ignoreGlobe, changedGroups)){
 			ignoreContentGroupJudge.stamp=new Date();
 			groupChanged= false;
 		}else{
@@ -131,7 +132,8 @@ public class ReadOnlyGroupManagerWithAction {
 			groupChanged= true;
 		}
 
-
+        log.info("readonlyGroupManagerWithAction -> isJobsAndGroupsChangedIgnoreContent jobChanged: " + jobChanged
+		+ " groupChanged :"+ groupChanged);
 		return jobChanged || groupChanged;
 	}
 	/**
@@ -226,7 +228,7 @@ public class ReadOnlyGroupManagerWithAction {
 		
 		boolean jobChanged;
 		Judge jobrealtime=null;
-		ZeusJobStatistic item= zeusJobMapper.selectJobStatistic();
+		ZeusJobStatistic item= zeusActionMapper.selectActionStatistic();
 		if(item!=null){
 			jobrealtime=new Judge();
 			jobrealtime.count=item.getCnt();

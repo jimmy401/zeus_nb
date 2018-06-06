@@ -110,7 +110,7 @@ public class ConfUtil {
 	
 	public static Configuration getDefaultMapredSite(){
 		try{
-			File f=new File(getHadoopConfDir()+File.separator+"mapred-site.xml");
+			File f=new File(getHiveConfDir()+File.separator+"mapred-site.xml");
 			if(f.exists()){
 				Configuration conf=new Configuration(false);
 				conf.addResource(f.toURI().toURL());
@@ -145,7 +145,7 @@ public class ConfUtil {
 
 	public static Configuration getDefaultYarnSite(){
 		try{
-			File f=new File(getHadoopConfDir()+File.separator+"yarn-site.xml");
+			File f=new File(getHiveConfDir()+File.separator+"yarn-site.xml");
 			if(f.exists()){
 				Configuration conf=new Configuration(false);
 				conf.addResource(f.toURI().toURL());

@@ -14,10 +14,11 @@
     <result column="user_type" jdbcType="INTEGER" property="userType" />
     <result column="description" jdbcType="VARCHAR" property="description" />
     <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="kerberos_user" jdbcType="VARCHAR" property="kerberosUser" />
   </resultMap>
   <sql id="Base_Column_List">
     id, email, gmt_create, gmt_modified, name, phone, uid, wangwang, is_effective, user_type, 
-    description, password
+    description, password,kerberos_user
   </sql>
   <sql id="common_where_if">
     <if test="uid != null">
@@ -26,13 +27,11 @@
     <if test="isEffective != null">
       and is_effective = #{isEffective,jdbcType=INTEGER}
     </if>
+    <if test="isAllJobsNeedAlert != null">
+      and is_all_jobs_need_alert = #{isAllJobsNeedAlert,jdbcType=INTEGER}
+    </if>
     <if test="userType != null">
       and user_type = #{userType,jdbcType=INTEGER}
-    </if>
-  </sql>
-  <sql id="uid_where_if">
-    <if test="uidString != null">
-      uid in (#{uidString,jdbcType=VARCHAR})
     </if>
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -62,13 +61,14 @@
     where uid like #{uid} or name like #{name} or email like #{email}
     order by #{sortField} #{sortOrder}
   </select>
-  <select id="selectByUids" parameterType="java.util.Map" resultMap="BaseResultMap">
+  <select id="selectByUids" parameterType="java.util.List" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
     from zeus_user
-    <where>
-      <include refid="uid_where_if" />
-    </where>
+    where uid in
+      <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+        #{item}
+      </foreach>
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from zeus_user

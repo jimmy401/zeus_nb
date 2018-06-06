@@ -14,12 +14,14 @@ import java.util.Map;
 import java.util.Set;
 
 import com.taobao.zeus.dal.logic.*;
+import com.taobao.zeus.dal.logic.impl.MysqlLogManager;
 import com.taobao.zeus.dal.logic.impl.ReadOnlyGroupManagerWithAction;
 import com.taobao.zeus.dal.model.ZeusHostGroup;
 import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.dal.tool.GroupBean;
 import com.taobao.zeus.dal.tool.JobBean;
 import com.taobao.zeus.dal.tool.ProcesserUtil;
+import com.taobao.zeus.model.*;
 import com.taobao.zeus.web.util.PermissionGroupManagerWithAction;
 import com.taobao.zeus.web.util.PermissionGroupManagerWithJob;
 import net.sf.json.JSONObject;
@@ -32,12 +34,8 @@ import com.sencha.gxt.data.shared.loader.PagingLoadConfig;
 import com.sencha.gxt.data.shared.loader.PagingLoadResult;
 import com.sencha.gxt.data.shared.loader.PagingLoadResultBean;
 import com.taobao.zeus.client.ZeusException;
-import com.taobao.zeus.model.JobDescriptor;
-import com.taobao.zeus.model.JobHistory;
-import com.taobao.zeus.model.JobStatus;
 import com.taobao.zeus.model.JobStatus.Status;
 import com.taobao.zeus.model.JobStatus.TriggerType;
-import com.taobao.zeus.model.ZeusFollow;
 import com.taobao.zeus.model.processer.Processer;
 import com.taobao.zeus.socket.protocol.Protocol.ExecuteKind;
 import com.taobao.zeus.socket.worker.ClientWorker;
@@ -53,6 +51,7 @@ import com.taobao.zeus.web.platform.client.util.HostGroupModel;
 import com.taobao.zeus.web.platform.client.util.ZUser;
 import com.taobao.zeus.web.platform.client.util.ZUserContactTuple;
 import com.taobao.zeus.web.platform.shared.rpc.JobService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -77,6 +76,10 @@ public class JobServiceImpl implements JobService {
 	private ClientWorker worker;
 	@Autowired
 	private HostGroupManager hostGroupManager;
+	@Autowired
+	@Qualifier("mysqlLogManager")
+	private MysqlLogManager mysqlLogManager;
+
 	@Override
 	public JobModel createJob(String jobName, String parentGroupId,
 			String jobType) throws GwtException {
@@ -92,6 +95,16 @@ public class JobServiceImpl implements JobService {
 		try {
 			JobDescriptor jd = permissionGroupManagerWithJob.createJob(LoginUser
 					.getUser().getUid(), jobName, parentGroupId, type);
+
+			String user=LoginUser.getUser().getUid();
+			LogDescriptor log = new LogDescriptor();
+			log.setCreateTime(new Date());
+			log.setUserName(user);
+			log.setLogType("add_job");
+			log.setUrl(jobName);
+
+			mysqlLogManager.addLog(log);
+
 			model = getUpstreamJob(jd.getId());
 			model.setDefaultTZ(DateUtil.getDefaultTZStr());
 			return model;
@@ -326,6 +339,14 @@ public class JobServiceImpl implements JobService {
 			permissionGroupManagerWithJob.updateJob(LoginUser.getUser().getUid(),
 					jd);
 //			permissionGroupManagerOld.updateActionList(jd);
+			String user=LoginUser.getUser().getUid();
+			LogDescriptor log = new LogDescriptor();
+			log.setCreateTime(new Date());
+			log.setUserName(user);
+			log.setLogType("update_job");
+			log.setUrl(jd.getName());
+
+			mysqlLogManager.addLog(log);
 			return getUpstreamJob(jd.getId());
 		} catch (ZeusException e) {
 			log.error(e);
@@ -725,6 +746,16 @@ public class JobServiceImpl implements JobService {
 		try {
 			permissionGroupManagerWithJob.deleteJob(LoginUser.getUser().getUid(),
 					jobId);
+
+			String user=LoginUser.getUser().getUid();
+			LogDescriptor log = new LogDescriptor();
+			log.setCreateTime(new Date());
+			log.setUserName(user);
+			log.setLogType("delete_job");
+			log.setIp(jobId);
+
+			mysqlLogManager.addLog(log);
+
 		} catch (ZeusException e) {
 			log.error("删除Job失败", e);
 			throw new GwtException(e.getMessage());

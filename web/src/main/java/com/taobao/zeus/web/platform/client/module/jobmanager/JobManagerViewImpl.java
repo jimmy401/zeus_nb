@@ -22,9 +22,10 @@ public class JobManagerViewImpl implements JobManagerView{
 	public AccordionLayoutContainer getContainer() {
 		if(container==null){
 			container=new AccordionLayoutContainer();
-			container.add(getMyTreePanel());
 			container.add(getAllTreePanel());
-			container.setActiveWidget(getMyTreePanel());
+			container.add(getMyTreePanel());
+
+			container.setActiveWidget(getAllTreePanel());
 		}
 		return container;
 	}

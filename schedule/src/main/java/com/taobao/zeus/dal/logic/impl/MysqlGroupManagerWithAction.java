@@ -17,6 +17,7 @@ import com.taobao.zeus.model.JobDescriptor.JobScheduleType;
 import com.taobao.zeus.model.JobStatus;
 import com.taobao.zeus.model.processer.DownloadProcesser;
 import com.taobao.zeus.model.processer.Processer;
+import com.taobao.zeus.util.DateUtil;
 import com.taobao.zeus.util.Tuple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -358,8 +359,8 @@ public class MysqlGroupManagerWithAction implements GroupManagerWithAction {
         params.put("parent",parentGroup);
         params.put("directory",isDirectory);
         params.put("existed",1);
-        params.put("gmtCreate",now);
-        params.put("gmtModified",now);
+        params.put("gmtCreate",DateUtil.date2String(now));
+        params.put("gmtModified",DateUtil.date2String(now));
         List<ZeusGroupWithBLOBs> result = zeusGroupMapper.selectByParams(params);
         return PersistenceAndBeanConvertWithAction.convert(result.get(0));
     }

@@ -11,6 +11,8 @@ import java.util.Map;
 public interface ZeusActionMapper {
     int deleteByPrimaryKey(Long id);
 
+    int deleteByJobId(Long jobId);
+
     int insert(ZeusActionWithBLOBs record);
 
     int insertSelective(ZeusActionWithBLOBs record);
@@ -28,6 +30,10 @@ public interface ZeusActionMapper {
     List<ZeusActionWithBLOBs> selectByJobId(Map<String,Object> params);
 
     List<ZeusActionWithBLOBs> selectByActionId(Map<String,Object> params);
+
+    ZeusJobStatistic selectActionStatistic();
+
+    List<ZeusAction> selectGreatThanGmtModified(Map<String,Object> params);
 
     int updateByPrimaryKeySelective(ZeusActionWithBLOBs record);
 

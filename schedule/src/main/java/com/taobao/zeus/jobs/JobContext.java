@@ -9,6 +9,7 @@ import com.taobao.zeus.model.DebugHistory;
 import com.taobao.zeus.model.JobHistory;
 import com.taobao.zeus.dal.tool.HierarchyProperties;
 import com.taobao.zeus.util.DateUtil;
+import com.taobao.zeus.util.Environment;
 
 /**
  * Job上下文
@@ -22,7 +23,7 @@ public class JobContext {
 		JobContext jobContext=new JobContext(runType);
 		JobHistory history=new JobHistory();
 		jobContext.setJobHistory(history);
-		File f=new File("/tmp/zeus/"+DateUtil.getToday());
+		File f=new File(Environment.getZeusTempWorkPath() + "/" +DateUtil.getToday());
 		if(!f.exists()){
 			f.mkdir();
 		}

@@ -121,8 +121,9 @@ public class ReadOnlyGroupManagerWithJob{
 			this.ignoreContentGroupJudge=grouprealtime;
 			groupChanged= true;
 		}
-		
-		
+
+		log.info("readonlyGroupManagerWithJob -> isJobsAndGroupsChangedIgnoreContent jobChanged: " + jobChanged
+				+ " groupChanged :"+ groupChanged);
 		return jobChanged || groupChanged;
 	}
 	/**
