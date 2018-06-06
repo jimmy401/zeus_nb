@@ -10,6 +10,7 @@ public class ZeusActionBakWithBLOBs extends ZeusActionBak {
     public ZeusActionBakWithBLOBs() {
     }
     public ZeusActionBakWithBLOBs(ZeusActionWithBLOBs persist) {
+        Date now = new Date();
         this.setId(persist.getId());
         this.setJobId(persist.getJobId());
         this.setAuto(persist.getAuto());
@@ -25,8 +26,8 @@ public class ZeusActionBakWithBLOBs extends ZeusActionBak {
         this.setOwner(persist.getOwner());
         this.setResources(persist.getResources());
 /*		this.script = persist.getScript();*/
-        this.setGmtCreate(persist.getGmtCreate());
-        this.setGmtModified(persist.getGmtModified());
+        this.setGmtCreate(persist.getGmtCreate()==null?now:persist.getGmtCreate());
+        this.setGmtModified(persist.getGmtModified()==null?now:persist.getGmtModified());
         this.setHistoryId(persist.getHistoryId());
         this.setStatus(persist.getStatus());
         this.setReadyDependency(persist.getReadyDependency());
