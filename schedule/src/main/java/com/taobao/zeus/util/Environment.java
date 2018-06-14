@@ -24,8 +24,10 @@ public class Environment {
 	private static String scheduleGroup;
 	
 	private static String hadoopHome;
-	private static String hadoopConfDir;
+	private static String hadoopConfDir;//需要跟prod.properties里的配置保持一致
+	//private static String hadoopConfDir="/etc/hadoop/conf";//需要跟prod.properties里的配置保持一致
 	private static String hiveHome;
+	//private static String hiveConfDir="/etc/hive/conf";
 	private static String hiveConfDir;
 	private static String host;
 	private static String port;

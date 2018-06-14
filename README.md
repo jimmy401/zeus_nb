@@ -107,6 +107,19 @@ worker-C跟worker-B一样。
         22.http://ip:port/zeus-web/dump.do查看任务状态
         23.任务失败后，会发送给重要联系人，然后是job本身的owner，最后是关注者。
 
+migu修改地方
+1.biadmin作为zeus管理员，zeus服务启动用户；
+2.所有用户都是通过biadmin sudo -u hadoop的方式提交shell,hive的。
+3.部署的机器上，hadoop都配置了kerberos信息。
+4.biadmin也需要配置kerberos，这样才能访问hive元数据库。
+5.zeus节点上有/mnt/sdb1/zeus/temp,/mnt/sdb1/zeus/job_dir,/mnt/sdb1/zeus/logs
+hadoop.home=/usr/lib/hadoop
+hadoop.conf.dir=/etc/hadoop/conf
+hive.home=/usr/lib/hive
+hive.conf.dir=/etc/hive/conf
+kerberos.auth=true
+kerberos.user=hadoop
+
 ##志同道合的朋友可以联系我
 --
 邮箱 dufu0401@126.com 
