@@ -120,6 +120,8 @@ hive.conf.dir=/etc/hive/conf
 kerberos.auth=true
 kerberos.user=hadoop
 
+需要注意防止重复手动提交任务。插入重复数据的问题。
+
 ##志同道合的朋友可以联系我
 --
 邮箱 dufu0401@126.com 

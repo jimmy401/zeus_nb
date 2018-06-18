@@ -6,6 +6,9 @@ import com.taobao.zeus.model.LogDescriptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @SuppressWarnings("unchecked")
 @Repository("mysqlLogManager")
 public class MysqlLogManager {
@@ -26,9 +29,21 @@ public class MysqlLogManager {
 			logPersistence.setMethod(logDescriptor.getMethod());
 			logPersistence.setDescription(logDescriptor.getDescription());
 			zeusLogMapper.insertSelective(logPersistence);
-			
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	public ZeusLog selectLogByActionId(String actionId) {
+		ZeusLog zeusLog = null;
+		try {
+			zeusLog = zeusLogMapper.selectByActionId(actionId);
+			return zeusLog;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+		return zeusLog;
 	}
 }

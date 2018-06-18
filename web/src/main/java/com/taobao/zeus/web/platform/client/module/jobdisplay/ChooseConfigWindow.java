@@ -1,47 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 package com.taobao.zeus.web.platform.client.module.jobdisplay;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
 import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ListStore;
@@ -50,20 +8,16 @@ import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.AutoProgressMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
-import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.FieldLabel;
 import com.sencha.gxt.widget.core.client.info.Info;
-import com.taobao.zeus.web.platform.client.module.jobdisplay.group.GroupPresenter;
 import com.taobao.zeus.web.platform.client.module.jobdisplay.job.JobPresenter;
-import com.taobao.zeus.web.platform.client.module.jobmanager.GroupModel;
-import com.taobao.zeus.web.platform.client.module.jobmanager.JobModel;
 import com.taobao.zeus.web.platform.client.util.RPCS;
-import com.taobao.zeus.web.platform.client.util.ZUser;
 import com.taobao.zeus.web.platform.client.util.async.AbstractAsyncCallback;
+
+import java.util.*;
 
 public class ChooseConfigWindow extends Window{
 
@@ -84,8 +38,8 @@ public class ChooseConfigWindow extends Window{
 		private static final long serialVersionUID = 1L;
 
 	{
-	    add("手动执行任务失败");
-	    add("手动恢复任务失败");
+	    add("手动执行任务失败,你没有权限操作，或者操作太频繁，间隔5分钟后重试！请确保上次操作真正结束，再触发执行！");
+	    add("手动恢复任务失败,你没有权限操作，或者操作太频繁，间隔5分钟后重试！请确保上次操作真正结束，再触发执行！");
 	}};	
 		private ListStore<Map<String, String>> store=new ListStore<Map<String, String>>(new ModelKeyProvider<Map<String, String>>() {
 			public String getKey(Map<String, String> item) {
