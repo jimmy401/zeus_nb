@@ -282,6 +282,11 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobModel updateJob(JobModel jobModel) throws GwtException {
+        if (jobModel.getScript().contains(" rm ")||jobModel.getPostProcessers().contains(" rm ")||
+                jobModel.getPreProcessers().contains(" rm "))
+        {
+            throw new GwtException("不得使用rm命令");
+        }
         JobDescriptor jd = new JobDescriptor();
         jd.setCronExpression(jobModel.getCronExpression());
         jd.setDependencies(jobModel.getDependencies());

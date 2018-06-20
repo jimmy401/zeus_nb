@@ -10,6 +10,9 @@ import java.text.ParseException;
 public class Test
 {
     public static void main (String []args) throws ParseException {
+        String content ="drop table dwd_video";
+       boolean ret= content.matches("drop\\s+table\\s+([Dd][Ww][Dd]_|[Dd][Ww][Ss]_|[Aa][Dd][Mm]_)");
+
             String tz="GMT+0800";
            long ts =  DateUtil.string2Timestamp(
                     DateUtil.getDayEndTime(0, tz), null);

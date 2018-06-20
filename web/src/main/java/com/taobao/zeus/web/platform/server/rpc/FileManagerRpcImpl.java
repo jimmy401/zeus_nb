@@ -114,8 +114,13 @@ public class FileManagerRpcImpl implements FileManagerService{
 		FileDescriptor fd=fileManager.getFile(fileId);
 		String user=LoginUser.getUser().getUid();
 		if(Super.getSupers().contains(user) || fd.getOwner().equalsIgnoreCase(user)){
-			fd.setContent(content);
-			fileManager.update(fd);
+			if (content.contains("rm ")){
+				throw new RuntimeException("不得使用rm命令");
+			}
+			else{
+				fd.setContent(content);
+				fileManager.update(fd);
+			}
 		}else{
 			throw new RuntimeException("权限不足");
 		}
