@@ -49,11 +49,12 @@ public class Environment {
     private static Boolean kerberosAuth=false;
     private static String kerberosUser="hadoop";
     private static String zeusTempWorkPath="/tmp/zeus/";
+    private static String zeusSafeDeleteDir="/tmp/zeus/";
 	
     public Environment(String env,String scheduleGroup,String downloadPath,String hadoopHome,String hadoopConfDir,String hiveHome,String hiveConfDir,
 			String host,String port,String username,String password,String sendFrom,String notifyUrl,String accessToken,String excludeFile, String defaultWorkerGroupId, String defaultMasterGroupId
 			,String maxMemRate, String maxCpuLoadPerCore, String scanRate,String scanExceptionRate,String zeusWorkerTasksMax
-	,Boolean kerberosAuth,String kerberosUser,String zeusTempWorkPath){
+	,Boolean kerberosAuth,String kerberosUser,String zeusTempWorkPath,String zeusSafeDeleteDir){
 		Environment.env=env.trim();
 		Environment.scheduleGroup=scheduleGroup.trim();
 		Environment.downloadPath=downloadPath.trim();
@@ -78,6 +79,7 @@ public class Environment {
 		Environment.kerberosAuth=kerberosAuth;
 		Environment.kerberosUser=kerberosUser;
 		Environment.zeusTempWorkPath=zeusTempWorkPath;
+		Environment.zeusSafeDeleteDir=zeusSafeDeleteDir;
 		try {
 			Environment.maxMemRate=Float.valueOf(maxMemRate.trim());
 		} catch (Exception e) {
@@ -128,6 +130,7 @@ public class Environment {
 		log.info("the kerberosAuth is " + kerberosAuth);
 		log.info("the kerberosUser is " + kerberosUser);
 		log.info("the zeusTempWorkPath is " + zeusTempWorkPath);
+		log.info("the zeusSafeDeleteDir is " + zeusSafeDeleteDir);
 	}
 	
 	public static String getNotifyUrl() {
@@ -266,5 +269,13 @@ public class Environment {
 
 	public static void setZeusTempWorkPath(String zeusTempWorkPath) {
 		Environment.zeusTempWorkPath = zeusTempWorkPath;
+	}
+
+	public static String getZeusSafeDeleteDir() {
+		return zeusSafeDeleteDir;
+	}
+
+	public static void setZeusSafeDeleteDir(String zeusSafeDeleteDir) {
+		Environment.zeusSafeDeleteDir = zeusSafeDeleteDir;
 	}
 }

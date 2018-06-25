@@ -103,6 +103,9 @@
 		<constructor-arg index="24">
 			<value>${zeus.tempWorkPath}</value>
 		</constructor-arg>
+		<constructor-arg index="25">
+			<value>${zeus.safe.delete.dir}</value>
+		</constructor-arg>
 	</bean>
 
 	<bean id="distributeLocker" class="com.taobao.zeus.schedule.DistributeLocker" init-method="init" depends-on="environment">

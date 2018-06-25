@@ -14,6 +14,7 @@ import com.taobao.zeus.dal.tool.GroupBean;
 import com.taobao.zeus.dal.tool.JobBean;
 import com.taobao.zeus.dal.tool.ProcesserUtil;
 import com.taobao.zeus.model.*;
+import com.taobao.zeus.util.ContentUtil;
 import com.taobao.zeus.web.util.PermissionGroupManagerWithAction;
 import com.taobao.zeus.web.util.PermissionGroupManagerWithJob;
 import net.sf.json.JSONObject;
@@ -282,10 +283,11 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobModel updateJob(JobModel jobModel) throws GwtException {
-        if (jobModel.getScript().contains(" rm ")||jobModel.getPostProcessers().contains(" rm ")||
-                jobModel.getPreProcessers().contains(" rm "))
-        {
-            throw new GwtException("不得使用rm命令");
+        if (ContentUtil.containInvalidContent(jobModel.getScript())){
+            throw new RuntimeException("不能删除重要的数据仓库表！");
+        }
+        else if (ContentUtil.containRmCnt(jobModel.getScript())!=ContentUtil.contentValidRmCnt(jobModel.getScript(),Environment.getZeusSafeDeleteDir())){
+            throw new RuntimeException("不能使用rm删除非许可文件路径！");
         }
         JobDescriptor jd = new JobDescriptor();
         jd.setCronExpression(jobModel.getCronExpression());

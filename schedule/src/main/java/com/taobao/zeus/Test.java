@@ -3,6 +3,8 @@ package com.taobao.zeus;
 import com.taobao.zeus.util.DateUtil;
 
 import java.text.ParseException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by lowry on 16/3/9.
@@ -10,8 +12,13 @@ import java.text.ParseException;
 public class Test
 {
     public static void main (String []args) throws ParseException {
-        String content ="drop table dwd_video";
-       boolean ret= content.matches("drop\\s+table\\s+([Dd][Ww][Dd]_|[Dd][Ww][Ss]_|[Aa][Dd][Mm]_)");
+        String content ="asfdas DROP table dwd_video asdfa drop   table  dws_video";
+
+        Pattern p=Pattern.compile("[Dd][Rr][Oo][Pp]\\s+[Tt][Aa][Bb][Ll][Ee]\\s+([Dd][Ww][Dd]_|[Dd][Ww][Ss]_|[Aa][Dd][Mm]_)");
+        Matcher m=p.matcher(content);
+        while(m.find()){
+            System.out.println(m.group());
+        }
 
             String tz="GMT+0800";
            long ts =  DateUtil.string2Timestamp(
