@@ -170,7 +170,7 @@ public class HiveJob extends ProcessJob {
 	@SuppressWarnings("unused")
 	private boolean getUdfSql() {
 		//TODO 请在此处填写udf文件对应的文档id
-		String fileID=null;
+		String fileID="121";
 		if(fileID==null){
 			return false;
 		}

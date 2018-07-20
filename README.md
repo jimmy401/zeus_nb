@@ -106,6 +106,11 @@ worker-C跟worker-B一样。
         ${yesterday}会被替换成昨天的日期，格式是yyyyMMdd，是任务时间的昨天。
         22.http://ip:port/zeus-web/dump.do查看任务状态
         23.任务失败后，会发送给重要联系人，然后是job本身的owner，最后是关注者。
+        24.定制Home页面<br/>
+           1.在开发中心创建一个文档，纪录下该文档的id<br/>
+           2.进入代码  com.taobao.zeus.web.platform.client.util.GWTEnvironment 将id填入相应TODO中(多环境下需要考虑环境判断)<br/>
+           3.重新部署代码发布<br/>
+           4.动态修改文档中心文件，即可实时修改此处内容,此内容支持html格式<br/>
 
 migu修改地方
 1.biadmin作为zeus管理员，zeus服务启动用户；
@@ -119,6 +124,7 @@ hive.home=/usr/lib/hive
 hive.conf.dir=/etc/hive/conf
 kerberos.auth=true
 kerberos.user=hadoop
+6.在HiveJob类中，填写hive udf的定义语句。请在此处填写udf文件对应的文档id,当前文档Id是121
 
 需要注意防止重复手动提交任务。插入重复数据的问题。
 
