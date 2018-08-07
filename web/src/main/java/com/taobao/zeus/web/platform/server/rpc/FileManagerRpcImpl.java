@@ -118,7 +118,7 @@ public class FileManagerRpcImpl implements FileManagerService {
         String user = LoginUser.getUser().getUid();
         if (Super.getSupers().contains(user) || fd.getOwner().equalsIgnoreCase(user)) {
             if (ContentUtil.containInvalidContent(content)){
-                throw new RuntimeException("不能删除重要的数据仓库表！");
+                throw new RuntimeException("没有数据仓库DDL权限！");
             }
             else if (ContentUtil.containRmCnt(content)!=ContentUtil.contentValidRmCnt(content,Environment.getZeusSafeDeleteDir())){
                 throw new RuntimeException("不能使用rm删除非许可文件路径！");

@@ -25,6 +25,7 @@ public class JobHistory{
 	private String timezone;
 	private String cycle;
 	private String hostGroupId;
+	private String script;
 
 	private Map<String, String> properties=new HashMap<String, String>();
 	
@@ -159,5 +160,13 @@ public class JobHistory{
 
 	public void setHostGroupId(String hostGroupId) {
 		this.hostGroupId = hostGroupId;
+	}
+
+	public String getScript() {
+		return script;
+	}
+
+	public void setScript(String script) {
+		this.script = script;
 	}
 }

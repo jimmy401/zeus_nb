@@ -179,15 +179,15 @@ public class PermissionGroupManagerWithJob implements GroupManagerWithJob {
 	@Override
 	public void updateJob(String user, JobDescriptor job) throws ZeusException {
 		if(hasJobPermission(user, job.getId())){
-			Tuple<JobDescriptor, JobStatus> old= groupManagerWithJob.getJobDescriptor(job.getId());
-			if(old!=null ){
+			Tuple<JobDescriptor, JobStatus> jobItem= groupManagerWithJob.getJobDescriptor(job.getId());
+			if(jobItem!=null ){
 				List<JobProcesser> hasadd=new ArrayList<JobProcesser>();
-				for(Processer p:old.getX().getPreProcessers()){
+				for(Processer p:jobItem.getX().getPreProcessers()){
 					if(p instanceof JobProcesser){
 						hasadd.add((JobProcesser)p);
 					}
 				}
-				for(Processer p:old.getX().getPostProcessers()){
+				for(Processer p:jobItem.getX().getPostProcessers()){
 					if(p instanceof JobProcesser){
 						hasadd.add((JobProcesser)p);
 					}

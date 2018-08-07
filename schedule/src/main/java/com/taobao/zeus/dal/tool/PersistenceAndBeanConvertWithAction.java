@@ -400,6 +400,7 @@ public class PersistenceAndBeanConvertWithAction {
 				: history.getTriggerType().getId());
 		persist.setIllustrate(history.getIllustrate());
 		persist.setOperator(history.getOperator());
+		persist.setScript(history.getScript());
 		JSONObject json = new JSONObject();
 		if (history.getProperties() != null) {
 			for (String key : history.getProperties().keySet()) {

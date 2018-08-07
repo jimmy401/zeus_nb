@@ -189,7 +189,7 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
       operator, gmt_create, gmt_modified, 
       trigger_type, status, illustrate, 
       properties, statis_end_time, timezone, 
-      host_group_id, cycle, log
+      host_group_id, cycle, log,script
       )
     values (#{id,jdbcType=BIGINT}, #{actionId,jdbcType=BIGINT}, #{jobId,jdbcType=BIGINT},
       #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, #{executeHost,jdbcType=VARCHAR}, 
@@ -197,6 +197,7 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
       #{triggerType,jdbcType=INTEGER}, #{status,jdbcType=VARCHAR}, #{illustrate,jdbcType=VARCHAR}, 
       #{properties,jdbcType=VARCHAR}, #{statisEndTime,jdbcType=TIMESTAMP}, #{timezone,jdbcType=VARCHAR}, 
       #{hostGroupId,jdbcType=INTEGER}, #{cycle,jdbcType=VARCHAR}, #{log,jdbcType=LONGVARCHAR}
+      , #{script,jdbcType=LONGVARCHAR}
       )
   </insert>
   <insert id="insertSelective" parameterType="com.taobao.zeus.dal.model.ZeusActionHistory">
@@ -256,6 +257,9 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
       <if test="log != null">
         log,
       </if>
+      <if test="script != null">
+        script,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -311,6 +315,9 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
       </if>
       <if test="log != null">
         #{log,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="script != null">
+        #{script,jdbcType=LONGVARCHAR},
       </if>
     </trim>
   </insert>

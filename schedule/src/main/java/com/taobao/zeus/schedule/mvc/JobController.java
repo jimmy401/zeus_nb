@@ -794,6 +794,7 @@ public class JobController extends Controller {
 //		history.setExecuteHost(jobDescriptor.getHost());
 		history.setHostGroupId(jobDescriptor.getHostGroupId());
 		history.setOperator(jobDescriptor.getOwner() == null ? null : jobDescriptor.getOwner());
+		history.setScript(jobDescriptor.getScript());
 		context.getJobHistoryManager().addJobHistory(history);
 		master.run(history);
 	}

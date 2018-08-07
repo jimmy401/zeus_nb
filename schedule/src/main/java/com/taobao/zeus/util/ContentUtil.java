@@ -6,7 +6,14 @@ import java.util.regex.Pattern;
 public class ContentUtil {
     //[Dd][Rr][Oo][Pp]\s+[Tt][Aa][Bb][Ll][Ee]\s+([Dd][Ww][Dd]_|[Dd][Ww][Ss]_|[Aa][Dd][Mm]_)
     public static boolean containInvalidContent(String content) {
-        String regexString="[Dd][Rr][Oo][Pp]\\s+[Tt][Aa][Bb][Ll][Ee]\\s+([Dd][Ww][Dd]_|[Dd][Ww][Ss]_|[Aa][Dd][Mm]_)";
+        String regexString1="[Dd][Rr][Oo][Pp]\\s+[Tt][Aa][Bb][Ll][Ee]\\s+([Dd][Ww][Dd]_|[Dd][Ww][Ss]_|[Aa][Dd][Mm]_)";
+        String regexString2="[Cc][Rr][Ee][Aa][Tt][Ee]\\s+[Tt][Aa][Bb][Ll][Ee]\\s+([Dd][Ww][Dd]_|[Dd][Ww][Ss]_|[Aa][Dd][Mm]_)";
+        String regexString3="[Aa][Ll][Tt][Ee][Rr]\\s+[Tt][Aa][Bb][Ll][Ee]\\s+([Dd][Ww][Dd]_|[Dd][Ww][Ss]_|[Aa][Dd][Mm]_)";
+
+        return patternMatch(content,regexString1)|patternMatch(content,regexString2)|patternMatch(content,regexString3);
+    }
+
+    public static boolean patternMatch(String content,String regexString) {
         boolean ret = false;
         Pattern p = Pattern.compile(regexString);
         Matcher m = p.matcher(content);
