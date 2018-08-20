@@ -7,7 +7,9 @@ import java.util.*;
 import com.taobao.zeus.dal.logic.*;
 import com.taobao.zeus.dal.logic.impl.MysqlLogManager;
 import com.taobao.zeus.dal.logic.impl.ReadOnlyGroupManagerWithAction;
+import com.taobao.zeus.dal.mapper.ZeusJobMapper;
 import com.taobao.zeus.dal.model.ZeusHostGroup;
+import com.taobao.zeus.dal.model.ZeusJobWithBLOBs;
 import com.taobao.zeus.dal.model.ZeusLog;
 import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.dal.tool.GroupBean;
@@ -47,6 +49,8 @@ import com.taobao.zeus.web.platform.shared.rpc.JobService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import static com.taobao.zeus.dal.model.ZeusUser.ADMIN;
+
 @Service
 public class JobServiceImpl implements JobService {
     private static Logger log = LogManager.getLogger(JobServiceImpl.class);
@@ -72,6 +76,9 @@ public class JobServiceImpl implements JobService {
     @Autowired
     @Qualifier("mysqlLogManager")
     private MysqlLogManager mysqlLogManager;
+
+    @Autowired
+    ZeusJobMapper zeusJobMapper;
 
     @Override
     public JobModel createJob(String jobName, String parentGroupId,
@@ -283,11 +290,12 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobModel updateJob(JobModel jobModel) throws GwtException {
-        if (ContentUtil.containInvalidContent(jobModel.getScript())){
-            throw new RuntimeException("没有数据仓库DDL权限！");
-        }
-        else if (ContentUtil.containRmCnt(jobModel.getScript())!=ContentUtil.contentValidRmCnt(jobModel.getScript(),Environment.getZeusSafeDeleteDir())){
-            throw new RuntimeException("不能使用rm删除非许可文件路径！");
+        if (!jobModel.getOwner().equalsIgnoreCase(ADMIN.getUid())) {
+            if (ContentUtil.containInvalidContent(jobModel.getScript())) {
+                throw new RuntimeException("没有数据仓库DDL权限！");
+            } else if (ContentUtil.containRmCnt(jobModel.getScript()) != ContentUtil.contentValidRmCnt(jobModel.getScript(), Environment.getZeusSafeDeleteDir())) {
+                throw new RuntimeException("不能使用rm删除非许可文件路径！");
+            }
         }
         JobDescriptor jd = new JobDescriptor();
         jd.setCronExpression(jobModel.getCronExpression());
@@ -335,6 +343,8 @@ public class JobServiceImpl implements JobService {
             jd.setHostGroupId(jobModel.getHostGroupId());
         }
         try {
+            ZeusJobWithBLOBs zeusJob =zeusJobMapper.selectByPrimaryKey(Long.valueOf(jd.getId()));
+
             permissionGroupManagerWithJob.updateJob(LoginUser.getUser().getUid(),
                     jd);
 //			permissionGroupManagerOld.updateActionList(jd);
@@ -344,6 +354,9 @@ public class JobServiceImpl implements JobService {
             log.setUserName(user);
             log.setLogType("update_job");
             log.setUrl(jd.getName());
+            log.setOldScript(zeusJob.getScript());
+            log.setNewScript(jd.getScript());
+            log.setStatus(0);
 
             mysqlLogManager.addLog(log);
             return getUpstreamJob(jd.getId());

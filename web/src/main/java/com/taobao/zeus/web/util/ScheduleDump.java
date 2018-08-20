@@ -23,6 +23,7 @@ import com.taobao.zeus.socket.master.JobElement;
 import com.taobao.zeus.socket.master.MasterContext;
 import com.taobao.zeus.socket.master.MasterWorkerHolder;
 import com.taobao.zeus.socket.master.MasterWorkerHolder.HeartBeatInfo;
+import com.taobao.zeus.util.DateUtil;
 import com.taobao.zeus.util.Environment;
 import com.taobao.zeus.util.Tuple;
 import org.jboss.netty.channel.Channel;
@@ -181,8 +182,9 @@ public class ScheduleDump extends HttpServlet {
                             Dispatcher dispatcher = context.getDispatcher();
                             if (dispatcher != null) {
                                 for (Controller c : dispatcher.getControllers()) {
+                                    if (c.getActionId().substring(0,8).compareTo(DateUtil.getDayBefore(3,DateUtil.yyyyMMdd))>0){
                                     resp.getWriter().println(
-                                            "<br>" + c.toString());
+                                            "<br>" + c.toString());}
                                 }
                             }
                         }/*

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>job check</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="newcss/easyui.css"/>
+    <link rel="stylesheet" href="newcss/color.css"/>
+    <link rel="stylesheet" href="newcss/icon.css"/>
+    <link rel="stylesheet" href="newcss/custom.css"/>
+
+    <script type="text/javascript" src="newjs/jquery.min.js"></script>
+    <script type="text/javascript" src="newjs/jquery.easyui.min.js"></script>
+    <script type="text/javascript">
+        var checkJobId = "";
+
+        $(function () {
+            initialCheckList();
+        });
+
+        function initialCheckList() {
+            $("#checklist-grid").datagrid({
+                title: '任务列表',
+                iconCls: 'icon-ok',
+                width: '100%',
+                rownumbers: true,
+                animate: true,
+                collapsible: true,
+                fitcolumns: true,
+                singleSelect: true,
+                pagination: true,
+                striped: true,
+                pageList: [20, 40, 60, 100, 1000],
+                url: "job_check/get_all_list",
+                idField: 'id',
+                showFooter: false,
+                columns: [[{
+                    field: 'id',
+                    title: 'id',
+                    width: 50,
+                    align: 'center'
+                }, {
+                    field: 'url',
+                    title: '任务名字',
+                    width: 100,
+                    align: 'center'
+                }, {
+                    field: 'oldScript',
+                    title: '修改前代码',
+                    width: 200,
+                    align: 'center'
+                }, {
+                    field: 'newScript',
+                    title: '修改后代码',
+                    width: 200,
+                    align: 'center'
+                }, {
+                    field: 'showCreateTime',
+                    title: '修改时间',
+                    width: 120,
+                    align: 'center'
+                }, {
+                    field: 'showStatus',
+                    title: '状态',
+                    width: 80,
+                    align: 'center'
+                }, {
+                    field: 'username',
+                    title: '修改人',
+                    width: 50,
+                    align: 'center'
+                }, {
+                    field: 'checkUid',
+                    title: '审核人',
+                    width: 50,
+                    align: 'center'
+                }, {
+                    field: 'showCheckTime',
+                    title: '审核时间',
+                    width: 120,
+                    align: 'center'
+                }, {
+                    field: 'description',
+                    title: '审核信息',
+                    width: 100,
+                    align: 'center'
+                }
+                ]],
+                onDblClickRow: function (index, row) {
+                    checkResult(row);
+                },
+                onLoadError: function () {
+                    $.messager.alert('出错', '加载列表信息出错!');
+                }
+            });
+        }
+
+        function checkResult(row) {
+            checkJobId = row.id;
+            $('#oldScriptInput').textbox("setText",row.oldScript);
+            $('#newScriptInput').textbox("setText",row.newScript);
+            $('#checkDialog').dialog('open').dialog('setTitle', "审核");
+        }
+
+        function saveCheckInfo() {
+            var checkStatus=$('#checkStatus').val();
+            var checkInfo=$('#checkInfo').val();
+            $.ajax({
+                type: "POST",
+                url: "job_check/check_result",
+                data: {
+                    "id": checkJobId,
+                    "status":checkStatus,
+                    "checkInfo":checkInfo
+                },
+
+                dataType: "json",
+                success: function (data) {
+                    $('#checklist-grid').datagrid('reload');
+                    $('#checkDialog').dialog('close');
+                },
+                error: function (data) {
+                    $.messager.alert('出错', '审核信息保存出错!');
+                }
+            });
+        }
+
+    </script>
+</head>
+<body>
+<table id="checklist-grid">
+</table>
+<div id="checkDialog" class="easyui-dialog" closed="true" buttons="#checkDialog-buttons" style="width: 650px;height: 600px;">
+    <div id="tt" >
+        <div style="margin-top: 10px;"></div>
+        <select id="checkStatus" class="easyui-combobox" name="state" label="是否通过:" labelPosition="left"
+                style="width:100%">
+            <option value="0">不通过，已经通知开发！</option>
+            <option value="1">通过</option>
+        </select>
+        <div style="margin-top: 10px;"></div>
+        <div style="margin-bottom:20px">
+            <input id="checkInfo" class="easyui-textbox"  style="width:400px;" multiline="true"  label="审核意见:" labelPosition="left">
+        </div>
+        <div>
+            <input id="oldScriptInput" class="easyui-textbox"  style="width:100%;height: 200px;" multiline="true"  label="修改前:" labelPosition="left">
+        </div>
+        <div>
+            <input id="newScriptInput" class="easyui-textbox"  style="width:100%;height: 200px;" multiline="true"  label="修改后:" labelPosition="left">
+        </div>
+    </div>
+    <div id="checkDialog-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconcls="icon-ok" onclick="saveCheckInfo()"> 保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconcls="icon-cancel"
+           onclick="javascript:$('#checkDialog').dialog('close')">取消</a>
+    </div>
+</div>
+</body>
+</html>

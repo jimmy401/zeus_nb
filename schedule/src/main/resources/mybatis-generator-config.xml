@@ -5,7 +5,7 @@
 <generatorConfiguration>
 
     <!-- 本地数据库驱动程序jar包的全路径 -->
-    <classPathEntry location="C:\Users\duxiaofu\.m2\repository\\mysql\mysql-connector-java\5.1.45\mysql-connector-java-5.1.45.jar"/>
+    <classPathEntry location="C:\Users\migu\.m2\repository\mysql\mysql-connector-java\5.1.45\mysql-connector-java-5.1.45.jar"/>
 
     <context id="context" targetRuntime="MyBatis3">
         <commentGenerator>
@@ -14,7 +14,7 @@
         </commentGenerator>
 
         <!-- 数据库的相关配置 -->
-        <jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://10.118.80.127:3306/zeus?useUnicode=true&amp;characterEncoding=UTF-8"
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://localhost:3306/zeus?useUnicode=true&amp;characterEncoding=UTF-8"
                         userId="root" password="root"/>
 
         <javaTypeResolver>
@@ -38,7 +38,7 @@
         </javaClientGenerator>
 
         <!-- 相关表的配置 -->
-        <table tableName="" domainObjectName=""
+        <table tableName="zeus_job_update_check" domainObjectName="zeusJobUpdateCheck"
                enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
                enableUpdateByExample="false"/>
     </context>

@@ -26,6 +26,8 @@ import com.taobao.zeus.web.platform.shared.rpc.FileClientBean;
 import com.taobao.zeus.web.platform.shared.rpc.FileManagerService;
 import org.springframework.stereotype.Service;
 
+import static com.taobao.zeus.dal.model.ZeusUser.ADMIN;
+
 @Service("file.rpc")
 public class FileManagerRpcImpl implements FileManagerService {
     private static Logger log = LoggerFactory.getLogger(FileManager.class);
@@ -117,10 +119,10 @@ public class FileManagerRpcImpl implements FileManagerService {
         FileDescriptor fd = fileManager.getFile(fileId);
         String user = LoginUser.getUser().getUid();
         if (Super.getSupers().contains(user) || fd.getOwner().equalsIgnoreCase(user)) {
-            if (ContentUtil.containInvalidContent(content)){
+            if (!ADMIN.getUid().equalsIgnoreCase(user) && ContentUtil.containInvalidContent(content)){
                 throw new RuntimeException("没有数据仓库DDL权限！");
             }
-            else if (ContentUtil.containRmCnt(content)!=ContentUtil.contentValidRmCnt(content,Environment.getZeusSafeDeleteDir())){
+            else if (!ADMIN.getUid().equalsIgnoreCase(user) && ContentUtil.containRmCnt(content)!=ContentUtil.contentValidRmCnt(content,Environment.getZeusSafeDeleteDir())){
                 throw new RuntimeException("不能使用rm删除非许可文件路径！");
             }
             else {
@@ -263,10 +265,10 @@ public class FileManagerRpcImpl implements FileManagerService {
     @Override
     public FileModel getHomeFile(String id) {
 
-        log.error("HomeFildId:" + id);
+        log.info("HomeFildId:" + id);
         FileModel homeTemplate = getFile(id);
-        log.error("homeTemplate:" + homeTemplate);
-        log.error("homeTemplate:" + homeTemplate.getContent());
+        log.info("homeTemplate:" + homeTemplate);
+        log.info("homeTemplate:" + homeTemplate.getContent());
 
         String content = homeTemplate.getContent();
         ZeusUser user = LoginUser.getUser();

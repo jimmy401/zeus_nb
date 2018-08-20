@@ -12,9 +12,15 @@
     <result column="delegate" property="delegate" jdbcType="VARCHAR" />
     <result column="method" property="method" jdbcType="VARCHAR" />
     <result column="description" property="description" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="check_uid" property="checkUid" jdbcType="VARCHAR" />
+    <result column="check_time" property="checkTime" jdbcType="TIMESTAMP" />
+    <result column="oldscript" property="oldScript" jdbcType="LONGVARCHAR" />
+    <result column="newscript" property="newScript" jdbcType="LONGVARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, logtype, createtime, username, ip, url, rpc, delegate, method, description
+    id, logtype, createtime, username, ip, url, rpc, delegate, method, description,
+    status,check_uid,check_time,oldscript,newscript
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
@@ -28,6 +34,13 @@
     from zeus_log
     where rpc = #{actionId,jdbcType=VARCHAR}
     order by createtime desc limit 1
+  </select>
+  <select id="selectByLogType" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from zeus_log
+    where logtype = #{logType,jdbcType=VARCHAR}
+    order by createtime desc limit 500
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from zeus_log
@@ -76,6 +89,21 @@
       <if test="description != null" >
         description,
       </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="checkUid != null" >
+        check_uid,
+      </if>
+      <if test="checkTime != null" >
+        check_time,
+      </if>
+      <if test="oldScript != null" >
+        oldscript,
+      </if>
+      <if test="newScript != null" >
+        newscript,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -108,6 +136,21 @@
       <if test="description != null" >
         #{description,jdbcType=VARCHAR},
       </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="checkUid != null" >
+        #{checkUid,jdbcType=VARCHAR},
+      </if>
+      <if test="checkTime != null" >
+        #{checkTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="oldScript != null" >
+        #{oldScript,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="newScript != null" >
+        #{newScript,jdbcType=LONGVARCHAR},
+      </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.taobao.zeus.dal.model.ZeusLog" >
@@ -139,6 +182,15 @@
       </if>
       <if test="description != null" >
         description = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status=#{status,jdbcType=INTEGER},
+      </if>
+      <if test="checkUid != null" >
+        check_uid=#{checkUid,jdbcType=VARCHAR},
+      </if>
+      <if test="checkTime != null" >
+        check_time=#{checkTime,jdbcType=TIMESTAMP},
       </if>
     </set>
     where id = #{id,jdbcType=BIGINT}

@@ -46,7 +46,7 @@ public class Environment {
     private static Integer scanRate = Integer.valueOf(3000);
     private static Integer scanExceptionRate = Integer.valueOf(3000);
     private static Integer zeusWorkerTasksMax = Integer.valueOf(5);
-    private static Boolean kerberosAuth=false;
+    private static String kerberosAuth="false";
     private static String kerberosUser="hadoop";
     private static String zeusTempWorkPath="/tmp/zeus/";
     private static String zeusSafeDeleteDir="/tmp/zeus/";
@@ -54,7 +54,7 @@ public class Environment {
     public Environment(String env,String scheduleGroup,String downloadPath,String hadoopHome,String hadoopConfDir,String hiveHome,String hiveConfDir,
 			String host,String port,String username,String password,String sendFrom,String notifyUrl,String accessToken,String excludeFile, String defaultWorkerGroupId, String defaultMasterGroupId
 			,String maxMemRate, String maxCpuLoadPerCore, String scanRate,String scanExceptionRate,String zeusWorkerTasksMax
-	,Boolean kerberosAuth,String kerberosUser,String zeusTempWorkPath,String zeusSafeDeleteDir){
+	,String kerberosAuth,String kerberosUser,String zeusTempWorkPath,String zeusSafeDeleteDir){
 		Environment.env=env.trim();
 		Environment.scheduleGroup=scheduleGroup.trim();
 		Environment.downloadPath=downloadPath.trim();
@@ -248,10 +248,10 @@ public class Environment {
 	}
 
 	public static Boolean getKerberosAuth() {
-		return kerberosAuth;
+		return kerberosAuth.equalsIgnoreCase("true");
 	}
 
-	public static void setKerberosAuth(Boolean kerberosAuth) {
+	public static void setKerberosAuth(String kerberosAuth) {
 		Environment.kerberosAuth = kerberosAuth;
 	}
 

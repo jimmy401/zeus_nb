@@ -9,6 +9,7 @@ import java.util.TimeZone;
 
 public class DateUtil {
 	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+	public static final String yyyyMMdd = "yyyyMMdd";
 
 	public static void main(String[] args) throws ParseException {
 		System.out.println(string2Date("2014-01-22 23:59:59").toString());
@@ -144,7 +145,15 @@ public class DateUtil {
 	}
 
 	public static String date2String(Date date) {
+		if (date==null)
+		{
+			return "";
+		}
 		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+	}
+
+	public static String date2String(Date date,String format) {
+		return new SimpleDateFormat(format).format(date);
 	}
 
 	public static String getDefaultTZStr() {
@@ -156,6 +165,15 @@ public class DateUtil {
 
 	public static String getToday() {
 		return new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+	}
+
+
+
+	public static String getDayBefore(int offset,String format) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(new Date());
+		cal.add(Calendar.DAY_OF_MONTH,offset);
+		return new SimpleDateFormat(format).format(cal.getTime());
 	}
 
 }

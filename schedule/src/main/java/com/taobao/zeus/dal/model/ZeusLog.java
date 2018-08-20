@@ -1,5 +1,7 @@
 package com.taobao.zeus.dal.model;
 
+import com.taobao.zeus.util.DateUtil;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -10,7 +12,7 @@ public class ZeusLog  implements Serializable {
 
     private String logtype;
 
-    private Date createtime=new Date();
+    private Date createtime;
 
     private String username;
 
@@ -25,6 +27,52 @@ public class ZeusLog  implements Serializable {
     private String method;
 
     private String description;
+
+    private String showCreateTime;
+
+    private Integer status;
+
+    private String showStatus;
+
+    private String checkUid;
+
+    private Date checkTime;
+
+    private String showCheckTime;
+
+    private String oldScript;
+
+    private String newScript;
+    public String getShowStatus() {
+        if (status == 0) {
+            return "待审核";
+        } else {
+            return "已经审核";
+        }
+    }
+    public String getShowCreateTime() {
+        return DateUtil.date2String(this.getCreatetime());
+    }
+
+    public String getShowCheckTime() {
+        return DateUtil.date2String(this.getCheckTime());
+    }
+
+    public String getOldScript() {
+        return oldScript;
+    }
+
+    public void setOldScript(String oldScript) {
+        this.oldScript = oldScript == null ? null : oldScript.trim();
+    }
+
+    public String getNewScript() {
+        return newScript;
+    }
+
+    public void setNewScript(String newScript) {
+        this.newScript = newScript == null ? null : newScript.trim();
+    }
 
     public Long getId() {
         return id;
@@ -104,5 +152,29 @@ public class ZeusLog  implements Serializable {
 
     public void setDescription(String description) {
         this.description = description == null ? null : description.trim();
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public String getCheckUid() {
+        return checkUid;
+    }
+
+    public void setCheckUid(String checkUid) {
+        this.checkUid = checkUid;
+    }
+
+    public Date getCheckTime() {
+        return checkTime;
+    }
+
+    public void setCheckTime(Date checkTime) {
+        this.checkTime = checkTime;
     }
 }
