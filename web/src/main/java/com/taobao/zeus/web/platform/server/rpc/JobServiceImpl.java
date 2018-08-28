@@ -524,7 +524,7 @@ public class JobServiceImpl implements JobService {
             GwtException e = new GwtException("你没有权限执行该操作");
             log.error(e);
             throw e;
-        }
+        }/*
         ZeusLog zeusActionLog = mysqlLogManager.selectLogByActionId(actionId);
         if (zeusActionLog != null) {
             Date now = new Date();
@@ -540,7 +540,7 @@ public class JobServiceImpl implements JobService {
                 log.error(e);
                 throw e;
             }
-        }
+        }*/
         try {
             Tuple<JobDescriptor, JobStatus> job = permissionGroupManagerWithAction
                     .getActionDescriptor(actionId);

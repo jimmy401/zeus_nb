@@ -38,8 +38,8 @@ public class ChooseConfigWindow extends Window{
 		private static final long serialVersionUID = 1L;
 
 	{
-	    add("手动执行任务失败,你没有权限操作，或者操作太频繁，间隔5分钟后重试！请确保上次操作真正结束，再触发执行！");
-	    add("手动恢复任务失败,你没有权限操作，或者操作太频繁，间隔5分钟后重试！请确保上次操作真正结束，再触发执行！");
+	    add("手动执行任务失败");
+	    add("手动恢复任务失败");
 	}};	
 		private ListStore<Map<String, String>> store=new ListStore<Map<String, String>>(new ModelKeyProvider<Map<String, String>>() {
 			public String getKey(Map<String, String> item) {

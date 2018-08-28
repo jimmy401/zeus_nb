@@ -106,6 +106,9 @@
 		<constructor-arg index="25">
 			<value>${zeus.safe.delete.dir}</value>
 		</constructor-arg>
+		<constructor-arg index="26">
+			<value>${hive.beeline.shell}</value>
+		</constructor-arg>
 	</bean>
 
 	<bean id="distributeLocker" class="com.taobao.zeus.schedule.DistributeLocker" init-method="init" depends-on="environment">

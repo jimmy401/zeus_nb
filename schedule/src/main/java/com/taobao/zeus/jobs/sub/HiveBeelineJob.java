@@ -1,5 +1,17 @@
 package com.taobao.zeus.jobs.sub;
 
+import com.taobao.zeus.dal.logic.FileManager;
+import com.taobao.zeus.jobs.JobContext;
+import com.taobao.zeus.jobs.ProcessJob;
+import com.taobao.zeus.model.FileDescriptor;
+import com.taobao.zeus.util.Environment;
+import com.taobao.zeus.util.PropertyKeys;
+import com.taobao.zeus.util.RunningJobKeys;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -9,33 +21,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.taobao.zeus.dal.logic.FileManager;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-
-import com.taobao.zeus.jobs.JobContext;
-import com.taobao.zeus.jobs.ProcessJob;
-import com.taobao.zeus.model.FileDescriptor;
-import com.taobao.zeus.util.Environment;
-import com.taobao.zeus.util.PropertyKeys;
-import com.taobao.zeus.util.RunningJobKeys;
-
 /**
- * 添加重试功能，如果任务在10分钟内失败，则进行重试
- * 
- * @author zhoufang
+ *
+ * @author duxiaofu
  * 
  */
-public class HiveJob extends ProcessJob {
-	private static Logger log=LoggerFactory.getLogger(HiveJob.class);
-	public static final String UDF_SQL_NAME = "zeus_udf.sql";
+public class HiveBeelineJob extends ProcessJob {
+	private static Logger log=LoggerFactory.getLogger(HiveBeelineJob.class);
 	private FileManager fileManager;
 	private ApplicationContext applicationContext;
 
 	@SuppressWarnings("unused")
-	public HiveJob(JobContext jobContext, ApplicationContext applicationContext) {
+	public HiveBeelineJob(JobContext jobContext, ApplicationContext applicationContext) {
 		super(jobContext);
 		this.applicationContext = applicationContext;
 		fileManager = (FileManager) this.applicationContext
@@ -61,8 +58,6 @@ public class HiveJob extends ProcessJob {
 
 	
 	public Integer runInner() throws Exception {
-		
-
 		String script = getProperties().getLocalProperty(PropertyKeys.JOB_SCRIPT);
 		File f = new File(jobContext.getWorkDir() + File.separator
 				+ (new Date().getTime()) + ".hive");
@@ -126,12 +121,6 @@ public class HiveJob extends ProcessJob {
 //			System.out.println("dos2unix file: " + hiveFilePath);
 			log("dos2unix file: " + hiveFilePath);
 		}
-		
-		// 引入常用udf函数
-//		if (getUdfSql()) {
-//			sb.append(" -i ").append(jobContext.getWorkDir())
-//					.append(File.separator).append(UDF_SQL_NAME);
-//		}
 
 		sb.append(" -f ").append(hiveFilePath);
 		// 执行shell
@@ -149,7 +138,7 @@ public class HiveJob extends ProcessJob {
 						tmpFile.createNewFile();
 					}
 					tmpWriter=new OutputStreamWriter(new FileOutputStream(tmpFile),Charset.forName(jobContext.getProperties().getProperty("zeus.fs.encode", "utf-8")));
-					tmpWriter.write("source " + localEnvFilePath + "; hive"+ sb.toString());
+					tmpWriter.write("source " + localEnvFilePath + "; " + Environment.getHiveBeelineShell()+ sb.toString());
 				} catch (Exception e) {
 					jobContext.getJobHistory().getLog().appendZeusException(e);
 				} finally{
@@ -159,37 +148,11 @@ public class HiveJob extends ProcessJob {
 				list.add(shellPrefix + " sh " + tmpFilePath);
 			}else{
 				list.add("chmod -R 777 " + jobContext.getWorkDir());
-				list.add(shellPrefix + " hive" + sb.toString());
+				list.add(shellPrefix + " " + Environment.getHiveBeelineShell() + sb.toString());
 			}
 		}else{
-			list.add("hive" + sb.toString());
+			list.add(Environment.getHiveBeelineShell() + sb.toString());
 		}
 		return list;
-	}
-
-	@SuppressWarnings("unused")
-	private boolean getUdfSql() {
-		//TODO 请在此处填写udf文件对应的文档id
-		String fileID="121";
-		if(fileID==null){
-			return false;
-		}
-		try {
-			FileDescriptor file = fileManager.getFile(fileID);
-			File f = new File(jobContext.getWorkDir() + File.separator
-					+ UDF_SQL_NAME);
-			if (f.exists()) {
-				f.delete();
-			}
-			FileWriter fos = new FileWriter(f);
-			fos.write(file.getContent());
-			fos.flush();
-			fos.close();
-			return true;
-		} catch (Exception e) {
-			log("获取同步表脚本失败");
-			log(e);
-			return false;
-		}
 	}
 }

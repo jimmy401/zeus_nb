@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.taobao.zeus.dal.logic.GroupManagerWithJob;
+import com.taobao.zeus.jobs.sub.HiveBeelineJob;
 import org.apache.commons.lang.StringUtils;
 import org.mortbay.log.Log;
 import org.springframework.context.ApplicationContext;
@@ -84,7 +85,7 @@ public class JobUtils {
 		pres.add(new DownloadJob(jobContext));
 		Job core = null;
 		if (history.getJobRunType() == JobRunType.Hive) {
-			core = new HiveJob(jobContext, applicationContext);
+			core = new HiveBeelineJob(jobContext, applicationContext);
 		} else if (history.getJobRunType() == JobRunType.Shell) {
 			core = new HadoopShellJob(jobContext);
 		}

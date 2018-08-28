@@ -10,6 +10,7 @@ import java.util.TimeZone;
 public class DateUtil {
 	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	public static final String yyyyMMdd = "yyyyMMdd";
+	public static final String yyyyMMddHHmm = "yyyyMMddHHmm";
 
 	public static void main(String[] args) throws ParseException {
 		System.out.println(string2Date("2014-01-22 23:59:59").toString());
@@ -58,6 +59,13 @@ public class DateUtil {
 				"yyyy-MM-dd HH:00:00");
 		dateFormatGmt.setTimeZone(TimeZone.getTimeZone(timezone));
 		return dateFormatGmt.format(calendar.getTime());
+	}
+
+	public static Date secondsAdd(Date date, int seconds) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.add(Calendar.SECOND,seconds);
+		return calendar.getTime();
 	}
 
 	public static String getDelayTime(int hour, String date)
@@ -142,6 +150,10 @@ public class DateUtil {
 
 	public static Date string2Date(String dateString) throws ParseException {
 		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateString);
+	}
+
+	public static Date string2Date(String dateString,String format) throws ParseException {
+		return new SimpleDateFormat(format).parse(dateString);
 	}
 
 	public static String date2String(Date date) {

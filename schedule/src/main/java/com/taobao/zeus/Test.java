@@ -13,6 +13,8 @@ public class Test
 {
     public static void main (String []args) throws ParseException {
         String content ="asfdas DROP table dwd_video asdfa drop   table  dws_video";
+String test = "201808281800000099";
+        System.out.println(test.substring(0,11));
 
         Pattern p=Pattern.compile("[Dd][Rr][Oo][Pp]\\s+[Tt][Aa][Bb][Ll][Ee]\\s+([Dd][Ww][Dd]_|[Dd][Ww][Ss]_|[Aa][Dd][Mm]_)");
         Matcher m=p.matcher(content);
