@@ -85,7 +85,7 @@ public class JobUtils {
 		pres.add(new DownloadJob(jobContext));
 		Job core = null;
 		if (history.getJobRunType() == JobRunType.Hive) {
-			core = new HiveBeelineJob(jobContext, applicationContext);
+			core = new HiveJob(jobContext, applicationContext);
 		} else if (history.getJobRunType() == JobRunType.Shell) {
 			core = new HadoopShellJob(jobContext);
 		}

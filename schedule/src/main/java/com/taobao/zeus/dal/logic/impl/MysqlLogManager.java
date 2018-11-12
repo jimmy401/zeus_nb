@@ -30,6 +30,7 @@ public class MysqlLogManager {
 			logPersistence.setStatus(logDescriptor.getStatus());
 			logPersistence.setOldScript(logDescriptor.getOldScript());
 			logPersistence.setNewScript(logDescriptor.getNewScript());
+			logPersistence.setCreatetime(logDescriptor.getCreateTime());
 
 			zeusLogMapper.insertSelective(logPersistence);
 
