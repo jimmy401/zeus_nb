@@ -125,6 +125,7 @@ hive.conf.dir=/etc/hive/conf
 kerberos.auth=true
 kerberos.user=hadoop
 6.在HiveJob类中，填写hive udf的定义语句。请在此处填写udf文件对应的文档id,当前文档Id是121
+7.执行时长超过12个小时的任务，置为失败。
 
 需要注意防止重复手动提交任务。插入重复数据的问题。
 

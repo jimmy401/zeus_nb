@@ -15,6 +15,7 @@ import com.taobao.zeus.dal.model.ZeusActionWithBLOBs;
 import com.taobao.zeus.dal.model.ZeusJob;
 import com.taobao.zeus.dal.model.ZeusJobWithBLOBs;
 import com.taobao.zeus.schedule.mvc.*;
+import com.taobao.zeus.socket.master.reqresp.MasterCancelJob;
 import com.taobao.zeus.util.*;
 import org.jboss.netty.channel.Channel;
 import org.quartz.SchedulerException;
@@ -300,7 +301,7 @@ public class Master {
                     log.error("error occurs in checkTimeOver", e);
                 }
             }
-        }, 0, 3, TimeUnit.SECONDS);
+        }, 0, 300, TimeUnit.SECONDS);
     }
 
     //重新调度漏跑的JOB
@@ -414,7 +415,7 @@ public class Master {
                                     break;
                                 } else {
 //									selectWorker = worker;
-                                    ScheduleInfoLog.info(" running task" + worker.getRunnings().size() + " >dmp.zeus.worker.tasks.max " + taskMax);
+                                    ScheduleInfoLog.info(" running task count:" + worker.getRunnings().size() + " >dmp.zeus.worker.tasks.max " + taskMax);
                                     break;
                                 }
                             } else {
@@ -486,9 +487,6 @@ public class Master {
                 log.info("HostGroupId : " + e.getHostGroupId() + ",schedule selectWorker : " + selectWorker + ",host :" + selectWorker.getHeart().host);
             }
         }
-
-//		 检测任务超时
-//		checkTimeOver();
     }
 
     private void runScheduleAction(final JobElement e) {
@@ -884,8 +882,8 @@ public class Master {
         }
     }
 
-    private void checkScheduleTimeOver(MasterWorkerHolder w) {
-        for (Map.Entry<String, Boolean> entry : w.getRunnings().entrySet()) {
+    private void checkScheduleTimeOver(MasterWorkerHolder workerHolder) {
+        for (Map.Entry<String, Boolean> entry : workerHolder.getRunnings().entrySet()) {
             if (entry.getValue() != null && entry.getValue()) {
                 continue;
             }
@@ -916,8 +914,12 @@ public class Master {
                 if (runTime > maxTime) {
                     log.info("send the timeOverAlarm of job: " + jobId);
                     if (timeOverAlarm(his, null, runTime, maxTime, 0, jd)) {
-                        w.getRunnings().replace(jobId, false, true);
+                        workerHolder.getRunnings().replace(jobId, false, true);
                     }
+                }
+                //任务执行时长超过一天的话，直接取消执行，状态置为失败
+                if(runTime>720){
+                    new MasterCancelJob().processScheduleCancel(context,his,workerHolder);
                 }
             }
         }
@@ -965,7 +967,7 @@ public class Master {
             if (type == 2) {
                 // 此处可以发送IM消息
             } else {
-                // 此处可以发送IM消息
+                // 此处可以发送邮件
                 new Thread() {
                     @Override
                     public void run() {
