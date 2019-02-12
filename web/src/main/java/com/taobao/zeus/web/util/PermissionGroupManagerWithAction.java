@@ -247,9 +247,9 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 	@Override
 	public void grantGroupOwner(String granter, String uid, String groupId) throws ZeusException{
 		ZeusUser nextUser = userManager.findByUidFilter(uid);
-		if (nextUser.getUserType() != 0) {
-			throw new ZeusException("请转给组管理员！");
-		}
+		//if (nextUser.getUserType() != 0) {
+		//	throw new ZeusException("请转给组管理员！");
+		//}
 		if (nextUser.getIsEffective() != 1) {
 			throw new ZeusException("请转给有效用户");
 		}
@@ -271,9 +271,9 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 	@Override
 	public void grantJobOwner(String granter, String uid, String jobId) throws ZeusException{
 		ZeusUser nextUser = userManager.findByUidFilter(uid);
-		if (nextUser.getUserType() != 0) {
-			throw new ZeusException("请转给组管理员！");
-		}
+		//if (nextUser.getUserType() != 0) {
+		//	throw new ZeusException("请转给组管理员！");
+		//}
 		if (nextUser.getIsEffective() != 1) {
 			throw new ZeusException("请转给有效用户");
 		}

@@ -39,6 +39,8 @@ public class ZeusActionHistory {
 
     private String log;
 
+    private String script;
+
     public Long getId() {
         return id;
     }
@@ -181,5 +183,13 @@ public class ZeusActionHistory {
 
     public void setLog(String log) {
         this.log = log == null ? null : log.trim();
+    }
+
+    public String getScript() {
+        return script;
+    }
+
+    public void setScript(String script) {
+        this.script = script;
     }
 }

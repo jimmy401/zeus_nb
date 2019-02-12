@@ -94,6 +94,21 @@
 		<constructor-arg index="21">
 			<value>${zeus.worker.tasks.max}</value>
 		</constructor-arg>
+		<constructor-arg index="22">
+			<value>${kerberos.auth}</value>
+		</constructor-arg>
+		<constructor-arg index="23">
+			<value>${kerberos.user}</value>
+		</constructor-arg>
+		<constructor-arg index="24">
+			<value>${zeus.tempWorkPath}</value>
+		</constructor-arg>
+		<constructor-arg index="25">
+			<value>${zeus.safe.delete.dir}</value>
+		</constructor-arg>
+		<constructor-arg index="26">
+			<value>${hive.beeline.shell}</value>
+		</constructor-arg>
 	</bean>
 
 	<bean id="distributeLocker" class="com.taobao.zeus.schedule.DistributeLocker" init-method="init" depends-on="environment">

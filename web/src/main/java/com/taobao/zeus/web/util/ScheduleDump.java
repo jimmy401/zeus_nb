@@ -1,5 +1,7 @@
 package com.taobao.zeus.web.util;
 
+import com.taobao.zeus.dal.logic.impl.MysqlZeusAction;
+import com.taobao.zeus.dal.logic.impl.MysqlZeusActionBak;
 import com.taobao.zeus.dal.mapper.ZeusActionBakMapper;
 import com.taobao.zeus.dal.mapper.ZeusActionMapper;
 import com.taobao.zeus.dal.model.ZeusActionBakWithBLOBs;
@@ -21,10 +23,13 @@ import com.taobao.zeus.socket.master.JobElement;
 import com.taobao.zeus.socket.master.MasterContext;
 import com.taobao.zeus.socket.master.MasterWorkerHolder;
 import com.taobao.zeus.socket.master.MasterWorkerHolder.HeartBeatInfo;
+import com.taobao.zeus.util.DateUtil;
 import com.taobao.zeus.util.Environment;
 import com.taobao.zeus.util.Tuple;
 import org.jboss.netty.channel.Channel;
 import org.quartz.SchedulerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -48,15 +53,12 @@ import java.util.*;
  */
 @Service
 public class ScheduleDump extends HttpServlet {
-
-    @Autowired
-    ZeusActionMapper zeusActionMapper;
-
-    @Autowired
-    ZeusActionBakMapper zeusActionBakMapper;
+    private static Logger log = LoggerFactory.getLogger(ScheduleDump.class);
 
     private static final long serialVersionUID = 1L;
     private DistributeLocker locker;
+    private MysqlZeusAction mysqlZeusAction;
+    private MysqlZeusActionBak mysqlZeusActionBak;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -64,6 +66,8 @@ public class ScheduleDump extends HttpServlet {
         ApplicationContext context = WebApplicationContextUtils
                 .getWebApplicationContext(config.getServletContext());
         locker = (DistributeLocker) context.getBean("distributeLocker");
+        mysqlZeusAction = (MysqlZeusAction) context.getBean("mysqlZeusAction");
+        mysqlZeusActionBak=(MysqlZeusActionBak) context.getBean("mysqlZeusActionBak");
     }
 
     @Override
@@ -178,8 +182,9 @@ public class ScheduleDump extends HttpServlet {
                             Dispatcher dispatcher = context.getDispatcher();
                             if (dispatcher != null) {
                                 for (Controller c : dispatcher.getControllers()) {
+                                    if (c.getActionId().substring(0,8).compareTo(DateUtil.getDayBefore(3,DateUtil.yyyyMMdd))>0){
                                     resp.getWriter().println(
-                                            "<br>" + c.toString());
+                                            "<br>" + c.toString());}
                                 }
                             }
                         }/*
@@ -381,27 +386,28 @@ public class ScheduleDump extends HttpServlet {
                                             for (JobDescriptor job : toBeTransferred) {
                                                 ZeusActionWithBLOBs persist = PersistenceAndBeanConvertWithAction.convert(job);
                                                 ZeusActionBakWithBLOBs backup = new ZeusActionBakWithBLOBs(persist);
-                                                //resp.getWriter().println("<br>备份数据库中id为" + job.getId() + "的action");
-
-                                                ZeusActionBakWithBLOBs bakItem = zeusActionBakMapper.selectByPrimaryKey(backup.getId());
+                                                resp.getWriter().println("<br>备份数据库中id为" + backup.getId() + "的action");
+                                                ZeusActionBakWithBLOBs bakItem = mysqlZeusActionBak.selectByPrimaryKey(backup.getId());
                                                 Boolean flag = true;
                                                 try {
                                                     if (bakItem != null) {
-                                                        zeusActionBakMapper.updateByPrimaryKeySelective(backup);
+                                                        mysqlZeusActionBak.updateByPrimaryKeySelective(backup);
                                                     } else {
-                                                        zeusActionBakMapper.insertSelective(backup);
+                                                        mysqlZeusActionBak.insertSelective(backup);
                                                     }
                                                 } catch (Exception ex) {
+                                                    resp.getWriter().println(ex);
                                                     flag=false;
                                                 }
                                                 if (flag){
-                                                    zeusActionMapper.deleteByPrimaryKey(persist.getId());
+                                                    mysqlZeusAction.deleteByPrimaryKey(persist.getId());
                                                     bakCount++;
                                                 }
                                             }
                                             resp.getWriter().println("<br>完成数据库备份， 共备份" + bakCount + "条数据");
                                         } catch (RuntimeException e) {
-                                            resp.getWriter().println(e.getMessage());
+                                            resp.getWriter().println("<br>出现错误");
+                                            resp.getWriter().println(e);
                                         }
                                     }
 

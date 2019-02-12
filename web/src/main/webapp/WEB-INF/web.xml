@@ -64,6 +64,11 @@
 		<filter-name>encodingFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
+<<<<<<< HEAD
+=======
+	<!-- need config a ssoFilter -->
+
+>>>>>>> migu
 	<filter>
 		<filter-name>LoginFilter</filter-name>
 		<filter-class>com.taobao.zeus.web.LoginFilter</filter-class>

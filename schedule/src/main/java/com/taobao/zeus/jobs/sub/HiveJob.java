@@ -103,7 +103,12 @@ public class HiveJob extends ProcessJob {
 		}else{
 			log("没有RunType=" + jobContext.getRunType() + " 的执行类别");
 		}
-		
+
+		if (Environment.getKerberosAuth()){
+			user=Environment.getKerberosUser();
+			shellPrefix= "sudo -u " + user;
+		}
+
 		//格式转换
 		String[] excludeFiles = Environment.getExcludeFile().split(";");
 		boolean isDos2unix = true;
@@ -123,10 +128,10 @@ public class HiveJob extends ProcessJob {
 		}
 		
 		// 引入常用udf函数
-		if (getUdfSql()) {
-			sb.append(" -i ").append(jobContext.getWorkDir())
-					.append(File.separator).append(UDF_SQL_NAME);
-		}
+//		if (getUdfSql()) {
+//			sb.append(" -i ").append(jobContext.getWorkDir())
+//					.append(File.separator).append(UDF_SQL_NAME);
+//		}
 
 		sb.append(" -f ").append(hiveFilePath);
 		// 执行shell
@@ -165,7 +170,7 @@ public class HiveJob extends ProcessJob {
 	@SuppressWarnings("unused")
 	private boolean getUdfSql() {
 		//TODO 请在此处填写udf文件对应的文档id
-		String fileID=null;
+		String fileID="121";
 		if(fileID==null){
 			return false;
 		}

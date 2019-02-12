@@ -1,16 +1,15 @@
 
 package com.taobao.zeus.web.platform.server.rpc;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import com.taobao.zeus.dal.logic.FollowManagerWithJob;
 import com.taobao.zeus.dal.logic.PermissionManager;
 import com.taobao.zeus.dal.logic.UserManager;
+import com.taobao.zeus.dal.logic.impl.MysqlLogManager;
 import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.dal.tool.GroupBean;
+import com.taobao.zeus.model.LogDescriptor;
 import com.taobao.zeus.web.util.PermissionGroupManagerWithJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +23,7 @@ import com.taobao.zeus.web.platform.client.module.jobmanager.GroupModel;
 import com.taobao.zeus.web.platform.client.util.GwtException;
 import com.taobao.zeus.web.platform.client.util.ZUser;
 import com.taobao.zeus.web.platform.shared.rpc.GroupService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service("group.rpc")
@@ -37,6 +37,11 @@ public class GroupServiceImpl implements GroupService{
 	private UserManager userManager;
 	@Autowired
 	private PermissionManager permissionManager;
+
+	@Autowired
+	@Qualifier("mysqlLogManager")
+	private MysqlLogManager mysqlLogManager;
+
 	@Override
 	public String createGroup(String groupName, String parentGroupId,
 			boolean isDirectory) throws GwtException {
@@ -52,6 +57,14 @@ public class GroupServiceImpl implements GroupService{
 	public void deleteGroup(String groupId) throws GwtException {
 		try {
 			permissionGroupManagerWithJob.deleteGroup(LoginUser.getUser().getUid(), groupId);
+			String user=LoginUser.getUser().getUid();
+			LogDescriptor log = new LogDescriptor();
+			log.setCreateTime(new Date());
+			log.setUserName(user);
+			log.setLogType("delete_group");
+			log.setIp(groupId);
+
+			mysqlLogManager.addLog(log);
 		} catch (ZeusException e) {
 			throw new GwtException(e.getMessage());
 		}

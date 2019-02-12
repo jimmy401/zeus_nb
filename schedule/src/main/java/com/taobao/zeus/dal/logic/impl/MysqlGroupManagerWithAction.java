@@ -17,6 +17,7 @@ import com.taobao.zeus.model.JobDescriptor.JobScheduleType;
 import com.taobao.zeus.model.JobStatus;
 import com.taobao.zeus.model.processer.DownloadProcesser;
 import com.taobao.zeus.model.processer.Processer;
+import com.taobao.zeus.util.DateUtil;
 import com.taobao.zeus.util.Tuple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -176,7 +177,7 @@ public class MysqlGroupManagerWithAction implements GroupManagerWithAction {
     @Override
     public GroupDescriptor getGroupDescriptor(String groupId) {
         ZeusGroupWithBLOBs persist = zeusGroupMapper.selectByPrimaryKey(Integer.valueOf(groupId));
-        log.info("root group id : {}",persist.getId());
+        log.info("root group id : {}", persist.getId());
         if (persist != null) {
             return PersistenceAndBeanConvertWithAction.convert(persist);
         }
@@ -199,7 +200,7 @@ public class MysqlGroupManagerWithAction implements GroupManagerWithAction {
             for (String jobID : jd.getDependencies()) {
                 if (StringUtils.isNotEmpty(jobID)) {
                     jp = getAction(jobID);
-                    if(jp!=null){
+                    if (jp != null) {
                         jd.getDepdCycleJob().put(jobID, jp.getCycle());
                     }
                 }
@@ -284,7 +285,7 @@ public class MysqlGroupManagerWithAction implements GroupManagerWithAction {
     }
 
     public void updateAction(String user, JobDescriptor job, String owner,
-                          String groupId) throws ZeusException {
+                             String groupId) throws ZeusException {
         ZeusActionWithBLOBs orgPersist = zeusActionMapper.selectByPrimaryKey(Long.valueOf(job.getId()));
         if (job.getScheduleType() == JobScheduleType.Independent) {
             job.setDependencies(new ArrayList<String>());
@@ -352,14 +353,14 @@ public class MysqlGroupManagerWithAction implements GroupManagerWithAction {
         persist.setExisted(1);
         zeusGroupMapper.insertSelective(persist);
 
-        Map<String ,Object> params = new HashMap<String ,Object>();
-        params.put("owner",user);
-        params.put("name",groupName);
-        params.put("parent",parentGroup);
-        params.put("directory",isDirectory);
-        params.put("existed",1);
-        params.put("gmtCreate",now);
-        params.put("gmtModified",now);
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("owner", user);
+        params.put("name", groupName);
+        params.put("parent", parentGroup);
+        params.put("directory", isDirectory);
+        params.put("existed", 1);
+        params.put("gmtCreate", DateUtil.date2String(now));
+        params.put("gmtModified", DateUtil.date2String(now));
         List<ZeusGroupWithBLOBs> result = zeusGroupMapper.selectByParams(params);
         return PersistenceAndBeanConvertWithAction.convert(result.get(0));
     }
@@ -383,11 +384,11 @@ public class MysqlGroupManagerWithAction implements GroupManagerWithAction {
         persist.setGmtModified(now);
 
         zeusActionMapper.insertSelective(persist);
-        Map<String ,Object> params = new HashMap<String ,Object>();
-        params.put("owner",user);
-        params.put("name",jobName);
-        params.put("groupId",parentGroup);
-        params.put("runType",jobType);
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("owner", user);
+        params.put("name", jobName);
+        params.put("groupId", parentGroup);
+        params.put("runType", jobType);
         List<ZeusActionWithBLOBs> result = zeusActionMapper.selectByParams(params);
 
         return PersistenceAndBeanConvertWithAction.convert(result.get(0)).getX();
@@ -397,18 +398,20 @@ public class MysqlGroupManagerWithAction implements GroupManagerWithAction {
     public Map<String, Tuple<JobDescriptor, JobStatus>> getActionDescriptor(
             final Collection<String> jobIds) {
         List<Long> ids = new ArrayList<Long>();
-        for (String i : jobIds) {
-            ids.add(Long.valueOf(i));
-        }
-        List<ZeusActionWithBLOBs> list = zeusActionMapper.findActionWithIds(ids);
         List<Tuple<JobDescriptor, JobStatus>> result = new ArrayList<Tuple<JobDescriptor, JobStatus>>();
-        if (list != null && !list.isEmpty()) {
-            for (ZeusActionWithBLOBs persist : list) {
-                result.add(PersistenceAndBeanConvertWithAction
-                        .convert(persist));
+        if (jobIds != null && jobIds.size() > 0) {
+            for (String i : jobIds) {
+                ids.add(Long.valueOf(i));
+            }
+            List<ZeusActionWithBLOBs> list = zeusActionMapper.findActionWithIds(ids);
+
+            if (list != null && !list.isEmpty()) {
+                for (ZeusActionWithBLOBs persist : list) {
+                    result.add(PersistenceAndBeanConvertWithAction
+                            .convert(persist));
+                }
             }
         }
-
         Map<String, Tuple<JobDescriptor, JobStatus>> map = new HashMap<String, Tuple<JobDescriptor, JobStatus>>();
         for (Tuple<JobDescriptor, JobStatus> jd : result) {
             map.put(jd.getX().getId(), jd);
@@ -502,7 +505,9 @@ public class MysqlGroupManagerWithAction implements GroupManagerWithAction {
     public List<String> getHosts() throws ZeusException {
         List<ZeusWorker> list = zeusWorkerMapper.selectAll();
         final List<String> results = new ArrayList<String>();
-        list.stream().forEach(o -> results.add(o.getHost()));
+        for (ZeusWorker item : list) {
+            results.add(item.getHost());
+        }
         return results;
     }
 
@@ -510,10 +515,9 @@ public class MysqlGroupManagerWithAction implements GroupManagerWithAction {
     public void replaceWorker(ZeusWorker worker) throws ZeusException {
         try {
             ZeusWorker item = zeusWorkerMapper.selectByPrimaryKey(worker.getHost());
-            if (item!=null){
+            if (item != null) {
                 zeusWorkerMapper.updateByPrimaryKeySelective(worker);
-            }else
-            {
+            } else {
                 zeusWorkerMapper.insertSelective(worker);
             }
         } catch (DataAccessException e) {
@@ -532,41 +536,40 @@ public class MysqlGroupManagerWithAction implements GroupManagerWithAction {
     }
 
     @Override
-    public void saveOrUpdateAction(ZeusActionWithBLOBs actionPer) throws ZeusException{
-        try{
+    public void saveOrUpdateAction(ZeusActionWithBLOBs actionPer) throws ZeusException {
+        try {
             ZeusActionWithBLOBs action = zeusActionMapper.selectByPrimaryKey(actionPer.getId());
-            if(action != null){
-                if(action.getStatus() == null || !action.getStatus().equalsIgnoreCase("running")){
+            if (action != null) {
+                if (action.getStatus() == null || !action.getStatus().equalsIgnoreCase("running")) {
                     actionPer.setHistoryId(action.getHistoryId());
                     actionPer.setReadyDependency(action.getReadyDependency());
 
-                    if(actionPer.getStatus()==null||
+                    if (actionPer.getStatus() == null ||
                             !actionPer.getStatus().equals(JobStatus.Status.FAILED.getId()))
                         actionPer.setStatus(action.getStatus());
-                }else{
+                } else {
                     actionPer = action;
                 }
-            }else{
+            } else {
                 SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
                 SimpleDateFormat df2 = new SimpleDateFormat("HH");
-                String currentDateStr = df.format(new Date())+"0000";
+                String currentDateStr = df.format(new Date()) + "0000";
                 String currentHourStr = df2.format(new Date());
                 if (Integer.parseInt(currentHourStr) > 8 && actionPer.getId() < Long.parseLong(currentDateStr)) {
                     actionPer.setStatus("failed");
                 }
             }
-            if(actionPer.getAuto() == 0){
-                if(actionPer.getStatus() == null || actionPer.getStatus().equalsIgnoreCase("wait")){
+            if (actionPer.getAuto() == 0) {
+                if (actionPer.getStatus() == null || actionPer.getStatus().equalsIgnoreCase("wait")) {
                     actionPer.setStatus("failed");
                 }
             }
-            if(action != null){
+            if (action != null) {
                 zeusActionMapper.updateByPrimaryKeySelective(actionPer);
-            }else
-            {
+            } else {
                 zeusActionMapper.insertSelective(actionPer);
             }
-        }catch(DataAccessException e){
+        } catch (DataAccessException e) {
             throw new ZeusException(e);
         }
     }
@@ -616,13 +619,13 @@ public class MysqlGroupManagerWithAction implements GroupManagerWithAction {
     }
 
     @Override
-    public void removeAction(Long actionId) throws ZeusException{
-        try{
+    public void removeAction(Long actionId) throws ZeusException {
+        try {
             ZeusActionWithBLOBs action = zeusActionMapper.selectByPrimaryKey(actionId);
-            if(action != null){
+            if (action != null) {
                 zeusActionMapper.deleteByPrimaryKey(action.getId());
             }
-        }catch(DataAccessException e){
+        } catch (DataAccessException e) {
             throw new ZeusException(e);
         }
     }

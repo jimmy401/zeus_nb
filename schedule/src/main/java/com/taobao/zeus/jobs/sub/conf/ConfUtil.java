@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 import com.taobao.zeus.util.Environment;
 
 public class ConfUtil {
-	
+
 	private static Logger log=LoggerFactory.getLogger(ConfUtil.class);
-	
+
 	public static String getHadoopHome(){
 		String dir = System.getenv("HADOOP_HOME");
 		if(dir==null || "".equals(dir.trim())){
@@ -20,7 +20,7 @@ public class ConfUtil {
 		}
 		return dir == null ? null : "";
 	}
-	
+
 	public static String getHiveHome(){
 		String dir = System.getenv("HIVE_HOME");
 		if(dir==null || "".equals(dir.trim())){
@@ -28,7 +28,7 @@ public class ConfUtil {
 		}
 		return dir == null ? null : "";
 	}
-	
+
 	public static String getHadoopConfDir(){
 		String dir=System.getenv("HADOOP_CONF_DIR");
 		//2014-09-19增加配置文件的读取
@@ -50,7 +50,7 @@ public class ConfUtil {
 //		System.out.println(dir);
 		return dir;
 	}
-	
+
 	public static String getHiveConfDir(){
 		String dir=System.getenv("HIVE_CONF_DIR");
 		//2014-09-19增加配置文件的读取
@@ -64,8 +64,8 @@ public class ConfUtil {
 //		System.out.println(dir);
 		return dir;
 	}
-	
-	
+
+
 	public static Configuration getDefaultHiveSite(){
 		try {
 			File f=new File(getHiveConfDir()+File.separator+"hive-site.xml");
@@ -93,7 +93,7 @@ public class ConfUtil {
 		}
 		return null;
 	}
-	
+
 	public static Configuration getDefaultHdfsSite(){
 		try{
 			File f=new File(getHadoopConfDir()+File.separator+"hdfs-site.xml");
@@ -107,10 +107,10 @@ public class ConfUtil {
 		}
 		return null;
 	}
-	
+
 	public static Configuration getDefaultMapredSite(){
 		try{
-			File f=new File(getHadoopConfDir()+File.separator+"mapred-site.xml");
+			File f=new File(getHiveConfDir()+File.separator+"mapred-site.xml");
 			if(f.exists()){
 				Configuration conf=new Configuration(false);
 				conf.addResource(f.toURI().toURL());
@@ -121,7 +121,7 @@ public class ConfUtil {
 		}
 		return null;
 	}
-	
+
 	public static Configuration getDefaultCoreAndHdfsSite(){
 		try{
 			File core_site=new File(getHadoopConfDir()+File.separator+"core-site.xml");
@@ -141,11 +141,11 @@ public class ConfUtil {
 		}
 		return null;
 	}
-	
+
 
 	public static Configuration getDefaultYarnSite(){
 		try{
-			File f=new File(getHadoopConfDir()+File.separator+"yarn-site.xml");
+			File f=new File(getHiveConfDir()+File.separator+"yarn-site.xml");
 			if(f.exists()){
 				Configuration conf=new Configuration(false);
 				conf.addResource(f.toURI().toURL());
@@ -156,7 +156,7 @@ public class ConfUtil {
 		}
 		return null;
 	}
-	
+
 //	public static Configuration getWorkConf(JobContext jobContext) {
 //		String workDir = jobContext.getWorkDir();
 //		Configuration conf = new Configuration();

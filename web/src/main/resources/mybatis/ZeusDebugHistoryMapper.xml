@@ -39,13 +39,13 @@
       and script = #{script,jdbcType=LONGVARCHAR}
     </if>
     <if test="hostGroupId != null">
-      and host_group_id = #{hostGroupId,jdbcType=INTEGER}
+      and host_group_id = #{hostGroupId,jdbcType=VARCHAR}
     </if>
     <if test="gmtCreate != null">
-      and gmt_create = #{gmtCreate,jdbcType=TIMESTAMP}
+      and gmt_create = #{gmtCreate,jdbcType=VARCHAR}
     </if>
     <if test="gmtModified != null">
-      and gmt_modified = #{gmtModified,jdbcType=TIMESTAMP}
+      and gmt_modified = #{gmtModified,jdbcType=VARCHAR}
     </if>
   </sql>
   <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
@@ -143,10 +143,10 @@
         #{fileId,jdbcType=BIGINT},
       </if>
       <if test="gmtCreate != null" >
-        #{gmtCreate,jdbcType=TIMESTAMP},
+        #{gmtCreate,jdbcType=VARCHAR},
       </if>
       <if test="gmtModified != null" >
-        #{gmtModified,jdbcType=TIMESTAMP},
+        #{gmtModified,jdbcType=VARCHAR},
       </if>
       <if test="runtype != null" >
         #{runtype,jdbcType=VARCHAR},
@@ -184,10 +184,10 @@
         file_id = #{fileId,jdbcType=BIGINT},
       </if>
       <if test="gmtCreate != null" >
-        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+        gmt_create = #{gmtCreate,jdbcType=VARCHAR},
       </if>
       <if test="gmtModified != null" >
-        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+        gmt_modified = #{gmtModified,jdbcType=VARCHAR},
       </if>
       <if test="runtype != null" >
         runtype = #{runtype,jdbcType=VARCHAR},

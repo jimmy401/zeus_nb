@@ -40,11 +40,15 @@ zeus操作起来更加方便。对被阿里抛弃的zeus，感觉很可惜。决
   
 4.配置数据库：<br/>
  在项目文件夹db目录下。里面已经配置好了用户。biadmin/123456<br/>
+ 如果java_home环境变量需要设置：
+ export JAVA_HOME=/usr/java/jdk1.7.0_67-cloudera  
+ export PATH=$JAVA_HOME/bin:$PATH
   
 5.编译源码：<br/>
   * 修改项目下resources目录下的env.sh中的java_home位置，指向A,B,C三台主机上的对应java_home路径。<br/>
   * 修改web工程下filter里的prod.properties里的数据库连接，hadoop,hive等配置。<br/>
   * hadoop.home=/usr/lib/hadoop 可以不改变，在对应linux服务器上建软连接的方式指向真正的hadoop lib路径。<br><br/>
+   * ln -s /opt/cloudera/parcels/CDH-5.10.0-1.cdh5.10.0.p0.41/lib/hadoop /usr/lib/hadoop
   * hive.home=/usr/lib/hive配置参考这个方法。<br>
   * zeus的每个节点都需要有这个配置。
   
@@ -52,6 +56,11 @@ zeus操作起来更加方便。对被阿里抛弃的zeus，感觉很可惜。决
   首先启动A,接着B,C，最先启动会作为master。<br/>
   
 7.打开浏览器，输入http://A:8080/zeus-web/login.do 输入biadmin/123456，就可以体验zeus了。<br/>
+
+8.master-A启动后，会在zeus_lock表里插入一条记录，标识自己是master.
+worker-B启动后，会判断zeus_lock表里是否有记录，如果有记录，就像master注册自己。不然插入记录，标识自己是master。
+worker-C跟worker-B一样。
+在master分配任务的时候，会在zeus_host_group，zeus_host_relation中遍历host,选择注册表里活跃的host作为worker,执行任务。
 
 版本
 ----
@@ -90,6 +99,7 @@ zeus操作起来更加方便。对被阿里抛弃的zeus，感觉很可惜。决
         16.zeus没有补跑action的原因是 Master里有清理scheduler的模块，小于当前时间往前追15分钟的actionId会被清理掉。<br>
         17.手动触发后，在运行日志中可以看到两个实例，一条是手动触发的，如果执行成功后，状态一直保持成running，而原来的实例会变成success。<br>
         18.每一个小时，会进行漏跑检测。<br>
+<<<<<<< HEAD
       19.启动后，每60秒钟扫描一次zeus_lock表，尝试更新记录，谁占有记录，谁就是master.<br>
         20.开发中心->同步任务的功能是把当前打开的文件中的内容，选择的hostGroupId，owner跟新到调度中心的一个任务里，替换里面的内容。
 前端调用的rpc地址，
@@ -121,6 +131,37 @@ JobService|getHostGroupNameById
 点击小目录后
 group.rpc,GroupService|getUpstreamGroup
 
+=======
+        19.启动后，每60秒钟扫描一次zeus_lock表，尝试更新记录，谁占有记录，谁就是master.<br>
+        20.zeus的任务依赖是跟随最小的父节点的周期的，例如，C是依赖任务，依赖A,B,A是每半小时调度一次，B是每小时调度一次，
+        那么C会跟随A的节奏，每半小时调度一次。
+        21.${zdt.format("yyyyMMdd")} 昨日时间：${zdt.addDay(-1).format("yyyyMMdd hh:mm:ss")},
+        ${yesterday}会被替换成昨天的日期，格式是yyyyMMdd，是任务时间的昨天。
+        22.http://ip:port/zeus-web/dump.do查看任务状态
+        23.任务失败后，会发送给重要联系人，然后是job本身的owner，最后是关注者。
+        24.定制Home页面<br/>
+           1.在开发中心创建一个文档，纪录下该文档的id<br/>
+           2.进入代码  com.taobao.zeus.web.platform.client.util.GWTEnvironment 将id填入相应TODO中(多环境下需要考虑环境判断)<br/>
+           3.重新部署代码发布<br/>
+           4.动态修改文档中心文件，即可实时修改此处内容,此内容支持html格式<br/>
+
+migu修改地方
+1.biadmin作为zeus管理员，zeus服务启动用户；
+2.所有用户都是通过biadmin sudo -u hadoop的方式提交shell,hive的。
+3.部署的机器上，hadoop都配置了kerberos信息。
+4.biadmin也需要配置kerberos，这样才能访问hive元数据库。
+5.zeus节点上有/mnt/sdb1/zeus/temp,/mnt/sdb1/zeus/job_dir,/mnt/sdb1/zeus/logs
+hadoop.home=/usr/lib/hadoop
+hadoop.conf.dir=/etc/hadoop/conf
+hive.home=/usr/lib/hive
+hive.conf.dir=/etc/hive/conf
+kerberos.auth=true
+kerberos.user=hadoop
+6.在HiveJob类中，填写hive udf的定义语句。请在此处填写udf文件对应的文档id,当前文档Id是121
+7.执行时长超过12个小时的任务，置为失败。
+
+需要注意防止重复手动提交任务。插入重复数据的问题。
+>>>>>>> migu
 
 ##志同道合的朋友可以联系我
 --

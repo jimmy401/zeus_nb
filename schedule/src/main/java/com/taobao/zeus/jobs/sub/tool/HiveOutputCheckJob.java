@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import com.taobao.zeus.broadcast.alarm.MailAlarm;
 import com.taobao.zeus.dal.logic.TableManager;
 import com.taobao.zeus.dal.logic.impl.CliTableManager;
 import com.taobao.zeus.dal.tool.HDFSManager;
@@ -17,7 +18,6 @@ import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.springframework.context.ApplicationContext;
 
-import com.taobao.zeus.broadcast.alarm.ZeusAlarm;
 import com.taobao.zeus.jobs.AbstractJob;
 import com.taobao.zeus.jobs.JobContext;
 import com.taobao.zeus.jobs.sub.conf.ConfUtil;
@@ -30,7 +30,7 @@ public class HiveOutputCheckJob extends AbstractJob {
 	private HiveProcesser processer;
 	private List<String> tableNames;
 	private Integer percent;
-	private ZeusAlarm wangWangAlarm;
+	private MailAlarm mailAlarm;
 	Integer exitCode = 0;
 	private Configuration conf;
 
@@ -40,8 +40,8 @@ public class HiveOutputCheckJob extends AbstractJob {
 			final HiveProcesser p, final ApplicationContext applicationContext)
 			throws Exception {
 		super(jobContext);
-		this.wangWangAlarm = (ZeusAlarm) applicationContext
-				.getBean("wangWangAlarm");
+		this.mailAlarm = (MailAlarm) applicationContext
+				.getBean("mailAlarm");
 		conf = ConfUtil.getDefaultCoreSite();
 		this.tableManager = new CliTableManager(conf);
 		this.processer = p;
@@ -199,7 +199,7 @@ public class HiveOutputCheckJob extends AbstractJob {
 	private void tableFailed(final String msg) throws Exception {
 		exitCode = -1;
 		log(msg + " 发出报警");
-		wangWangAlarm.alarm(jobContext.getJobHistory().getId(),
+		mailAlarm.alarm(jobContext.getJobHistory().getId(),
 				"Zeus任务产出分区检查报警", msg);
 	}
 

@@ -99,10 +99,10 @@
         #{id,jdbcType=BIGINT},
       </if>
       <if test="gmtCreate != null" >
-        #{gmtCreate,jdbcType=TIMESTAMP},
+        #{gmtCreate,jdbcType=VARCHAR},
       </if>
       <if test="gmtModified != null" >
-        #{gmtModified,jdbcType=TIMESTAMP},
+        #{gmtModified,jdbcType=VARCHAR},
       </if>
       <if test="targetId != null" >
         #{targetId,jdbcType=BIGINT},
@@ -122,10 +122,10 @@
     update zeus_follow
     <set >
       <if test="gmtCreate != null" >
-        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+        gmt_create = #{gmtCreate,jdbcType=VARCHAR},
       </if>
       <if test="gmtModified != null" >
-        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+        gmt_modified = #{gmtModified,jdbcType=VARCHAR},
       </if>
       <if test="targetId != null" >
         target_id = #{targetId,jdbcType=BIGINT},

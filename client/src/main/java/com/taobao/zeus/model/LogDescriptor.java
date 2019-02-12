@@ -16,7 +16,52 @@ public class LogDescriptor implements Serializable{
 	private String delegate;
 	private String method;
 	private String description;
-	
+	private int status;
+	private String checkUid;
+	private String checkTime;
+	private String oldScript;
+	private String newScript;
+
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	public String getCheckUid() {
+		return checkUid;
+	}
+
+	public void setCheckUid(String checkUid) {
+		this.checkUid = checkUid;
+	}
+
+	public String getCheckTime() {
+		return checkTime;
+	}
+
+	public void setCheckTime(String checkTime) {
+		this.checkTime = checkTime;
+	}
+
+	public String getOldScript() {
+		return oldScript;
+	}
+
+	public void setOldScript(String oldScript) {
+		this.oldScript = oldScript;
+	}
+
+	public String getNewScript() {
+		return newScript;
+	}
+
+	public void setNewScript(String newScript) {
+		this.newScript = newScript;
+	}
+
 	public Long getId() {
 		return id;
 	}

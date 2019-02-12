@@ -53,10 +53,10 @@
       and job_id = #{actionId,jdbcType=BIGINT}
     </if>
     <if test="gmtCreate != null">
-      and gmt_create = #{gmtCreate,jdbcType=TIMESTAMP}
+      and gmt_create = #{gmtCreate,jdbcType=VARCHAR}
     </if>
     <if test="gmtModified != null">
-      and gmt_modified = #{gmtModified,jdbcType=TIMESTAMP}
+      and gmt_modified = #{gmtModified,jdbcType=VARCHAR}
     </if>
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
@@ -189,7 +189,7 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
       operator, gmt_create, gmt_modified, 
       trigger_type, status, illustrate, 
       properties, statis_end_time, timezone, 
-      host_group_id, cycle, log
+      host_group_id, cycle, log,script
       )
     values (#{id,jdbcType=BIGINT}, #{actionId,jdbcType=BIGINT}, #{actionId,jdbcType=BIGINT},
       #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, #{executeHost,jdbcType=VARCHAR}, 
@@ -197,6 +197,7 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
       #{triggerType,jdbcType=INTEGER}, #{status,jdbcType=VARCHAR}, #{illustrate,jdbcType=VARCHAR}, 
       #{properties,jdbcType=VARCHAR}, #{statisEndTime,jdbcType=TIMESTAMP}, #{timezone,jdbcType=VARCHAR}, 
       #{hostGroupId,jdbcType=INTEGER}, #{cycle,jdbcType=VARCHAR}, #{log,jdbcType=LONGVARCHAR}
+      , #{script,jdbcType=LONGVARCHAR}
       )
   </insert>
   <insert id="insertSelective" parameterType="com.taobao.zeus.dal.model.ZeusActionHistory">
@@ -256,6 +257,9 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
       <if test="log != null">
         log,
       </if>
+      <if test="script != null">
+        script,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -280,10 +284,10 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
         #{operator,jdbcType=VARCHAR},
       </if>
       <if test="gmtCreate != null">
-        #{gmtCreate,jdbcType=TIMESTAMP},
+        #{gmtCreate,jdbcType=VARCHAR},
       </if>
       <if test="gmtModified != null">
-        #{gmtModified,jdbcType=TIMESTAMP},
+        #{gmtModified,jdbcType=VARCHAR},
       </if>
       <if test="triggerType != null">
         #{triggerType,jdbcType=INTEGER},
@@ -312,6 +316,9 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
       <if test="log != null">
         #{log,jdbcType=LONGVARCHAR},
       </if>
+      <if test="script != null">
+        #{script,jdbcType=LONGVARCHAR},
+      </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.taobao.zeus.dal.model.ZeusActionHistory">
@@ -336,10 +343,10 @@ where status='success' and trigger_type=1 and to_days(#{startDate,jdbcType=TIMES
         operator = #{operator,jdbcType=VARCHAR},
       </if>
       <if test="gmtCreate != null">
-        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+        gmt_create = #{gmtCreate,jdbcType=VARCHAR},
       </if>
       <if test="gmtModified != null">
-        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+        gmt_modified = #{gmtModified,jdbcType=VARCHAR},
       </if>
       <if test="triggerType != null">
         trigger_type = #{triggerType,jdbcType=INTEGER},

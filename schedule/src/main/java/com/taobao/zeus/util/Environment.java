@@ -24,8 +24,10 @@ public class Environment {
 	private static String scheduleGroup;
 	
 	private static String hadoopHome;
-	private static String hadoopConfDir;
+	private static String hadoopConfDir;//需要跟prod.properties里的配置保持一致
+	//private static String hadoopConfDir="/etc/hadoop/conf";//需要跟prod.properties里的配置保持一致
 	private static String hiveHome;
+	//private static String hiveConfDir="/etc/hive/conf";
 	private static String hiveConfDir;
 	private static String host;
 	private static String port;
@@ -44,10 +46,16 @@ public class Environment {
     private static Integer scanRate = Integer.valueOf(3000);
     private static Integer scanExceptionRate = Integer.valueOf(3000);
     private static Integer zeusWorkerTasksMax = Integer.valueOf(5);
+    private static String kerberosAuth="false";
+    private static String kerberosUser="hadoop";
+    private static String zeusTempWorkPath="/tmp/zeus/";
+    private static String zeusSafeDeleteDir="/tmp/zeus/";
+    private static String hiveBeelineShell="hive ";
 	
     public Environment(String env,String scheduleGroup,String downloadPath,String hadoopHome,String hadoopConfDir,String hiveHome,String hiveConfDir,
 			String host,String port,String username,String password,String sendFrom,String notifyUrl,String accessToken,String excludeFile, String defaultWorkerGroupId, String defaultMasterGroupId
-			,String maxMemRate, String maxCpuLoadPerCore, String scanRate,String scanExceptionRate,String zeusWorkerTasksMax){
+			,String maxMemRate, String maxCpuLoadPerCore, String scanRate,String scanExceptionRate,String zeusWorkerTasksMax
+	,String kerberosAuth,String kerberosUser,String zeusTempWorkPath,String zeusSafeDeleteDir,String hiveBeelineShell){
 		Environment.env=env.trim();
 		Environment.scheduleGroup=scheduleGroup.trim();
 		Environment.downloadPath=downloadPath.trim();
@@ -69,6 +77,11 @@ public class Environment {
 		Environment.excludeFile=excludeFile.trim();
 		Environment.defaultWorkerGroupId=defaultWorkerGroupId.trim();
 		Environment.defaultMasterGroupId=defaultMasterGroupId.trim();
+		Environment.kerberosAuth=kerberosAuth;
+		Environment.kerberosUser=kerberosUser;
+		Environment.zeusTempWorkPath=zeusTempWorkPath;
+		Environment.zeusSafeDeleteDir=zeusSafeDeleteDir;
+		Environment.hiveBeelineShell=hiveBeelineShell;
 		try {
 			Environment.maxMemRate=Float.valueOf(maxMemRate.trim());
 		} catch (Exception e) {
@@ -116,6 +129,11 @@ public class Environment {
 		log.info("the scanRate is " + scanRate.trim().toString());
 		log.info("the scanExceptionRate is " + scanExceptionRate.trim().toString());
 		log.info("the zeusWorkerTasksMax is " + zeusWorkerTasksMax.trim().toString());
+		log.info("the kerberosAuth is " + kerberosAuth);
+		log.info("the kerberosUser is " + kerberosUser);
+		log.info("the zeusTempWorkPath is " + zeusTempWorkPath);
+		log.info("the zeusSafeDeleteDir is " + zeusSafeDeleteDir);
+		log.info("the hiveBeelineShell is " + hiveBeelineShell);
 	}
 	
 	public static String getNotifyUrl() {
@@ -230,5 +248,45 @@ public class Environment {
 
 	public static void setZeusWorkerTasksMax(Integer zeusWorkerTasksMax) {
 		Environment.zeusWorkerTasksMax = zeusWorkerTasksMax;
+	}
+
+	public static Boolean getKerberosAuth() {
+		return kerberosAuth.equalsIgnoreCase("true");
+	}
+
+	public static void setKerberosAuth(String kerberosAuth) {
+		Environment.kerberosAuth = kerberosAuth;
+	}
+
+	public static String getKerberosUser() {
+		return kerberosUser;
+	}
+
+	public static void setKerberosUser(String kerberosUser) {
+		Environment.kerberosUser = kerberosUser;
+	}
+
+	public static String getZeusTempWorkPath() {
+		return zeusTempWorkPath;
+	}
+
+	public static void setZeusTempWorkPath(String zeusTempWorkPath) {
+		Environment.zeusTempWorkPath = zeusTempWorkPath;
+	}
+
+	public static String getZeusSafeDeleteDir() {
+		return zeusSafeDeleteDir;
+	}
+
+	public static void setZeusSafeDeleteDir(String zeusSafeDeleteDir) {
+		Environment.zeusSafeDeleteDir = zeusSafeDeleteDir;
+	}
+
+	public static String getHiveBeelineShell() {
+		return hiveBeelineShell;
+	}
+
+	public static void setHiveBeelineShell(String hiveBeelineShell) {
+		Environment.hiveBeelineShell = hiveBeelineShell;
 	}
 }

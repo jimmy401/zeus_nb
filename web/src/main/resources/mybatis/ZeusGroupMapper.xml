@@ -44,10 +44,10 @@
       and existed = #{existed,jdbcType=INTEGER}
     </if>
     <if test="gmtCreate != null">
-      and gmt_create = #{gmtCreate,jdbcType=TIMESTAMP}
+      and gmt_create = #{gmtCreate,jdbcType=VARCHAR}
     </if>
     <if test="gmtModified != null">
-      and gmt_modified = #{gmtModified,jdbcType=TIMESTAMP}
+      and gmt_modified = #{gmtModified,jdbcType=VARCHAR}
     </if>
   </sql>
   <select id="selectByParams" parameterType="java.util.Map" resultMap="ResultMapWithBLOBs">
@@ -75,7 +75,7 @@
     <include refid="Blob_Column_List" />
     from zeus_group
     <![CDATA[
-    where gmt_modified > #{gmtModified,jdbcType=TIMESTAMP}
+    where gmt_modified > #{gmtModified,jdbcType=VARCHAR}
     ]]>
   </select>
   <select id="selectFirstOne" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer" >
@@ -175,10 +175,10 @@
         #{directory,jdbcType=INTEGER},
       </if>
       <if test="gmtCreate != null" >
-        #{gmtCreate,jdbcType=TIMESTAMP},
+        #{gmtCreate,jdbcType=VARCHAR},
       </if>
       <if test="gmtModified != null" >
-        #{gmtModified,jdbcType=TIMESTAMP},
+        #{gmtModified,jdbcType=VARCHAR},
       </if>
       <if test="name != null" >
         #{name,jdbcType=VARCHAR},
@@ -210,10 +210,10 @@
         directory = #{directory,jdbcType=INTEGER},
       </if>
       <if test="gmtCreate != null" >
-        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+        gmt_create = #{gmtCreate,jdbcType=VARCHAR},
       </if>
       <if test="gmtModified != null" >
-        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+        gmt_modified = #{gmtModified,jdbcType=VARCHAR},
       </if>
       <if test="name != null" >
         name = #{name,jdbcType=VARCHAR},

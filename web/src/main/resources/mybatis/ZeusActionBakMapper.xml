@@ -31,7 +31,7 @@
     <result column="statis_start_time" jdbcType="TIMESTAMP" property="statisStartTime" />
     <result column="status" jdbcType="VARCHAR" property="status" />
     <result column="timezone" jdbcType="VARCHAR" property="timezone" />
-    <result column="job_id" jdbcType="BIGINT" property="actionId" />
+    <result column="job_id" jdbcType="BIGINT" property="jobId" />
     <result column="store_time" jdbcType="TIMESTAMP" property="storeTime" />
   </resultMap>
   <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.taobao.zeus.dal.model.ZeusActionBakWithBLOBs">
@@ -82,7 +82,7 @@
       #{postProcessers,jdbcType=VARCHAR}, #{preProcessers,jdbcType=VARCHAR}, #{readyDependency,jdbcType=VARCHAR}, 
       #{runType,jdbcType=VARCHAR}, #{scheduleType,jdbcType=INTEGER}, #{startTime,jdbcType=TIMESTAMP}, 
       #{startTimestamp,jdbcType=BIGINT}, #{statisEndTime,jdbcType=TIMESTAMP}, #{statisStartTime,jdbcType=TIMESTAMP}, 
-      #{status,jdbcType=VARCHAR}, #{timezone,jdbcType=VARCHAR}, #{actionId,jdbcType=BIGINT},
+      #{status,jdbcType=VARCHAR}, #{timezone,jdbcType=VARCHAR}, #{jobId,jdbcType=BIGINT},
       #{storeTime,jdbcType=TIMESTAMP}, #{configs,jdbcType=LONGVARCHAR}, #{resources,jdbcType=LONGVARCHAR}
       )
   </insert>
@@ -176,7 +176,7 @@
       <if test="timezone != null">
         timezone,
       </if>
-      <if test="actionId != null">
+      <if test="jobId != null">
         job_id,
       </if>
       <if test="storeTime != null">
@@ -209,10 +209,10 @@
         #{descr,jdbcType=VARCHAR},
       </if>
       <if test="gmtCreate != null">
-        #{gmtCreate,jdbcType=TIMESTAMP},
+        #{gmtCreate,jdbcType=VARCHAR},
       </if>
       <if test="gmtModified != null">
-        #{gmtModified,jdbcType=TIMESTAMP},
+        #{gmtModified,jdbcType=VARCHAR},
       </if>
       <if test="groupId != null">
         #{groupId,jdbcType=INTEGER},
@@ -277,8 +277,8 @@
       <if test="timezone != null">
         #{timezone,jdbcType=VARCHAR},
       </if>
-      <if test="actionId != null">
-        #{actionId,jdbcType=BIGINT},
+      <if test="jobId != null">
+        #{jobId,jdbcType=BIGINT},
       </if>
       <if test="storeTime != null">
         #{storeTime,jdbcType=TIMESTAMP},
@@ -310,10 +310,10 @@
         descr = #{descr,jdbcType=VARCHAR},
       </if>
       <if test="gmtCreate != null">
-        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+        gmt_create = #{gmtCreate,jdbcType=VARCHAR},
       </if>
       <if test="gmtModified != null">
-        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+        gmt_modified = #{gmtModified,jdbcType=VARCHAR},
       </if>
       <if test="groupId != null">
         group_id = #{groupId,jdbcType=INTEGER},
@@ -378,8 +378,8 @@
       <if test="timezone != null">
         timezone = #{timezone,jdbcType=VARCHAR},
       </if>
-      <if test="actionId != null">
-        job_id = #{actionId,jdbcType=BIGINT},
+      <if test="jobId != null">
+        job_id = #{jobId,jdbcType=BIGINT},
       </if>
       <if test="storeTime != null">
         store_time = #{storeTime,jdbcType=TIMESTAMP},
@@ -423,7 +423,7 @@
       statis_start_time = #{statisStartTime,jdbcType=TIMESTAMP},
       status = #{status,jdbcType=VARCHAR},
       timezone = #{timezone,jdbcType=VARCHAR},
-      job_id = #{actionId,jdbcType=BIGINT},
+      job_id = #{jobId,jdbcType=BIGINT},
       store_time = #{storeTime,jdbcType=TIMESTAMP},
       configs = #{configs,jdbcType=LONGVARCHAR},
       resources = #{resources,jdbcType=LONGVARCHAR}
@@ -459,7 +459,7 @@
       statis_start_time = #{statisStartTime,jdbcType=TIMESTAMP},
       status = #{status,jdbcType=VARCHAR},
       timezone = #{timezone,jdbcType=VARCHAR},
-      job_id = #{actionId,jdbcType=BIGINT},
+      job_id = #{jobId,jdbcType=BIGINT},
       store_time = #{storeTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=BIGINT}
   </update>

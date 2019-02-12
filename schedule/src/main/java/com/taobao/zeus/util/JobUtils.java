@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.taobao.zeus.dal.logic.GroupManagerWithJob;
+import com.taobao.zeus.jobs.sub.HiveBeelineJob;
 import org.apache.commons.lang.StringUtils;
 import org.mortbay.log.Log;
 import org.springframework.context.ApplicationContext;

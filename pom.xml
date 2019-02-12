@@ -17,7 +17,7 @@
     <name>Zeus</name>
 	<properties>
 		<warExplodedDirectory>target/exploded/${project.artifactId}.war</warExplodedDirectory>
-		<java.version>1.8</java.version>
+		<java.version>1.7</java.version>
 		<springext-plugin-version>1.0</springext-plugin-version>
 		<java.encoding>UTF-8</java.encoding>
 		<jetty-version>6.1.22</jetty-version>
@@ -180,8 +180,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>

@@ -1,6 +1,9 @@
 package com.taobao.zeus.dal.model;
 
+import org.quartz.CronExpression;
+
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.Date;
 
 public class ZeusAction  implements Serializable {
@@ -64,6 +67,27 @@ public class ZeusAction  implements Serializable {
     private String timezone;
 
     private Long jobId;
+
+    /**
+     * 获取Cron表达式的执行周期
+     * 现在暂不支持范围性任务的周期解析:* 10,20,30 12 * * ?
+     *            cron表达式
+     * @return 执行周期（秒）
+     * @throws ParseException
+     */
+    public int getCronExcuteCycle() {
+        int excute_cycle = 1000000000;
+        try {
+            CronExpression cExpression = new CronExpression(cronExpression);
+            Date now_time = new Date();
+            Date firstTime = cExpression.getNextValidTimeAfter(now_time);
+            Date nextTime = cExpression.getNextValidTimeAfter(firstTime);
+            excute_cycle = (int)((nextTime.getTime() - firstTime.getTime())/1000);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return excute_cycle;
+    }
 
     public Long getId() {
         return id;

@@ -1,47 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 package com.taobao.zeus.web.platform.client.module.jobdisplay;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
 import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ListStore;
@@ -50,20 +8,16 @@ import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.AutoProgressMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
-import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.FieldLabel;
 import com.sencha.gxt.widget.core.client.info.Info;
-import com.taobao.zeus.web.platform.client.module.jobdisplay.group.GroupPresenter;
 import com.taobao.zeus.web.platform.client.module.jobdisplay.job.JobPresenter;
-import com.taobao.zeus.web.platform.client.module.jobmanager.GroupModel;
-import com.taobao.zeus.web.platform.client.module.jobmanager.JobModel;
 import com.taobao.zeus.web.platform.client.util.RPCS;
-import com.taobao.zeus.web.platform.client.util.ZUser;
 import com.taobao.zeus.web.platform.client.util.async.AbstractAsyncCallback;
+
+import java.util.*;
 
 public class ChooseConfigWindow extends Window{
 
