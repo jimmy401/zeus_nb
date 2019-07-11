@@ -9,4 +9,8 @@ public class JobConfig {
     public static final String ENCRYPTION = "zeus.secret.script";
     public static final String MAX_TIME= "zeus.job.maxtime";
     public static final String POSITIVE_INTEGER = "^[0-9]*[1-9][0-9]*$";
+
+    public static final String MapReduce = "mapreduce";
+    public static final String SHELL = "shell";
+    public static final String HIVE = "hive";
 }

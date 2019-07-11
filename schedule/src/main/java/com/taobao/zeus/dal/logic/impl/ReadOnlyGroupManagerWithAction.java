@@ -7,6 +7,7 @@ import com.taobao.zeus.dal.mapper.ZeusGroupMapper;
 import com.taobao.zeus.dal.mapper.ZeusJobMapper;
 import com.taobao.zeus.dal.model.*;
 import com.taobao.zeus.dal.tool.*;
+import com.taobao.zeus.model.FileResource;
 import com.taobao.zeus.model.GroupDescriptor;
 import com.taobao.zeus.model.JobDescriptor;
 import com.taobao.zeus.model.JobDescriptor.JobRunType;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
+import javax.annotation.processing.Filer;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -678,21 +680,6 @@ public class ReadOnlyGroupManagerWithAction {
 		}
 
 		@Override
-		public List<Map<String, String>> getResources() {
-			List<Map<String, String>> list=gd.getResources();
-			List<Map<String, String>> result=new ArrayList<Map<String,String>>();
-			for(Map<String, String> map:list){
-				result.add(new HashMap<String, String>(map));
-			}
-			return result;
-		}
-
-		@Override
-		public void setResources(List<Map<String, String>> resources) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
 		public void setId(String id) {
 			throw new UnsupportedOperationException();
 		}
@@ -725,15 +712,7 @@ public class ReadOnlyGroupManagerWithAction {
 		public ReadOnlyJobDescriptor(JobDescriptor jd){
 			this.jd=jd;
 		}
-		@Override
-		public List<Map<String, String>> getResources() {
-			List<Map<String, String>> list=jd.getResources();
-			List<Map<String, String>> result=new ArrayList<Map<String,String>>();
-			for(Map<String, String> map:list){
-				result.add(new HashMap<String, String>(map));
-			}
-			return result;
-		}
+
 		@Override
 		public String getCronExpression() {
 			return jd.getCronExpression();
@@ -831,7 +810,7 @@ public class ReadOnlyGroupManagerWithAction {
 		}
 
 		@Override
-		public void setResources(List<Map<String, String>> resources) {
+		public void setResources(List<FileResource> resources) {
 			throw new UnsupportedOperationException();
 		}
 

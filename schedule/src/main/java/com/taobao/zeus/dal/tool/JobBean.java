@@ -50,7 +50,8 @@ public class JobBean {
 	
 	public List<Map<String, String>> getHierarchyResources(){
 		List<String> existList=new ArrayList<String>();
-		List<Map<String, String>> local=new ArrayList<Map<String,String>>(jobDescriptor.getResources());
+		List<Map<String, String>> local = new ArrayList<>();
+		/*List<Map<String, String>> local=new ArrayList<Map<String,String>>(jobDescriptor.getResources());
 		if(local==null){
 			local=new ArrayList<Map<String,String>>();
 		}
@@ -67,7 +68,7 @@ public class JobBean {
 					local.add(map);
 				}
 			}
-		}
+		}*/
 		return local;
 	}
 	/**

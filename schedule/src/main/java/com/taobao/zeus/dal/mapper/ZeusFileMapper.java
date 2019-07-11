@@ -24,6 +24,8 @@ public interface ZeusFileMapper {
 
     List<ZeusFile> findByOwner(Map<String,Object> map);
 
+    List<ZeusFile> selectTreeByOwner(Map<String,Object> map);
+
     int updateByPrimaryKeySelective(ZeusFile record);
 
     int updateByPrimaryKeyWithBLOBs(ZeusFile record);

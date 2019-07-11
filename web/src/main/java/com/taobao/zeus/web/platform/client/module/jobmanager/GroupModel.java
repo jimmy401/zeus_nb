@@ -1,5 +1,7 @@
 package com.taobao.zeus.web.platform.client.module.jobmanager;
 
+import com.taobao.zeus.model.FileResource;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,8 +21,8 @@ public class GroupModel implements Serializable{
 	private boolean directory;
 	private Map<String, String> allProperties=new HashMap<String, String>();
 	private Map<String, String> localProperties=new HashMap<String, String>();
-	private List<Map<String, String>> allResources=new ArrayList<Map<String,String>>();
-	private List<Map<String, String>> localResources=new ArrayList<Map<String,String>>();
+	private List<FileResource> allResources=new ArrayList<FileResource>();
+	private List<FileResource> localResources=new ArrayList<FileResource>();
 	private boolean admin;
 	private List<String> admins=new ArrayList<String>();
 	private List<String> follows=new ArrayList<String>();
@@ -78,16 +80,16 @@ public class GroupModel implements Serializable{
 	public void setLocalProperties(Map<String, String> localProperties) {
 		this.localProperties = localProperties;
 	}
-	public List<Map<String, String>> getAllResources() {
+	public List<FileResource> getAllResources() {
 		return allResources;
 	}
-	public void setAllResources(List<Map<String, String>> allResources) {
+	public void setAllResources(List<FileResource> allResources) {
 		this.allResources = allResources;
 	}
-	public List<Map<String, String>> getLocalResources() {
+	public List<FileResource> getLocalResources() {
 		return localResources;
 	}
-	public void setLocalResources(List<Map<String, String>> localResources) {
+	public void setLocalResources(List<FileResource> localResources) {
 		this.localResources = localResources;
 	}
 	public List<String> getAdmins() {

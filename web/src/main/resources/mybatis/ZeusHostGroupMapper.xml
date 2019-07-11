@@ -17,10 +17,12 @@
     <include refid="Base_Column_List" />
     from zeus_host_group
     where id = #{id,jdbcType=INTEGER}
+    and effective=1
   </select>
   <select id="selectAll" resultMap="BaseResultMap" >
     select
     <include refid="Base_Column_List" />
     from zeus_host_group
+    where effective=1
   </select>
 </mapper>

@@ -15,6 +15,6 @@ public class ScheduleCenterController extends BaseController{
 
     @RequestMapping(value = "/schedule_center", method = RequestMethod.GET)
     public ModelAndView homePage(HttpServletResponse response) throws Exception {
-        return new ModelAndView("schedulecenter");
+        return new ModelAndView("developcenter");
     }
 }

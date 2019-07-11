@@ -1,7 +1,9 @@
 package com.taobao.zeus.dal.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class ZeusFile implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -26,6 +28,12 @@ public class ZeusFile implements Serializable {
     private Integer hostGroupId;
 
     private String content;
+
+    private Integer category;
+
+    private String text;
+
+    private List<ZeusFile> children = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -97,5 +105,29 @@ public class ZeusFile implements Serializable {
 
     public void setContent(String content) {
         this.content = content == null ? null : content.trim();
+    }
+
+    public Integer getCategory() {
+        return category;
+    }
+
+    public void setCategory(Integer category) {
+        this.category = category;
+    }
+
+    public String getText() {
+        return this.getName();
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public List<ZeusFile> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<ZeusFile> children) {
+        this.children = children;
     }
 }

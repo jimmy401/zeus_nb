@@ -67,7 +67,7 @@ public class LoginFilter implements Filter {
 		HttpServletResponse httpResponse=(HttpServletResponse)response;
 		httpResponse.setCharacterEncoding("utf-8");
 		String uri=httpRequest.getRequestURI();
-log.info("request url : " + uri);
+        log.info("request url : " + uri);
 		//线上服务器检测
 
 		if(uri.equals("/zeus.check")){
@@ -77,20 +77,17 @@ log.info("request url : " + uri);
 
 		ZeusUser zeusUser=null;
 
-		if(uri.endsWith(".taobao") || uri.endsWith(".js") || uri.endsWith(".css") || uri.endsWith(".gif") ||
-				uri.endsWith(".jpg") || uri.endsWith(".png") || uri.endsWith(".do")|| uri.endsWith(".jsp")||
-				uri.endsWith("loginold.html")||uri.endsWith("loginold.html")|| uri.endsWith("userInfo.html")|| uri.endsWith("userEdit.html")||
+		if(uri.endsWith(".js") || uri.endsWith(".css") || uri.endsWith(".gif") ||
+				uri.endsWith(".jpg") || uri.endsWith(".png") || uri.endsWith(".jsp")||
 				uri.endsWith(".ico")||uri.endsWith("logon")||uri.endsWith("login")){
 			chain.doFilter(request, response);
 			return;
 		}
 
-		String uid= CurrentUser.getUser().getUid();
-
-
-		if(null!=uid){//如果存在session
+		if(null!=CurrentUser.getUser()){//如果存在session
 			Boolean check = false;
 			Cookie[] cookies = httpRequest.getCookies();
+			String uid= CurrentUser.getUser().getUid();
             for(Cookie c :cookies ){
             	if(c.getName().equals("LOGIN_USERNAME")){
             		if(c.getValue().equals(uid)){
@@ -104,12 +101,12 @@ log.info("request url : " + uri);
 
             }
            if(!check){
-			   httpResponse.sendRedirect("/zeus-web/login.do");
+			   httpResponse.sendRedirect("/zeus-web/login");
         	   return;
            }
 
 		}else{//不存在user
-			 httpResponse.sendRedirect("/zeus-web/login.do");
+			 httpResponse.sendRedirect("/zeus-web/login");
 			 return;
 		}
 

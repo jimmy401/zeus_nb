@@ -7,6 +7,9 @@ import java.util.List;
 public interface FileManager {
 	String PERSONAL="个人文档";
 	String SHARE="共享文档";
+
+	Integer PERSON = 1;
+	Integer PUBLIC = 2;
 	/**
 	 * 添加文件/文件夹
 	 * @param file

@@ -1,9 +1,7 @@
 package com.taobao.zeus.web.controller;
 
-import com.sun.deploy.util.StringUtils;
 import com.taobao.zeus.client.ZeusException;
 import com.taobao.zeus.dal.logic.FollowManagerWithJob;
-import com.taobao.zeus.dal.logic.JobHistoryManager;
 import com.taobao.zeus.dal.logic.PermissionManager;
 import com.taobao.zeus.dal.logic.UserManager;
 import com.taobao.zeus.dal.logic.impl.ReadOnlyGroupManagerWithJob;
@@ -11,14 +9,14 @@ import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.dal.tool.GroupBean;
 import com.taobao.zeus.model.GroupDescriptor;
 import com.taobao.zeus.model.ZeusFollow;
+import com.taobao.zeus.web.common.CurrentUser;
 import com.taobao.zeus.web.controller.response.CommonResponse;
 import com.taobao.zeus.web.controller.response.ReturnCode;
 import com.taobao.zeus.web.platform.client.module.jobmanager.GroupModel;
-import com.taobao.zeus.web.platform.client.util.GwtException;
 import com.taobao.zeus.web.platform.client.util.ZUser;
 import com.taobao.zeus.web.util.LoginUser;
 import com.taobao.zeus.web.util.PermissionGroupManagerWithJob;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,11 +37,6 @@ public class GroupController extends BaseController{
 
     @Autowired
     private ReadOnlyGroupManagerWithJob readOnlyGroupManagerWithJob;
-    @Autowired
-    private FollowManagerWithJob followManagerWithJob;
-    @Autowired
-    private JobHistoryManager jobHistoryManager;
-
     @Autowired
     private PermissionGroupManagerWithJob permissionGroupManagerWithJob;
     @Autowired
@@ -76,7 +69,7 @@ public class GroupController extends BaseController{
             model.setOwnerName(ownerName);
             model.setParent(gd.getParent());
             model.setAllProperties(bean.getHierarchyProperties().getAllProperties());
-            model.setAdmin(permissionGroupManagerWithJob.hasGroupPermission(LoginUser.getUser().getUid(), groupId));
+            model.setAdmin(permissionGroupManagerWithJob.hasGroupPermission(CurrentUser.getUser().getUid(), groupId));
             List<ZeusFollow> follows = followManager.findGroupFollowers(Arrays.asList(groupId));
             if (follows != null) {
                 List<String> followsName = new ArrayList<String>();
@@ -203,7 +196,7 @@ public class GroupController extends BaseController{
         for(ZeusUser zu:users){
             result.add(zu.getName());
         }
-        return this.buildResponse(ReturnCode.SUCCESS, StringUtils.join(result,","));
+        return this.buildResponse(ReturnCode.SUCCESS, StringUtils.join(result.iterator(),","));
     }
 
     @RequestMapping(value = "/get_group_admins", method = RequestMethod.GET)
@@ -218,6 +211,7 @@ public class GroupController extends BaseController{
         }
         return result;
     }
+
     @RequestMapping(value = "/add_group_admins", method = RequestMethod.GET)
     public CommonResponse<Void> addGroupAdmin(@RequestParam(value = "groupId") String groupId,@RequestParam(value = "uid") String uid) {
         try {

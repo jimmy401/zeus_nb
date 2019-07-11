@@ -1,5 +1,6 @@
 package com.taobao.zeus.web.platform.client.module.jobmanager;
 
+import com.taobao.zeus.model.FileResource;
 import com.taobao.zeus.web.common.JobConfig;
 
 import java.io.Serializable;
@@ -26,7 +27,7 @@ public class JobModel implements Serializable {
 	private String owner;
 	private List<String> owners;
 	private String ownerName;
-	private List<Map<String, String>> localResources = new ArrayList<Map<String, String>>();
+	private List<FileResource> localResources = new ArrayList<FileResource>();
 	private List<Map<String, String>> allResources = new ArrayList<Map<String, String>>();
 	private String jobRunType;
 	private String jobScheduleType;
@@ -119,7 +120,7 @@ public class JobModel implements Serializable {
 		model.setJobScheduleType(getJobScheduleType());
 		model.setLocalProperties(new HashMap<String, String>(
 				getLocalProperties()));
-		model.setLocalResources(new ArrayList<Map<String, String>>(
+		model.setLocalResources(new ArrayList<FileResource>(
 				getLocalResources()));
 		model.setName(getName());
 		model.setOwner(getOwner());
@@ -225,11 +226,11 @@ public class JobModel implements Serializable {
 		this.ownerName = ownerName;
 	}
 
-	public List<Map<String, String>> getLocalResources() {
+	public List<FileResource> getLocalResources() {
 		return localResources;
 	}
 
-	public void setLocalResources(List<Map<String, String>> localResources) {
+	public void setLocalResources(List<FileResource> localResources) {
 		this.localResources = localResources;
 	}
 

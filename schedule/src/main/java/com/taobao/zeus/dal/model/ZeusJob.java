@@ -108,6 +108,8 @@ public class ZeusJob  implements Serializable {
      */
     public int getCronExcuteCycle() {
         int excute_cycle = 1000000000;
+        if (cronExpression==null||cronExpression.trim().equalsIgnoreCase(""))
+            return excute_cycle;
         try {
             CronExpression cExpression = new CronExpression(cronExpression);
             Date now_time = new Date();

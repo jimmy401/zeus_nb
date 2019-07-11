@@ -28,25 +28,37 @@
 }
 
 body {
- min-width: 1600px;
- background: #b6b7bc;
- font-family: "Helvetica Neue", "Lucida Grande", "Segoe UI", Arial, Helvetica, Verdana, sans-serif;
  margin: 0px;
  padding: 0px;
 }
 
-.page {
- background-color: #F5F3E5;
- margin: 0px auto 0px auto;
- min-height: 1000px;
+.c_text{
+ font-size: 14px;
+ text-decoration: none;
+ color: #009900;
 }
 
-.loginpage {
- width: 1220px;
- height: 700px;
- background-color: #FEEEBD;
- margin: 50px auto 0px auto;
- border: 1px solid #496077;
+.leftnav{
+ text-decoration:none;
+ display: block;
+ margin-top: 10px;
+ padding: 10px;
+}
+
+.leftbackground{
+ background: #e6e6e6;
+ color: #00438a;
+ -moz-border-radius: 5px 5px 5px 5px;
+ -webkit-border-radius: 5px 5px 5px 5px;
+ border-radius: 5px 5px 5px 5px;
+}
+
+.leftnav:hover {
+ background: #e6e6e6;
+ color: #00438a;
+ -moz-border-radius: 5px 5px 5px 5px;
+ -webkit-border-radius: 5px 5px 5px 5px;
+ border-radius: 5px 5px 5px 5px;
 }
 
 .header {
@@ -57,38 +69,10 @@ body {
  background-color: #FED54E;
 }
 
-.homePageImage {
- position: relative;
- left: 130px;
- top: 20px;
- width: 100px;
-}
-
-.headerImage {
- padding: 20px 0 0 100px;
-}
-
 .headerButton {
  float: right;
  position: relative;
  right: 150px;
- top: 10px;
-}
-
-.loginframe {
- background: #FED54E;
- position: relative;
- top: 150px;
- left: 300px;
- border: 1px solid #CCCCCC;
- height: 200px;
- width: 500px;
-}
-
-.menubutton {
- float: right;
- position: relative;
- right: 15px;
  top: 10px;
 }
 
@@ -103,53 +87,8 @@ body {
 
 .mainContent {
  position: absolute;
- left: 350px;
- top: 120px;
-}
-
-.linkstyle:hover {
- cursor: pointer;
- background-color: #D66C18;
-}
-
-.linkText {
- text-decoration: none;
- font-size: 0.8em;
- color: black;
-}
-
-.clickstyle {
- text-decoration: underline;
-}
-
-.clickstyle:hover {
- cursor: pointer;
-}
-
-.linkLineheight {
- line-height: 30px;
-}
-
-.topmargin {
- margin-top: 20px;
-}
-
-.bottommargin {
- margin-bottom: 20px;
-}
-
-.bordersize {
- border: 1px solid #99BBE8;
-}
-
-table {
- border: 0;
- margin: 0;
- border-collapse: collapse;
-}
-
-table td {
- padding: 5px;
+ left: 150px;
+ top: 42px;
 }
 
 .error {
@@ -157,45 +96,4 @@ table td {
  line-height: 16px;
  position: absolute;
  font-size: 0.8em;
-}
-
-.inputtext {
- width: 200px;
- border: 1px solid #99BBE8;
- padding: 2px;
- margin-top: 10px;
-}
-
-.ftitle {
- font-size: 14px;
- font-weight: bold;
- color: #666;
- padding: 5px 0;
- margin-bottom: 10px;
- border-bottom: 1px solid #ccc;
-}
-
-.fitem {
- 
-}
-
-.fitem label {
- display: inline-block;
- width: 100px;
-}
-
-.borderset {
- border: 1px solid #99BBE8;
-}
-
-.inputSize {
- width: 50px;
-}
-
-.textSize {
- font-size: 12px;
-}
-
-.hide {
- display: none;
 }

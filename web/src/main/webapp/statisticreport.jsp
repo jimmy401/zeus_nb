@@ -12,6 +12,8 @@
 
     <script type="text/javascript" src="newjs/jquery.min.js"></script>
     <script type="text/javascript" src="newjs/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="newjs/jquery.extend.js"></script>
+    <script type="text/javascript" src="newjs/statisticreport.js"></script>
 </head>
 <body>
 <div id="body" class="page" style="position: relative;">

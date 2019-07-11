@@ -201,7 +201,7 @@ public class FileManagerRpcImpl implements FileManagerService {
     public List<FileModel> getCommonFiles(FileModel fm) {
         List<FileModel> result = new ArrayList<FileModel>();
         if (fm == null) {
-            List<ZeusUser> users = userManager.getAllUsers();
+            List<ZeusUser> users = userManager.getAllEffectiveUsers();
             for (ZeusUser zu : users) {
                 //没有公共文档则不返回该用户
                 if (!hasCommonFiles(zu)) {

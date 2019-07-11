@@ -1,14 +1,6 @@
 package com.taobao.zeus.web.controller;
 
-<<<<<<< HEAD
-import com.taobao.zeus.web.common.BusinessException;
-import com.taobao.zeus.web.controller.response.CommonResponse;
-import com.taobao.zeus.web.controller.response.PageResponse;
-import com.taobao.zeus.web.controller.response.ResponseStatus;
-import com.taobao.zeus.web.controller.response.ReturnCode;
-=======
 import com.taobao.zeus.web.controller.response.*;
->>>>>>> migu
 import org.springframework.util.StringUtils;
 
 import java.util.regex.Matcher;
@@ -22,15 +14,8 @@ public class BaseController {
     /**
      * 设置返回状态
      *
-<<<<<<< HEAD
-     * @param status
-     *            返回状态对象
-     * @param returnCode
-     *            返回码
-=======
      * @param status     返回状态对象
      * @param returnCode 返回码
->>>>>>> migu
      */
     protected void setResponseStatus(ResponseStatus status, ReturnCode returnCode) {
         status.setCode(returnCode.getCode());
@@ -40,18 +25,9 @@ public class BaseController {
     /**
      * 设置返回状态
      *
-<<<<<<< HEAD
-     * @param status
-     *            返回状态对象
-     * @param returnCode
-     *            返回码
-     * @param message
-     *            其他信息
-=======
      * @param status     返回状态对象
      * @param returnCode 返回码
      * @param message    其他信息
->>>>>>> migu
      */
     protected void setResponseStatus(ResponseStatus status, ReturnCode returnCode, String message) {
         status.setCode(returnCode.getCode());
@@ -59,18 +35,9 @@ public class BaseController {
     }
 
     /**
-<<<<<<< HEAD
-     * @param code
-     *            错误码
-     * @param data
-     *            返回数据内容
-     * @param <T>
-     *            返回数据类型
-=======
      * @param code 错误码
      * @param data 返回数据内容
      * @param <T>  返回数据类型
->>>>>>> migu
      * @return
      */
     protected <T> CommonResponse<T> buildResponse(ReturnCode code, T data) {
@@ -78,15 +45,8 @@ public class BaseController {
     }
 
     /**
-<<<<<<< HEAD
-     * @param data
-     *            返回数据内容
-     * @param <T>
-     *            返回数据类型
-=======
      * @param data 返回数据内容
      * @param <T>  返回数据类型
->>>>>>> migu
      * @return
      */
     protected <T> CommonResponse<T> buildResponse(T data) {
@@ -94,15 +54,8 @@ public class BaseController {
     }
 
     /**
-<<<<<<< HEAD
-     * @param data
-     *            返回数据内容
-     * @param <T>
-     *            返回数据类型
-=======
      * @param data 返回数据内容
      * @param <T>  返回数据类型
->>>>>>> migu
      * @return
      */
     protected <T> CommonResponse<T> buildResponse(T data, Object properties) {
@@ -110,12 +63,7 @@ public class BaseController {
     }
 
     /**
-<<<<<<< HEAD
-     * @param code
-     *            错误码
-=======
      * @param code 错误码
->>>>>>> migu
      * @return
      */
     protected CommonResponse<Void> buildResponse(ReturnCode code) {
@@ -141,7 +89,7 @@ public class BaseController {
         Pattern pattern = Pattern.compile("1\\d{10}");
         Matcher matcher = pattern.matcher(mobile);
         if (!matcher.matches()) {
-            throw new BusinessException(ReturnCode.MOBILE_ILLEGAL);
+            throw new BusinessException(ReturnCode.INVALID_PARAMETER);
         }
 
         return mobile;
@@ -161,18 +109,9 @@ public class BaseController {
     }
 
     /**
-<<<<<<< HEAD
-     * @param total
-     *            总页数
-     * @param rows
-     *            返回数据内容
-     * @param <T>
-     *            返回数据类型
-=======
      * @param total 总页数
      * @param rows  返回数据内容
      * @param <T>   返回数据类型
->>>>>>> migu
      * @return
      */
     protected <T> PageResponse<T> buildPageResponse(int total, T rows) {
@@ -180,18 +119,9 @@ public class BaseController {
     }
 
     /**
-<<<<<<< HEAD
-     * @param total
-     *            总页数
-     * @param rows
-     *            返回数据内容
-     * @param <T>
-     *            返回数据类型
-=======
      * @param total 总页数
      * @param rows  返回数据内容
      * @param <T>   返回数据类型
->>>>>>> migu
      * @return
      */
     protected <T> PageResponse<T> buildPageResponse(int rank, int total, T rows) {
@@ -199,18 +129,9 @@ public class BaseController {
     }
 
     /**
-<<<<<<< HEAD
-     * @param code
-     *            错误码
-     * @param data
-     *            返回数据内容
-     * @param <T>
-     *            返回数据类型
-=======
      * @param code 错误码
      * @param data 返回数据内容
      * @param <T>  返回数据类型
->>>>>>> migu
      * @return
      */
     protected <T> PageResponse<T> buildPageResponse(ReturnCode code, T rows) {

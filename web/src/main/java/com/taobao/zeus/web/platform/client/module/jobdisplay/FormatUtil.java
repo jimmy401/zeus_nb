@@ -6,10 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.EditorError;
 import com.sencha.gxt.widget.core.client.form.Validator;
 import com.sencha.gxt.widget.core.client.form.error.DefaultEditorError;
+import com.taobao.zeus.model.FileResource;
 
 
 public class FormatUtil {
@@ -25,9 +27,9 @@ public class FormatUtil {
 		return sb.toString();
 	}
 	
-	public static String convertResourcesToEditString(List<Map<String, String>> resources){
-		String s="";
-		for(Map<String, String> map:resources){
+	public static String convertResourcesToEditString(List<FileResource> resources){
+		String s=JSON.toJSONString(resources);
+		/*for(Map<String, String> map:resources){
 			if(map.isEmpty()){
 				continue;
 			}
@@ -38,7 +40,7 @@ public class FormatUtil {
 				s=s.substring(0, s.length()-1);
 			}
 			s+="\n";
-		}
+		}*/
 		return s;
 	}
 	/**
@@ -106,7 +108,8 @@ public class FormatUtil {
 		}
 		return conf;
 	}
-	public static List<Map<String, String>> parseResources(String text){
+	public static List<FileResource> parseResources(String text){
+		List<FileResource> resources = new ArrayList<FileResource>();
 		List<Map<String, String>> res=new ArrayList<Map<String,String>>();
 		if(text!=null){
 			String[] lines=text.split("\n");
@@ -120,6 +123,9 @@ public class FormatUtil {
 				for(String v:vv){
 					String key=v.split(":")[0];
 					String value=v.substring(key.length()+1);
+					FileResource item = new FileResource();
+					item.setName(value);
+					item.setUri(value);
 					map.put(key, value);
 				}
 				if(!map.isEmpty()){
@@ -127,7 +133,7 @@ public class FormatUtil {
 				}
 			}
 		}
-		return res;
+		return resources;
 	}
 	
 	public static Validator<String> propValidator=new Validator<String>() {

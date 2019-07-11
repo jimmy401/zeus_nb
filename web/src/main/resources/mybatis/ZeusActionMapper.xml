@@ -31,7 +31,7 @@
     <result column="statis_start_time" property="statisStartTime" jdbcType="TIMESTAMP" />
     <result column="status" property="status" jdbcType="VARCHAR" />
     <result column="timezone" property="timezone" jdbcType="VARCHAR" />
-    <result column="job_id" property="actionId" jdbcType="BIGINT" />
+    <result column="job_id" property="jobId" jdbcType="BIGINT" />
   </resultMap>
   <resultMap id="ResultMapWithBLOBs" type="com.taobao.zeus.dal.model.ZeusActionWithBLOBs" extends="BaseResultMap" >
     <result column="configs" property="configs" jdbcType="LONGVARCHAR" />
@@ -39,7 +39,7 @@
   </resultMap>
   <resultMap id="StatisticResultMap" type="com.taobao.zeus.dal.model.ZeusJobStatistic" >
     <result column="cnt" property="cnt" jdbcType="INTEGER" />
-    <result column="job_id" property="actionId" jdbcType="BIGINT" />
+    <result column="job_id" property="jobId" jdbcType="BIGINT" />
     <result column="gmt_modified" property="gmtModified" jdbcType="TIMESTAMP" />
   </resultMap>
   <sql id="Base_Column_List" >
@@ -119,7 +119,7 @@
     ,
     <include refid="Blob_Column_List" />
     from zeus_action
-    where job_id = #{actionId,jdbcType=BIGINT}
+    where job_id = #{jobId,jdbcType=BIGINT}
     order by id desc
   </select>
   <select id="selectByActionId" resultMap="ResultMapWithBLOBs" parameterType="java.util.Map" >

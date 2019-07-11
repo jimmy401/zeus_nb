@@ -16,6 +16,7 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.form.FieldLabel;
 import com.sencha.gxt.widget.core.client.form.FieldSet;
+import com.taobao.zeus.model.FileResource;
 import com.taobao.zeus.web.platform.client.module.jobdisplay.AdminConfigWindow;
 import com.taobao.zeus.web.platform.client.module.jobdisplay.CenterTemplate;
 import com.taobao.zeus.web.platform.client.module.jobmanager.GroupModel;
@@ -169,16 +170,16 @@ public class CardInfo extends CenterTemplate implements Refreshable<GroupModel>{
 		
 		
 		sb=new StringBuffer("<div style='font-size:13px'>");
-		for(Map<String, String> record:model.getLocalResources()){
-			sb.append("<p title='"+record.get("uri")+"'>"+record.get("name")+"</p>");
+		for(FileResource record:model.getLocalResources()){
+			sb.append("<p title='"+record.getUri()+"'>"+record.getName()+"</p>");
 		}
 		sb.append("</div>");
 		resourceContent.getElement().setInnerHTML(sb.toString());
 		
 		sb=new StringBuffer("<div style='font-size:13px'>");
-		for(Map<String, String> record:model.getAllResources()){
+		for(FileResource record:model.getAllResources()){
 			if(!model.getLocalResources().contains(record)){
-				sb.append("<p title='"+record.get("uri")+"'>"+record.get("name")+"</p>");
+				sb.append("<p title='"+record.getUri()+"'>"+record.getName()+"</p>");
 			}
 		}
 		sb.append("</div>");

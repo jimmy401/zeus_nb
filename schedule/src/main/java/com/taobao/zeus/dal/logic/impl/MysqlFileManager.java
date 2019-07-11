@@ -13,8 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.*;
 
 @Repository("mysqlFileManager")
-public class MysqlFileManager implements
-        FileManager {
+public class MysqlFileManager implements FileManager {
 
     private static Logger log = LoggerFactory.getLogger(MysqlFileManager.class);
 
@@ -81,7 +80,7 @@ public class MysqlFileManager implements
         List<FileDescriptor> result = new ArrayList<FileDescriptor>();
 
         synchronized (locker) {
-        List<ZeusFile> list = zeusFileMapper.findByOwner(params);
+            List<ZeusFile> list = zeusFileMapper.findByOwner(params);
             if (list == null || list.isEmpty()) {
                 if (list == null) {
                     list = new ArrayList<ZeusFile>();
@@ -90,10 +89,12 @@ public class MysqlFileManager implements
                 personal.setName(PERSONAL);
                 personal.setOwner(uid);
                 personal.setType(ZeusFile.FOLDER);
+                personal.setCategory(PERSON);
                 ZeusFile common = new ZeusFile();
                 common.setName(SHARE);
                 common.setOwner(uid);
                 common.setType(ZeusFile.FOLDER);
+                common.setCategory(PUBLIC);
 
                 zeusFileMapper.insertSelective(personal);
                 zeusFileMapper.insertSelective(common);
@@ -114,12 +115,19 @@ public class MysqlFileManager implements
                 list.add(common);
             }
 
-        if (list != null) {
-            for (ZeusFile fp : list) {
-                result.add(PersistenceAndBeanConvertWithAction.convert(fp));
+            if (list != null) {
+                for (ZeusFile fp : list) {
+                    result.add(PersistenceAndBeanConvertWithAction.convert(fp));
+                }
             }
         }
-        }
+        return result;
+    }
+
+    public List<ZeusFile> getPersonalFiles(String uid) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("owner", uid);
+        List<ZeusFile> result = zeusFileMapper.selectTreeByOwner(params);
         return result;
     }
 

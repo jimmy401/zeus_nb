@@ -1,5 +1,5 @@
+var pwdmin = 6;
 $(function() {
-
 	$('#switch_qlogin').click(
 			function() {
 				$('#switch_login').removeClass("switch_btn_focus").addClass(
@@ -16,7 +16,6 @@ $(function() {
 			});
 	$('#switch_login').click(
 			function() {
-
 				$('#switch_login').removeClass("switch_btn").addClass(
 						'switch_btn_focus');
 				$('#switch_qlogin').removeClass("switch_btn_focus").addClass(
@@ -32,7 +31,173 @@ $(function() {
 	if (getParam("a") == '0') {
 		$('#switch_login').trigger('click');
 	}
+    $("#button").click(function() {
+        var username = $("#username").val();
+        var password = $("#password").val();
+        if (username == "") {
+            $("#username").addClass("has-error");
+            return false;
+        }
+        if (password == "") {
+            $("#password").addClass("has-error");
+            return false;
+        }
+        $.ajax({
+            url : "logon",
+            async : false,
+            data : {
+                username : username,
+                password : password
+            },
+            type : "post",
 
+            error : function(response) {
+                alert("请求发送失败");
+
+            },
+            success : function(response) {
+//								console.log(response);
+                if (response == "null") {
+                    alert("用户名不存在");
+                } else if (response == "error") {
+                    alert("账户错误");
+                } else {
+                    window.location.href = '/zeus-web/homepage.jsp';
+                }
+            }
+        });
+    });
+
+    $("#container input,textarea,select").on(
+        'input propertychange', function(event) {
+            validate(event);
+        });
+    $('#register')
+        .click(
+            function() {
+                var user = $("#user").val();
+                var passwd = $("#passwd").val();
+                var email = $("#email").val();
+                var phone = $("#phone").val();
+                var userType = $('input[name="userTypes"]:checked').val();
+                var description = $("#description").val();
+                if ($('#user').val() == "") {
+                    $('#user').focus().css({
+                        border : "1px solid red",
+                        boxShadow : "0 0 2px red"
+                    });
+                    $('#userCue')
+                        .html(
+                            "<font color='red'><b>×用户名不能为空</b></font>");
+                    return false;
+                }
+
+                if (user.length < 4
+                    || user.length > 16) {
+
+                    $('#user').focus().css({
+                        border : "1px solid red",
+                        boxShadow : "0 0 2px red"
+                    });
+                    $('#userCue')
+                        .html(
+                            "<font color='red'><b>×用户名位4-16字符</b></font>");
+                    return false;
+
+                }
+                //密码验证
+                if (passwd.length < pwdmin) {
+                    $('#passwd').focus();
+                    $('#userCue').html(
+                        "<font color='red'><b>×密码不能小于"
+                        + pwdmin
+                        + "位</b></font>");
+                    return false;
+                }
+                //两次密码验证
+                if ($('#passwd2').val() != $('#passwd')
+                    .val()) {
+                    $('#passwd2').focus();
+                    $('#userCue')
+                        .html(
+                            "<font color='red'><b>×两次密码不一致！</b></font>");
+                    return false;
+                }
+
+                //邮箱验证
+                //var emailPatrn  = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+                var emailPattern = /^([\.a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/;
+                if (!emailPattern.test(email)) {
+                    $('#userCue')
+                        .html(
+                            "<font color='red'><b>×邮件格式不正确！</b></font>");
+                    return false;
+                }
+
+                //手机号码验证
+                var phonePattern=/^[0-9]{1,12}$/;
+                if (!phonePattern.exec(phone)) {
+                    $('#userCue')
+                        .html(
+                            "<font color='red'><b>×手机号码格式不正确！</b></font>");
+                    return false;
+                }
+
+                //申请描述
+                if ($('#description').val() == "") {
+                    $('#description').focus().css({
+                        border : "1px solid red",
+                        boxShadow : "0 0 2px red"
+                    });
+                    $('#userCue')
+                        .html(
+                            "<font color='red'><b>×注册说明信息不能为空</b></font>");
+                    return false;
+                }
+
+                //提交
+                $.ajax({
+                    url : "register",
+                    async : false,
+                    data : {
+                        user : user,
+                        passwd : passwd,
+                        email : email,
+                        phone : phone,
+                        userType : userType,
+                        description : description
+                    },
+                    type : "post",
+
+                    error : function(response) {
+                        alert("请求发送失败");
+
+                    },
+                    success : function(response) {
+//												console.log(response);
+                        if (response == "exist") {
+                            $('#userCue')
+                                .html(
+                                    "<font color='red'><b>警告：用户名已经存在！</b></font>");
+                        } else if (response == "error") {
+                            $('#userCue')
+                                .html(
+                                    "<font color='red'><b>警告：用户注册失败！</b></font>");
+                        } else{
+                            $('#userCue')
+                                .html(
+                                    "<font color='green'><b>用户注册成功！</b></font>");
+                            $("#user").val("");
+                            $("#passwd").val("");
+                            $("#passwd2").val("");
+                            $("#email").val("");
+                            $("#phone").val("");
+                            $("#description").val("");
+                        }
+                    }
+                });
+            });
+    $('#description').myHoverTip('descriptionInfo');
 });
 
 function logintab() {
@@ -121,178 +286,4 @@ $.fn.myHoverTip = function(divId) {
     }  
     );  
     return this;  
-}  
-
-var reMethod = "GET", pwdmin = 6;
-
-$(document)
-		.ready(
-				function() {
-					$("#button").click(function() {
-						var username = $("#username").val();
-						var password = $("#password").val();
-						if (username == "") {
-							$("#username").addClass("has-error");
-							return false;
-						}
-						if (password == "") {
-							$("#password").addClass("has-error");
-							return false;
-						}
-						$.ajax({
-							url : "logon",
-							async : false,
-							data : {
-								username : username,
-								password : password
-							},
-							type : "post",
-
-							error : function(response) {
-								alert("请求发送失败");
-
-							},
-							success : function(response) {
-//								console.log(response);
-								if (response == "null") {
-									alert("用户名不存在");
-								} else if (response == "error") {
-									alert("账户错误");
-								} else {
-									window.location.href = '/zeus-web/home_page';
-								}
-							}
-						});
-					});
-
-					$("#container input,textarea,select").on(
-							'input propertychange', function(event) {
-								validate(event);
-							});
-					$('#register')
-							.click(
-									function() {
-										var user = $("#user").val();
-										var passwd = $("#passwd").val();
-										var email = $("#email").val();
-										var phone = $("#phone").val();
-										var userType = $('input[name="userTypes"]:checked').val();
-										var description = $("#description").val();
-										if ($('#user').val() == "") {
-											$('#user').focus().css({
-												border : "1px solid red",
-												boxShadow : "0 0 2px red"
-											});
-											$('#userCue')
-													.html(
-															"<font color='red'><b>×用户名不能为空</b></font>");
-											return false;
-										}
-
-										if (user.length < 4
-												|| user.length > 16) {
-
-											$('#user').focus().css({
-												border : "1px solid red",
-												boxShadow : "0 0 2px red"
-											});
-											$('#userCue')
-													.html(
-															"<font color='red'><b>×用户名位4-16字符</b></font>");
-											return false;
-
-										}
-										//密码验证
-										if (passwd.length < pwdmin) {
-											$('#passwd').focus();
-											$('#userCue').html(
-													"<font color='red'><b>×密码不能小于"
-															+ pwdmin
-															+ "位</b></font>");
-											return false;
-										}
-										//两次密码验证
-										if ($('#passwd2').val() != $('#passwd')
-												.val()) {
-											$('#passwd2').focus();
-											$('#userCue')
-													.html(
-															"<font color='red'><b>×两次密码不一致！</b></font>");
-											return false;
-										}
-										
-										//邮箱验证
-										//var emailPatrn  = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-										var emailPattern = /^([\.a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/; 
-										if (!emailPattern.test(email)) {
-											$('#userCue')
-											.html(
-													"<font color='red'><b>×邮件格式不正确！</b></font>");
-											return false;
-										}
-										
-										//手机号码验证
-										var phonePattern=/^[0-9]{1,12}$/;
-										if (!phonePattern.exec(phone)) {
-											$('#userCue')
-											.html(
-													"<font color='red'><b>×手机号码格式不正确！</b></font>");
-											return false;
-										}
-										
-										//申请描述
-										if ($('#description').val() == "") {
-											$('#description').focus().css({
-												border : "1px solid red",
-												boxShadow : "0 0 2px red"
-											});
-											$('#userCue')
-													.html(
-															"<font color='red'><b>×注册说明信息不能为空</b></font>");
-											return false;
-										}
-										
-										//提交
-										$.ajax({
-											url : "register",
-											async : false,
-											data : {
-												user : user,
-												passwd : passwd,
-												email : email,
-												phone : phone,
-												userType : userType,
-												description : description
-											},
-											type : "post",
-
-											error : function(response) {
-												alert("请求发送失败");
-
-											},
-											success : function(response) {
-//												console.log(response);
-												if (response == "exist") {
-													$('#userCue')
-													.html(
-															"<font color='red'><b>警告：用户名已经存在！</b></font>");
-												} else if (response == "error") {
-													$('#userCue')
-													.html(
-															"<font color='red'><b>警告：用户注册失败！</b></font>");
-												} else{
-													$('#userCue')
-													.html(
-															"<font color='green'><b>用户注册成功！</b></font>");
-													$("#user").val("");
-													$("#passwd").val("");
-													$("#passwd2").val("");
-													$("#email").val("");
-													$("#phone").val("");
-													$("#description").val("");
-												}
-											}
-										});
-									});
-					$('#description').myHoverTip('descriptionInfo');
-				});
+}

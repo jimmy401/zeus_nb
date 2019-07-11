@@ -29,6 +29,7 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.form.FieldLabel;
 import com.sencha.gxt.widget.core.client.form.FieldSet;
 import com.sencha.gxt.widget.core.client.info.Info;
+import com.taobao.zeus.model.FileResource;
 import com.taobao.zeus.web.platform.client.app.PlacePath;
 import com.taobao.zeus.web.platform.client.app.PlacePath.App;
 import com.taobao.zeus.web.platform.client.app.PlacePath.DocType;
@@ -433,8 +434,8 @@ public class CardInfo extends CenterTemplate implements Refreshable<JobModel>{
 		
 		
 		sb=new StringBuffer("<div style='font-size:13px'>");
-		for(Map<String, String> record:model.getLocalResources()){
-			sb.append("<p title='"+record.get("uri")+"'>"+record.get("name")+"</p>");
+		for(FileResource record:model.getLocalResources()){
+			sb.append("<p title='"+record.getUri()+"'>"+record.getName()+"</p>");
 		}
 		sb.append("</div>");
 		resourceContent.getElement().setInnerHTML(sb.toString());

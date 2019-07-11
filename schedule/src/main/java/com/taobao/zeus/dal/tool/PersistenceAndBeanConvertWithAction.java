@@ -1,5 +1,6 @@
 package com.taobao.zeus.dal.tool;
 
+import com.alibaba.fastjson.JSON;
 import com.taobao.zeus.dal.model.*;
 import com.taobao.zeus.model.*;
 import com.taobao.zeus.model.JobDescriptor.JobRunType;
@@ -98,17 +99,8 @@ public class PersistenceAndBeanConvertWithAction {
 		jd.setScheduleType(JobScheduleType.parser(persist.getScheduleType()));
 		String res = persist.getResources();
 		if (res != null) {
-			List<Map<String, String>> tempRes = new ArrayList<Map<String, String>>();
-			JSONArray resArray = JSONArray.fromObject(res);
-			for (int i = 0; i < resArray.size(); i++) {
-				JSONObject o = resArray.getJSONObject(i);
-				Map<String, String> map = new HashMap<String, String>();
-				for (Object key : o.keySet()) {
-					map.put(key.toString(), o.getString(key.toString()));
-				}
-				tempRes.add(map);
-			}
-			jd.setResources(tempRes);
+			List<FileResource> resources = JSON.parseArray(res, FileResource.class);
+			jd.setResources(resources);
 		}
 
 /*		jd.setScript(persist.getScript());*/
@@ -192,15 +184,8 @@ public class PersistenceAndBeanConvertWithAction {
 			return null;
 		}
 		ZeusActionWithBLOBs persist = new ZeusActionWithBLOBs();
-		JSONArray resArray = new JSONArray();
-		for (Map<String, String> map : jd.getResources()) {
-			JSONObject o = new JSONObject();
-			for (String key : map.keySet()) {
-				o.put(key, map.get(key));
-			}
-			resArray.add(o);
-		}
-		persist.setResources(resArray.toString());
+
+		persist.setResources(JSON.toJSONString(jd.getResources()));
 		JSONObject object = new JSONObject();
 		for (Object key : jd.getProperties().keySet()) {
 			object.put(key, jd.getProperties().get(key.toString()));
@@ -295,21 +280,10 @@ public class PersistenceAndBeanConvertWithAction {
 						object.getString(key.toString()));
 			}
 		}
-		String cp = persist.getResources();
-		gd.setResources(new ArrayList<Map<String, String>>());
-
 		if (persist.getResources() != null) {
-			JSONArray resArray = JSONArray.fromObject(cp);
-			for (int i = 0; i < resArray.size(); i++) {
-				Map<String, String> map = new HashMap<String, String>();
-				JSONObject o = resArray.getJSONObject(i);
-				for (Object key : o.keySet()) {
-					map.put(key.toString(), o.getString(key.toString()));
-				}
-				gd.getResources().add(map);
-			}
+			List<FileResource>  resources= JSON.parseArray(persist.getResources(),FileResource.class);
+			gd.setResources(resources);
 		}
-
 		return gd;
 	}
 
@@ -318,15 +292,7 @@ public class PersistenceAndBeanConvertWithAction {
 			return null;
 		}
 		ZeusGroupWithBLOBs persist = new ZeusGroupWithBLOBs();
-		JSONArray resArray = new JSONArray();
-		for (Map<String, String> map : gd.getResources()) {
-			JSONObject o = new JSONObject();
-			for (String key : map.keySet()) {
-				o.put(key, map.get(key));
-			}
-			resArray.add(o);
-		}
-		persist.setResources(resArray.toString());
+		persist.setResources(JSON.toJSONString(gd.getResources()));
 		JSONObject object = new JSONObject();
 		for (Object key : gd.getProperties().keySet()) {
 			object.put(key, gd.getProperties().get(key.toString()));

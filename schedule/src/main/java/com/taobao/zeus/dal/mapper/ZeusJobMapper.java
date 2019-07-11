@@ -1,10 +1,8 @@
 package com.taobao.zeus.dal.mapper;
 
 import com.taobao.zeus.annotation.MybatisMapper;
-import com.taobao.zeus.dal.model.ZeusActionWithBLOBs;
-import com.taobao.zeus.dal.model.ZeusJobStatistic;
-import com.taobao.zeus.dal.model.ZeusJob;
-import com.taobao.zeus.dal.model.ZeusJobWithBLOBs;
+import com.taobao.zeus.dal.model.*;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
@@ -19,9 +17,13 @@ public interface ZeusJobMapper {
 
     ZeusJobWithBLOBs selectByPrimaryKey(Long id);
 
+    List<ZeusJobShort> selectLikeName(@Param("name")String name);
+
     List<ZeusJobWithBLOBs> selectByParams(Map<String,Object> params);
 
     List<ZeusJobWithBLOBs> findJobWithIds(List<Long> list);
+
+    List<ZeusJobShort> findJobShortWithIds(List<Long> list);
 
     List<ZeusJobWithBLOBs> selectAll();
 

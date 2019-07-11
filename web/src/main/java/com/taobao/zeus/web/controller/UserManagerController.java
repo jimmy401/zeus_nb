@@ -4,6 +4,10 @@ import com.taobao.zeus.broadcast.alarm.MailAlarm;
 import com.taobao.zeus.dal.logic.UserManager;
 import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.web.common.CurrentUser;
+import com.taobao.zeus.web.controller.response.CommonResponse;
+import com.taobao.zeus.web.controller.response.GridContent;
+import com.taobao.zeus.web.controller.response.ReturnCode;
+import com.taobao.zeus.web.platform.client.util.ZUser;
 import com.taobao.zeus.web.util.EncryptHelper;
 import com.taobao.zeus.web.util.LoginUser;
 import org.slf4j.Logger;
@@ -31,7 +35,7 @@ public class UserManagerController extends BaseController {
     @Autowired
     UserManager mysqlUserManager;
 
-    @RequestMapping(value = "login", method = RequestMethod.GET)
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
     public ModelAndView loginpage(ModelMap model, HttpServletResponse response) throws Exception {
         return new ModelAndView("login");
     }
@@ -40,53 +44,44 @@ public class UserManagerController extends BaseController {
     public String logon(@RequestParam(value = "username", defaultValue = "-1") String username,
                         @RequestParam(value = "password", defaultValue = "-1") String password,
                         HttpServletRequest request, HttpServletResponse response) throws Exception {
-        ZeusUser u = mysqlUserManager.findByUidFilter(username);
-        if (null == u) {
+        ZeusUser user = mysqlUserManager.findByUidFilter(username);
+        if (null == user) {
             return "null";
         } else {
-            String ps = u.getPassword();
+            String ps = user.getPassword();
             if (null != ps) {
                 if (!EncryptHelper.MD5(password).toUpperCase().equals(ps.toUpperCase())) {
                     return "error";
                 }
             }
-            String uid = u.getUid();
 
-            ZeusUser user= new ZeusUser();
-            user.setUid(uid);
-            user.setEmail(u.getEmail());
-            user.setName(u.getName());
-            user.setPhone(u.getPhone());
-
-            Cookie cookie = new Cookie("LOGIN_USERNAME", uid);
-            String host = request.getServerName();
+            Cookie cookie = new Cookie("LOGIN_USERNAME", user.getUid());
             cookie.setPath("/");
-            //cookie.setDomain(host);
             response.addCookie(cookie);
 
             CurrentUser.setUser(user);
 
             LoginUser.user.set(user);
-            return uid;
+            return user.getUid();
         }
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public String register(@RequestParam(value = "user", defaultValue = "-1") String uid,
-                        @RequestParam(value = "password", defaultValue = "-1") String password,
+                           @RequestParam(value = "password", defaultValue = "-1") String password,
                            @RequestParam(value = "email", defaultValue = "-1") String email,
                            @RequestParam(value = "phone", defaultValue = "-1") String phone,
                            @RequestParam(value = "userType", defaultValue = "-1") String userType,
                            @RequestParam(value = "description", defaultValue = "-1") String description,
-                        HttpServletRequest request, HttpServletResponse response) throws Exception {
+                           HttpServletRequest request, HttpServletResponse response) throws Exception {
         request.setCharacterEncoding("utf-8");
         response.setCharacterEncoding("utf-8");
 
         ZeusUser u = mysqlUserManager.findByUid(uid);
-        if(null != u){
+        if (null != u) {
             return "exist";
-        }else{
-            try{
+        } else {
+            try {
                 String passwordMD5 = EncryptHelper.MD5(password);
                 ZeusUser newUser = new ZeusUser();
                 newUser.setUid(uid);
@@ -100,40 +95,40 @@ public class UserManagerController extends BaseController {
                 newUser.setUserType(Integer.parseInt(userType));
                 newUser.setDescription(description);
                 ZeusUser returnUser = mysqlUserManager.addOrUpdateUser(newUser);
-                if(null != returnUser){
+                if (null != returnUser) {
                     List<String> mailUsers = new ArrayList<String>();
                     mailUsers.add(ZeusUser.ADMIN.getUid());
                     mailUsers.add("diadmin");
                     MailAlarm mailAlarm = new MailAlarm();
                     List<String> emails = getEmailsByUsers(mailUsers);
-                    if(emails != null && emails.size()>0){
+                    if (emails != null && emails.size() > 0) {
                         emails.add(returnUser.getEmail());
 
                         mailAlarm.sendEmail("", emails, "Zeus新用户注册申请",
-                                "Dear All,"+
-                                        "\r\n	Zeus系统有新用户注册，详细信息如下："+
-                                        "\r\n		用户类别："+(returnUser.getUserType()==0 ? "组用户" : "个人用户")+
-                                        "\r\n		用户账号："+returnUser.getUid()+
-                                        "\r\n		用户姓名："+returnUser.getName()+
-                                        "\r\n		用户邮箱："+returnUser.getEmail()+
-                                        "\r\n	请确认并审核。\r\n"+
-                                        "\r\n	另外，请DI团队开通hive帐号及权限，描述如下："+
-                                        "\r\n		" + returnUser.getDescription()+
+                                "Dear All," +
+                                        "\r\n	Zeus系统有新用户注册，详细信息如下：" +
+                                        "\r\n		用户类别：" + (returnUser.getUserType() == 0 ? "组用户" : "个人用户") +
+                                        "\r\n		用户账号：" + returnUser.getUid() +
+                                        "\r\n		用户姓名：" + returnUser.getName() +
+                                        "\r\n		用户邮箱：" + returnUser.getEmail() +
+                                        "\r\n	请确认并审核。\r\n" +
+                                        "\r\n	另外，请DI团队开通hive帐号及权限，描述如下：" +
+                                        "\r\n		" + returnUser.getDescription() +
                                         "\r\n	\r\n	\r\n谢谢！");
                     }
                     return returnUser.getUid();
-                }else{
+                } else {
                     return "error";
                 }
-            }catch(Exception ex){
+            } catch (Exception ex) {
                 return "error";
             }
         }
     }
 
-    private List<String> getEmailsByUsers(List<String> users){
+    private List<String> getEmailsByUsers(List<String> users) {
         List<String> emails = new ArrayList<String>();
-        try{
+        try {
             List<ZeusUser> userList = mysqlUserManager.findListByUid(users);
             if (userList != null && userList.size() > 0) {
                 for (ZeusUser user : userList) {
@@ -153,19 +148,148 @@ public class UserManagerController extends BaseController {
                     }
                 }
             }
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
         return emails;
     }
 
-    @RequestMapping(value = "/logout", method = RequestMethod.GET)
-    public ModelAndView logout(HttpServletResponse response) throws Exception {
-        return new ModelAndView("login");
+    @RequestMapping(value = "/logout", method = RequestMethod.POST)
+    public CommonResponse<Void> logout(HttpServletResponse response) throws Exception {
+        CurrentUser.destroyUser();
+        return this.buildResponse(ReturnCode.SUCCESS);
     }
 
-    @RequestMapping(value = "/user_manager", method = RequestMethod.GET)
-    public ModelAndView homePage(HttpServletResponse response) throws Exception {
-        return new ModelAndView("usermanager");
+    @RequestMapping(value = "user_manager/get_all_users_by_page", method = RequestMethod.POST)
+    public GridContent getAll(@RequestParam(value = "user", defaultValue = "") String uid,
+                              @RequestParam(value = "page", required = false) Integer page,
+                              @RequestParam(value = "rows", required = false) Integer rows
+    ) throws Exception {
+        GridContent gridcontent = new GridContent();
+        try {
+            ZeusUser aUser = CurrentUser.getUser();
+            List<ZeusUser> listUsers = new ArrayList<>();
+            int count = 0;
+            if (aUser.getUserType() == 0) {//组用户的情况下，匹配所有用户
+                if (!uid.equals("")) {
+                    listUsers.addAll(mysqlUserManager.selectPageByParams(page, rows, uid));
+                } else {
+                    listUsers.addAll(mysqlUserManager.getPageAllUsers(page, rows));
+                }
+                count = mysqlUserManager.selectRecordCountByParams(uid);
+            } else {
+                listUsers.add(CurrentUser.getUser());
+                count = 1;
+            }
+
+            gridcontent.rows = listUsers;
+            gridcontent.total = count;
+        } catch (Exception e) {
+            logger.error("user_manager/get_all fail", e);
+        }
+        return gridcontent;
+    }
+
+    @RequestMapping(value = "user_manager/get_all_users", method = RequestMethod.POST)
+    public List<ZeusUser> getEffectiveUsers() {
+        List<ZeusUser> listUsers = new ArrayList<>();
+        try {
+            listUsers = mysqlUserManager.getAllUsers();
+        } catch (Exception e) {
+            logger.error("user_manager/get_all_users fail", e);
+        }
+        return listUsers;
+    }
+
+    @RequestMapping(value = "/user_manager/edit_user", method = RequestMethod.POST)
+    public CommonResponse<Void> editUser(@RequestParam(value = "uid", defaultValue = "-1") String uid,
+                                         @RequestParam(value = "passwd", defaultValue = "-1") String passwd,
+                                         @RequestParam(value = "email", defaultValue = "-1") String email,
+                                         @RequestParam(value = "phone", defaultValue = "-1") String phone) throws
+            Exception {
+        try {
+            ZeusUser curUser = CurrentUser.getUser();
+            if (curUser.getUserType() == 0 || curUser.getUid().equals(uid)) {//组用户,或者是本人的情况下
+                ZeusUser aUser = mysqlUserManager.findByUid(uid);
+                aUser.setPassword(EncryptHelper.MD5(passwd));
+                aUser.setEmail(email);
+                aUser.setPhone(phone);
+                mysqlUserManager.update(aUser);
+            }
+        } catch (Exception e) {
+            logger.error("user_manager/edit_user fail", e);
+        }
+
+        return buildResponse(ReturnCode.SUCCESS);
+    }
+
+    @RequestMapping(value = "/user_manager/ok", method = RequestMethod.POST)
+    public CommonResponse<Void> ok(@RequestParam(value = "uid", defaultValue = "-1") String uid) throws Exception {
+        try {
+
+            ZeusUser curUser = CurrentUser.getUser();
+            if (curUser.getUserType() == 0) {//组用户的情况下，匹配所有用户
+                ZeusUser aUser = mysqlUserManager.findByUid(uid);
+                aUser.setIsEffective(1);
+                mysqlUserManager.update(aUser);
+            }
+
+        } catch (Exception e) {
+            logger.error("user_manager/ok fail", e);
+        }
+
+        return buildResponse(ReturnCode.SUCCESS);
+    }
+
+    @RequestMapping(value = "/user_manager/no", method = RequestMethod.POST)
+    public CommonResponse<Void> no(@RequestParam(value = "uid", defaultValue = "-1") String uid) throws Exception {
+        try {
+
+            ZeusUser curUser = CurrentUser.getUser();
+            if (curUser.getUserType() == 0) {//组用户的情况下，匹配所有用户
+                ZeusUser aUser = mysqlUserManager.findByUid(uid);
+                aUser.setIsEffective(0);
+                mysqlUserManager.update(aUser);
+            }
+
+        } catch (Exception e) {
+            logger.error("user_manager/no fail", e);
+        }
+
+        return buildResponse(ReturnCode.SUCCESS);
+    }
+
+    @RequestMapping(value = "/user_manager/delete", method = RequestMethod.POST)
+    public CommonResponse<Void> delete(@RequestParam(value = "uid", defaultValue = "-1") String uid) throws Exception {
+        try {
+
+            ZeusUser curUser = CurrentUser.getUser();
+            if (curUser.getUserType() == 0) {//组用户的情况下
+                ZeusUser aUser = mysqlUserManager.findByUid(uid);
+                aUser.setIsEffective(ZeusUser.UserStatus.Cancel.value());
+                mysqlUserManager.update(aUser);
+
+                MailAlarm mailAlarm = new MailAlarm();
+                List<String> emails = new ArrayList<String>();
+                emails.add(curUser.getEmail());
+                emails.add(aUser.getEmail());
+                if (emails != null && emails.size() > 0) {
+                    mailAlarm.sendEmail(
+                            "",
+                            emails,
+                            "Zeus用户被删除",
+                            "Dear All," + "\r\n	Zeus用户被删除，详细信息如下：" + "\r\n		用户类别："
+                                    + (aUser.getUserType() == 0 ? "组用户" : "个人用户")
+                                    + "\r\n		用户账号：" + aUser.getUid() + "\r\n		用户姓名："
+                                    + aUser.getName() + "\r\n		用户邮箱："
+                                    + aUser.getEmail() + "\r\n	请知晓，谢谢！");
+                }
+            }
+
+        } catch (Exception e) {
+            logger.error("user_manager/delete fail", e);
+        }
+
+        return buildResponse(ReturnCode.SUCCESS);
     }
 }

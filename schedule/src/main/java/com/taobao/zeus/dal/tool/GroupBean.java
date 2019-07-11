@@ -1,5 +1,6 @@
 package com.taobao.zeus.dal.tool;
 
+import com.taobao.zeus.model.FileResource;
 import com.taobao.zeus.model.GroupDescriptor;
 import com.taobao.zeus.dal.tool.HierarchyProperties;
 import com.taobao.zeus.dal.tool.JobBean;
@@ -40,10 +41,15 @@ public class GroupBean implements Serializable{
 		return groupDescriptor.getProperties();
 	}
 
-	public List<Map<String, String>> getHierarchyResources(){
-		List<Map<String, String>> local=new ArrayList<Map<String,String>>(groupDescriptor.getResources());
+	public List<FileResource> getHierarchyResources(){
+		List<FileResource> local=new ArrayList<FileResource>();
+		if (groupDescriptor.getResources()==null){
+			local=new ArrayList<FileResource>();
+		}else{
+			local=new ArrayList<FileResource>(groupDescriptor.getResources());
+		}
 		if(local==null){
-			local=new ArrayList<Map<String,String>>();
+			local=new ArrayList<FileResource>();
 		}
 		if(parentGroupBean!=null){
 			local.addAll(parentGroupBean.getHierarchyResources());

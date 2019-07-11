@@ -48,9 +48,4 @@
   <mvc:resources mapping="/js/**" location="/js/" />
   <mvc:resources mapping="/newjs/**" location="/newjs/" />
   <mvc:resources mapping="/images/**" location="/images/" />
-<<<<<<< HEAD
-=======
-  <mvc:resources mapping="/images/**" location="/images/" />
-  <mvc:resources mapping="/**" location="/" />
->>>>>>> migu
 </beans>

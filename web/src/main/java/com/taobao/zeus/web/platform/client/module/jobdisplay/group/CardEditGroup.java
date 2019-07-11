@@ -18,6 +18,7 @@ import com.sencha.gxt.widget.core.client.form.FieldLabel;
 import com.sencha.gxt.widget.core.client.form.FieldSet;
 import com.sencha.gxt.widget.core.client.form.TextArea;
 import com.sencha.gxt.widget.core.client.form.TextField;
+import com.taobao.zeus.model.FileResource;
 import com.taobao.zeus.web.platform.client.module.jobdisplay.CenterTemplate;
 import com.taobao.zeus.web.platform.client.module.jobdisplay.FormatUtil;
 import com.taobao.zeus.web.platform.client.module.jobdisplay.job.FileUploadWidget;
@@ -47,11 +48,11 @@ public class CardEditGroup extends CenterTemplate implements Refreshable<GroupMo
 			new FileUploadWidget("group", model.getId(),new UploadCallback() {
 				@Override
 				public void call(String name, String uri) {
-					Map<String, String> map=new HashMap<String, String>();
-					map.put("name", name);
-					map.put("uri", uri);
-					List<Map<String, String>> temp=new ArrayList<Map<String,String>>();
-					temp.add(map);
+					FileResource item = new FileResource();
+					item.setName(name);
+					item.setUri(uri);
+					List<FileResource> temp=new ArrayList<FileResource>();
+					temp.add(item);
 					resources.setValue(resources.getValue()+"\n"+FormatUtil.convertResourcesToEditString(temp));
 					
 				}

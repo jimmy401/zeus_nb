@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
 <!-- Authority Control -->
 <script type="text/javascript">
     /*$(function() {
@@ -37,23 +37,18 @@
         });
     });*/
 </script>
-<input type="hidden" id="user_id" value="${user.uid}" />
+<input type="hidden" id="h_user_id" value="${user.uid}"/>
 <div id="sidebar" style="width: 100px;">
-    <ul>
-        <li id="data_module" class="submenu" style="display: none;"><a href="#"><i class="icon icon-th-list icon-home"></i>
-            <span class="custom_menu">数据开发</span></a>
-            <ul>
-                <li id="home_page" style="display: none;"><a href="home_page/index"><span class="custom_suojin">首页</span></a></li>
-                <li id="develop_center_page" style="display: none;"><a href="develop_center/index"><span class="custom_suojin">开发中心</span></a></li>
-                <li id="schedule_center_page" style="display: none;"><a href="schedule_center/index"><span class="custom_suojin">调度中心</span></a></li>
-                <li id="statistic_report_page" style="display: none;"><a href="statistic_report/index"><span class="custom_suojin">统计报表</span></a></li>
-                <li id="user_manager_page" style="display: none;"><a href="user_manager/index"><span class="custom_suojin">用户管理</span></a></li>
-            </ul>
-        </li>
-        <li id="channel_module" class="submenu" style="display: none;"><a href="#"><i class="icon icon-file"></i> <span class="custom_menu">其他</span></a>
-            <ul>
-                <li id="channel_page" style="display: none;"><a href="qita"><span class="custom_suojin">其他</span> </a></li>
-            </ul>
-        </li>
-    </ul>
+    <div class="easyui-accordion" data-options="multiple:true" style="width:150px;height1:700px;">
+        <div title="开发中心" style="overflow:auto;padding:10px;height: 300px;">
+            <a href="homepage.jsp?objId=a_home_page" id="a_home_page"  class="leftnav"><span class="c_text">首页 </span></a>
+            <a href="developcenter.jsp?objId=a_develop_center" id="a_develop_center" class="leftnav"><span class="c_text">开发中心</span></a>
+            <a href="schedulecenter.jsp?objId=a_schedule_center" id="a_schedule_center" class="leftnav"><span class="c_text">调度中心</span></a>
+            <a href="statisticreport.jsp?objId=a_statistic_report" id="a_statistic_report"  class="leftnav"><span class="c_text">统计报表</span></a>
+            <a href="usermanager.jsp?objId=a_user_manager" id="a_user_manager"  class="leftnav"><span class="c_text">用户管理</span></a>
+        </div>
+        <div title="Java" style="padding:10px;height: 200px;">
+            <p>qita</p>
+        </div>
+    </div>
 </div>

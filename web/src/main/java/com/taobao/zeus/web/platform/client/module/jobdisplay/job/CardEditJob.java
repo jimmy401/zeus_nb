@@ -34,6 +34,7 @@ import com.sencha.gxt.widget.core.client.form.FieldSet;
 import com.sencha.gxt.widget.core.client.form.TextArea;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.form.validator.RegExValidator;
+import com.taobao.zeus.model.FileResource;
 import com.taobao.zeus.web.platform.client.lib.codemirror.CodeMirror;
 import com.taobao.zeus.web.platform.client.lib.codemirror.CodeMirror.CodeMirrorConfig;
 import com.taobao.zeus.web.platform.client.module.jobdisplay.CenterTemplate;
@@ -67,11 +68,12 @@ public class CardEditJob extends CenterTemplate implements
 					new UploadCallback() {
 						@Override
 						public void call(final String name, final String uri) {
-							Map<String, String> map = new HashMap<String, String>();
-							map.put("name", name);
-							map.put("uri", uri);
-							List<Map<String, String>> temp = new ArrayList<Map<String, String>>();
-							temp.add(map);
+							FileResource item = new FileResource();
+							item.setName(name);
+							item.setUri(uri);
+
+							List<FileResource> temp = new ArrayList<FileResource>();
+							temp.add(item);
 							resources.setValue(resources.getValue()
 									+ "\n"
 									+ FormatUtil

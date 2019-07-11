@@ -8,25 +8,18 @@
             dataType : "json",
             success : function(ret) {
                 if (ret.code == "00000") {
-                    var url = ret.data;
-                    window.location.href = url;
+                    window.location.href = "login";
                 }
             }
         });
         return false;
     }
-
-    function gotoAccount() {
-        window.location.href = "user_index_page";
-        return false;
-    }
 </script>
 <div id="div_header">
     <div class="easyui-panel" style="padding:5px;">
-        <a href="#" class="easyui-linkbutton" data-options="menu:'#mm1'">${user.name}</a>
+        <a href="#" class="easyui-menubutton" style="float:right;" data-options="menu:'#mm1',iconCls:'icon-edit'">${user.name}</a>
     </div>
     <div id="mm1" style="width:100px;">
-        <div><a href="javascript:void(0)" onclick="gotoAccount();">账户</a></div>
-        <div><a href="javascript:void(0)" onclick="logOut();">退出登录</a></div>
+        <div><a href="javascript:void(0)" class="c_text"  onclick="logOut();">退出登录</a></div>
     </div>
 </div>

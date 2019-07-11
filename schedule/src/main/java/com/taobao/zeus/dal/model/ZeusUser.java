@@ -1,5 +1,7 @@
 package com.taobao.zeus.dal.model;
 
+import com.taobao.zeus.util.DateUtil;
+
 import java.util.Date;
 
 public class ZeusUser {
@@ -44,6 +46,8 @@ public class ZeusUser {
     private Date gmtCreate;
 
     private Date gmtModified;
+
+    private String modifiedTime;
 
     private String name;
 
@@ -94,6 +98,10 @@ public class ZeusUser {
 
     public void setGmtModified(Date gmtModified) {
         this.gmtModified = gmtModified;
+    }
+
+    public String getModifiedTime() {
+        return DateUtil.date2String(this.getGmtModified(),"yyyy-MM-dd HH:mm:ss");
     }
 
     public String getName() {

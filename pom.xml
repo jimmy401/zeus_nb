@@ -14,7 +14,7 @@
 		<module>deploy</module>
 		<module>client</module>
     </modules>
-    <name>Zeus</name>
+    <name>zeus_nb</name>
 	<properties>
 		<warExplodedDirectory>target/exploded/${project.artifactId}.war</warExplodedDirectory>
 		<java.version>1.7</java.version>

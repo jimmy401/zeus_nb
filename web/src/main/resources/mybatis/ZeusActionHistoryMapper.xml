@@ -4,7 +4,7 @@
   <resultMap id="BaseResultMap" type="com.taobao.zeus.dal.model.ZeusActionHistory">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="action_id" jdbcType="BIGINT" property="actionId" />
-    <result column="job_id" jdbcType="BIGINT" property="actionId" />
+    <result column="job_id" jdbcType="BIGINT" property="jobId" />
     <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
     <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
     <result column="execute_host" jdbcType="VARCHAR" property="executeHost" />
@@ -82,8 +82,8 @@
     <include refid="Blob_Column_List" />
     from zeus_action_history
     <where>
-      <if test="actionId!=null and actionId!=''">
-        job_id =#{actionId,jdbcType=BIGINT}
+      <if test="jobId!=null and jobId!=''">
+        job_id =#{jobId,jdbcType=BIGINT}
       </if>
       <if test="actionId!=null and actionId!=''">
         and action_id =#{actionId,jdbcType=BIGINT}
@@ -97,8 +97,8 @@
     count(*)
     from zeus_action_history
     <where>
-      <if test="actionId!=null and actionId!=''">
-        job_id =#{actionId,jdbcType=BIGINT}
+      <if test="jobId!=null and jobId!=''">
+        job_id =#{jobId,jdbcType=BIGINT}
       </if>
     </where>
   </select>

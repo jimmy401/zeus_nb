@@ -7,17 +7,24 @@ import com.taobao.zeus.dal.logic.UserManager;
 import com.taobao.zeus.dal.logic.impl.ReadOnlyGroupManagerWithJob;
 import com.taobao.zeus.dal.tool.GroupBean;
 import com.taobao.zeus.dal.tool.JobBean;
+import com.taobao.zeus.model.JobHistory;
 import com.taobao.zeus.model.ZeusFollow;
+import com.taobao.zeus.util.DateUtil;
+import com.taobao.zeus.web.common.CurrentUser;
 import com.taobao.zeus.web.controller.response.CommonResponse;
 import com.taobao.zeus.web.controller.response.ReturnCode;
 import com.taobao.zeus.web.platform.client.module.jobmanager.GroupJobTreeModel;
+import com.taobao.zeus.web.platform.client.module.jobmanager.JobRelationInfo;
 import com.taobao.zeus.web.util.LoginUser;
 import com.taobao.zeus.web.util.PermissionGroupManagerWithJob;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
@@ -25,7 +32,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/tree")
-public class TreeController extends BaseController{
+public class TreeController extends BaseController {
     private static final Logger log = LoggerFactory.getLogger(TreeController.class);
 
     @Autowired
@@ -115,7 +122,7 @@ public class TreeController extends BaseController{
     }
 
     private GroupJobTreeModel getTreeData(GroupBean rootGroup) {
-        String uid = LoginUser.getUser().getUid();
+        String uid = CurrentUser.getUser().getUid();
         List<ZeusFollow> list = followManagerWithJob.findAllTypeFollows(uid);
         Map<String, Boolean> groupFollow = new HashMap<String, Boolean>();
         Map<String, Boolean> jobFollow = new HashMap<String, Boolean>();
@@ -184,6 +191,126 @@ public class TreeController extends BaseController{
                         group.getChildren().add(job);
                     }
                 }
+            }
+        }
+    }
+
+    @RequestMapping(value = "/get_dependee_tree", method = RequestMethod.GET)
+    public CommonResponse<JobRelationInfo> getDependeeTreeJson(@RequestParam(value = "jobId", defaultValue = "") String jobId) {
+        try {
+            JobRelationInfo jobRelationInfo = getJsonData(getDependeeTree(jobId));
+            return this.buildResponse(jobRelationInfo,ReturnCode.SUCCESS);
+        } catch (Exception e) {
+            log.error("get_dependee_tree", e);
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    private JobRelationInfo getJsonData(GroupJobTreeModel result) throws JSONException {
+        JobRelationInfo jobRelationInfo = new JobRelationInfo();
+        jobRelationInfo.setId(result.getId() + "-" + new Random().nextInt(1000));
+        jobRelationInfo.setName(result.getName());
+
+        Map<String, JobHistory> map = jobHistoryManager.findLastHistoryByList(Arrays.asList(result.getId()));
+        JobHistory his = map.get(result.getId());
+        if (his == null) {
+            jobRelationInfo.setJobId(result.getId());
+            jobRelationInfo.setHistoryId("");
+            jobRelationInfo.setLastStatus("");
+            jobRelationInfo.setLastRuntime("");
+        } else {
+            jobRelationInfo.setJobId(result.getId());
+            jobRelationInfo.setHistoryId(his.getId());
+            jobRelationInfo.setLastStatus(his.getStatus() == null ? "" : his.getStatus().toString());
+            jobRelationInfo.setLastRuntime(his.getStartTime() == null ? null : DateUtil.date2String(his.getStartTime()));
+        }
+        if (result.getChildren().size() > 0) {
+            List<JobRelationInfo> children = new ArrayList<>();
+            jobRelationInfo.setChildren(children);
+            jobRelationInfo.getChildren().addAll(getChildren(result));
+        } else {
+            List<JobRelationInfo> children = new ArrayList<>();
+            jobRelationInfo.setChildren(children);
+        }
+        return jobRelationInfo;
+    }
+
+    private ArrayList<JobRelationInfo> getChildren(GroupJobTreeModel result) throws JSONException {
+        ArrayList<JobRelationInfo> children = new ArrayList<>();
+        for (GroupJobTreeModel child : result.getChildren()) {
+            children.add(getJsonData(child));
+        }
+        return children;
+    }
+
+    @RequestMapping(value = "/get_depender_tree", method = RequestMethod.GET)
+    public CommonResponse<JobRelationInfo> getDependerTreeJson(@RequestParam(value = "jobId", defaultValue = "") String jobId) {
+        try {
+            JobRelationInfo jobRelationInfo = getJsonData(getDependerTree(jobId));
+            return this.buildResponse(jobRelationInfo,ReturnCode.SUCCESS);
+        } catch (Exception e) {
+            log.error("get_depender_tree", e);
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public GroupJobTreeModel getDependeeTree(String jobId) {
+        GroupBean globe = readOnlyGroupManagerWithJob.getGlobeGroupBean();
+        JobBean jb = globe.getAllSubJobBeans().get(jobId);
+        if (jb != null) {
+            GroupJobTreeModel root = new GroupJobTreeModel();
+            root.setName(jb.getJobDescriptor().getName());
+            root.setId(jb.getJobDescriptor().getId());
+            root.setGroup(false);
+            root.setDirectory(jb.getDependee().isEmpty() ? false : true);
+            root.setJob(true);
+            root.setOwner(jb.getJobDescriptor().getOwner());
+
+            setJob(root, jb.getDependee(), true);
+            return root;
+        }
+        return null;
+    }
+
+    public GroupJobTreeModel getDependerTree(String jobId) {
+        GroupBean globe = readOnlyGroupManagerWithJob.getGlobeGroupBean();
+        JobBean jb = globe.getAllSubJobBeans().get(jobId);
+        if (jb != null) {
+            GroupJobTreeModel root = new GroupJobTreeModel();
+            root.setName(jb.getJobDescriptor().getName());
+            root.setId(jb.getJobDescriptor().getId());
+            root.setGroup(false);
+            root.setDirectory(jb.getDepender().isEmpty() ? false : true);
+            root.setJob(true);
+            root.setOwner(jb.getJobDescriptor().getOwner());
+
+            setJob(root, jb.getDepender(), false);
+            return root;
+        }
+        return null;
+    }
+
+    private void setJob(GroupJobTreeModel parent, Collection<JobBean> children, boolean dependee) {
+        for (JobBean g : children) {
+            GroupJobTreeModel job = new GroupJobTreeModel();
+            job.setName(g.getJobDescriptor().getName());
+            job.setId(g.getJobDescriptor().getId());
+            job.setGroup(false);
+            job.setJob(true);
+            job.setOwner(g.getJobDescriptor().getOwner());
+            Boolean dir = false;
+            Collection<JobBean> childs = null;
+            if (dependee) {
+                dir = g.getDependee().isEmpty() ? false : true;
+                childs = g.getDependee();
+            } else {
+                dir = g.getDepender().isEmpty() ? false : true;
+                childs = g.getDepender();
+            }
+            job.setDirectory(dir);
+            parent.getChildren().add(job);
+            if (!childs.isEmpty()) {
+                setJob(job, childs, dependee);
             }
         }
     }

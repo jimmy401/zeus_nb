@@ -31,6 +31,10 @@
     <result column="timezone" property="timezone" jdbcType="VARCHAR" />
     <result column="host_group_id" property="hostGroupId" jdbcType="INTEGER" />
   </resultMap>
+  <resultMap id="JobShortInfoResultMap" type="com.taobao.zeus.dal.model.ZeusJobShort" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+  </resultMap>
   <resultMap id="ResultMapWithBLOBs" type="com.taobao.zeus.dal.model.ZeusJobWithBLOBs" extends="BaseResultMap" >
     <result column="configs" property="configs" jdbcType="LONGVARCHAR" />
     <result column="resources" property="resources" jdbcType="LONGVARCHAR" />
@@ -38,7 +42,7 @@
   </resultMap>
   <resultMap id="StatisticResultMap" type="com.taobao.zeus.dal.model.ZeusJobStatistic" >
     <result column="cnt" property="cnt" jdbcType="INTEGER" />
-    <result column="job_id" property="actionId" jdbcType="BIGINT" />
+    <result column="job_id" property="jobId" jdbcType="BIGINT" />
     <result column="gmt_modified" property="gmtModified" jdbcType="TIMESTAMP" />
   </resultMap>
   <sql id="Base_Column_List" >
@@ -120,6 +124,18 @@
       </if>
     </where>
   </select>
+  <select id="findJobShortWithIds" resultMap="JobShortInfoResultMap">
+    select id,name
+    from zeus_job
+    <where>
+      <if test="list!=null">
+        id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+          #{item}
+        </foreach>
+      </if>
+    </where>
+  </select>
   <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
     select 
     <include refid="Base_Column_List" />
@@ -127,6 +143,15 @@
     <include refid="Blob_Column_List" />
     from zeus_job
     where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectLikeName" resultMap="JobShortInfoResultMap" parameterType="java.lang.String" >
+    select
+    id,name
+    from zeus_job
+    <if test="name != null and name != ''">
+      where name like CONCAT(CONCAT('%', #{name,jdbcType=VARCHAR}), '%')
+      or id like CONCAT(CONCAT('%', #{name,jdbcType=VARCHAR}), '%')
+    </if>
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from zeus_job

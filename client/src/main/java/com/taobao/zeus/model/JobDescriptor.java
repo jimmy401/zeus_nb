@@ -21,7 +21,7 @@ public class JobDescriptor implements Serializable {
 	private String groupId;
 	private String owner;
 	private Boolean auto = false;
-	private List<Map<String, String>> resources = new ArrayList<Map<String, String>>();
+	private List<FileResource> resources = new ArrayList<>();
 
 	private JobRunType jobRunType;
 	private JobScheduleType jobScheduleType;
@@ -87,7 +87,7 @@ public class JobDescriptor implements Serializable {
 		this.jobId = jobId;
 	}
 
-	public List<Map<String, String>> getResources() {
+	public List<FileResource> getResources() {
 		return resources;
 	}
 
@@ -167,7 +167,7 @@ public class JobDescriptor implements Serializable {
 		this.id = id;
 	}
 
-	public void setResources(List<Map<String, String>> resources) {
+	public void setResources(List<FileResource> resources) {
 		this.resources = resources;
 	}
 

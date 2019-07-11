@@ -48,6 +48,33 @@
     <include refid="common_where_if" />
   </where>
 </select>
+  <select id="selectPageByParams" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from zeus_user
+    <if test="uid != null and uid != ''">
+      where uid like CONCAT(CONCAT('%', #{uid,jdbcType=VARCHAR}), '%')
+    </if>
+    <if test="start != null">
+      limit #{start,jdbcType=INTEGER},#{end,jdbcType=INTEGER}
+    </if>
+  </select>
+  <select id="selectRecordCountByParams" parameterType="java.util.Map" resultType="java.lang.Integer">
+    select
+    count(*) cnt
+    from zeus_user
+    <if test="uid != null and uid != ''">
+      where uid like CONCAT(CONCAT('%', #{uid,jdbcType=VARCHAR}), '%')
+    </if>
+    <if test="start != null">
+      limit #{start,jdbcType=INTEGER},#{end,jdbcType=INTEGER}
+    </if>
+  </select>
+  <select id="selectAllUsers"  resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from zeus_user
+  </select>
   <select id="selectAll" parameterType="java.util.Map" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />

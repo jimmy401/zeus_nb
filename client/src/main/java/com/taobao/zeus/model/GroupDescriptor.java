@@ -16,7 +16,7 @@ public class GroupDescriptor implements Serializable{
 	private boolean directory;
 	private boolean isExisted;
 	private Map<String, String> properties=new HashMap<String, String>();
-	private List<Map<String,String>> resources=new ArrayList<Map<String,String>>();
+	private List<FileResource> resources=new ArrayList<>();
 	
 	public String getDesc() {
 		return desc;
@@ -60,11 +60,11 @@ public class GroupDescriptor implements Serializable{
 		this.parent = parent;
 	}
 
-	public List<Map<String, String>> getResources() {
+	public List<FileResource> getResources() {
 		return resources;
 	}
 
-	public void setResources(List<Map<String, String>> resources) {
+	public void setResources(List<FileResource> resources) {
 		this.resources = resources;
 	}
 

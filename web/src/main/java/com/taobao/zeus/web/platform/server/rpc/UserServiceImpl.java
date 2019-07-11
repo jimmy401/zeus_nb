@@ -10,7 +10,6 @@ import com.taobao.zeus.dal.logic.GroupManagerWithAction;
 import com.taobao.zeus.dal.logic.UserManager;
 import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.dal.tool.Super;
-import com.taobao.zeus.util.Environment;
 import com.taobao.zeus.web.util.LoginUser;
 import com.taobao.zeus.web.platform.client.util.GwtException;
 import com.taobao.zeus.web.platform.client.util.ZUser;
@@ -83,7 +82,7 @@ public class UserServiceImpl extends RemoteServiceServlet implements
     @Override
     public List<ZUser> getAllUsers() {
         List<ZUser> result = new ArrayList<ZUser>();
-        List<ZeusUser> list = userManager.getAllUsers();
+        List<ZeusUser> list = userManager.getAllEffectiveUsers();
         for (ZeusUser u : list) {
             // ZUser zu=new ZUser();
             // zu.setName(u.getName());
@@ -180,7 +179,7 @@ public class UserServiceImpl extends RemoteServiceServlet implements
     @Override
     public List<ZUser> getAllGroupUsers() {
         List<ZUser> result = new ArrayList<ZUser>();
-        List<ZeusUser> list = userManager.getAllUsers();
+        List<ZeusUser> list = userManager.getAllEffectiveUsers();
         for (ZeusUser u : list) {
             //if (u.getUserType() == 0) {
                 result.add(transform(u));

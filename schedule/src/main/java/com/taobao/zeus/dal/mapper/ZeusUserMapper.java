@@ -17,9 +17,15 @@ public interface ZeusUserMapper {
 
     List<ZeusUser> selectByParams(Map<String,Object> params);
 
+    List<ZeusUser> selectPageByParams(Map<String,Object> params);
+
+    int selectRecordCountByParams(Map<String,Object> params);
+
     List<ZeusUser> selectByUids(List<String> uids);
 
     List<ZeusUser> selectAll(Map<String,Object> params);
+
+    List<ZeusUser> selectAllUsers();
 
     List<ZeusUser> selectByFilter(Map<String,Object> params);
 
