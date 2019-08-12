@@ -4,11 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-
-@RemoteServiceRelativePath("report.rpc")
-public interface ReportService extends RemoteService{
+public interface ReportService{
 	/**
 	 * 按日排序的任务运行趋势数据
 	 * 包括每天自动调度成功的任务数，每天自动调度失败的任务数

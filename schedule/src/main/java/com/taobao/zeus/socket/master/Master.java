@@ -12,6 +12,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.taobao.zeus.dal.model.ZeusActionWithBLOBs;
+import com.taobao.zeus.dal.model.ZeusFile;
 import com.taobao.zeus.dal.model.ZeusJob;
 import com.taobao.zeus.dal.model.ZeusJobWithBLOBs;
 import com.taobao.zeus.schedule.mvc.*;
@@ -818,7 +819,7 @@ public class Master {
             DebugHistory his = context.getDebugHistoryManager()
                     .findDebugHistory(historyId);
             long maxTime;
-            FileDescriptor fd;
+            ZeusFile fd;
             try {
                 fd = context.getFileManager().getFile(his.getFileId());
                 Profile pf = context.getProfileManager().findByUid(
@@ -925,7 +926,7 @@ public class Master {
         }
     }
 
-    private boolean timeOverAlarm(final JobHistory his, FileDescriptor fd,
+    private boolean timeOverAlarm(final JobHistory his, ZeusFile zeusFile,
                                   long runTime, long maxTime, int type, JobDescriptor jd) {
         final MailAlarm mailAlarm = (MailAlarm) context.getMailAlarm();
         SMSAlarm smsAlarm = (SMSAlarm) context.getSmsAlarm();
@@ -939,7 +940,7 @@ public class Master {
                 title.append("手动调度").append("] jobID=").append(his.getActionId());
                 break;
             case 2:
-                title.append("调试任务").append("] 脚本名称：").append(fd.getName());
+                title.append("调试任务").append("] 脚本名称：").append(zeusFile.getName());
         }
         final StringBuffer content = new StringBuffer(title);
         if (jd != null) {

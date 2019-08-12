@@ -8,14 +8,14 @@ import java.util.List;
 public class ZeusFile implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    public static int FOLDER=1;
-    public static int FILE=2;
+    public static int FOLDER = 1;
+    public static int FILE = 2;
 
     private Long id;
 
-    private Date gmtCreate=new Date();
+    private Date gmtCreate = new Date();
 
-    private Date gmtModified=new Date();
+    private Date gmtModified = new Date();
 
     private String name;
 
@@ -33,7 +33,17 @@ public class ZeusFile implements Serializable {
 
     private String text;
 
-    private List<ZeusFile> children = new ArrayList<>();
+    private String state;
+
+    public String getState() {
+        if (this.getType() == FOLDER) {
+            return "closed";
+        } else {
+            return "open";
+        }
+    }
+
+    private List<ZeusFile> children;
 
     public Long getId() {
         return id;
@@ -124,6 +134,9 @@ public class ZeusFile implements Serializable {
     }
 
     public List<ZeusFile> getChildren() {
+        if (this.getType() == FOLDER && children == null) {
+            children = new ArrayList<>();
+        }
         return children;
     }
 

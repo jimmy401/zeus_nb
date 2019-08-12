@@ -1,18 +1,16 @@
 package com.taobao.zeus.web.platform.server.rpc;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sencha.gxt.data.shared.loader.PagingLoadConfig;
-import com.sencha.gxt.data.shared.loader.PagingLoadResult;
-import com.sencha.gxt.data.shared.loader.PagingLoadResultBean;
 import com.taobao.zeus.broadcast.alarm.MailAlarm;
 import com.taobao.zeus.client.ZeusException;
 import com.taobao.zeus.dal.logic.GroupManagerWithAction;
 import com.taobao.zeus.dal.logic.UserManager;
 import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.dal.tool.Super;
+import com.taobao.zeus.web.platform.module.PagingLoadConfig;
+import com.taobao.zeus.web.platform.module.PagingLoadResult;
+import com.taobao.zeus.web.platform.module.PagingLoadResultBean;
+import com.taobao.zeus.web.platform.module.ZUser;
 import com.taobao.zeus.web.util.LoginUser;
-import com.taobao.zeus.web.platform.client.util.GwtException;
-import com.taobao.zeus.web.platform.client.util.ZUser;
 import com.taobao.zeus.web.platform.shared.rpc.UserService;
 import com.taobao.zeus.web.util.EncryptHelper;
 import org.slf4j.Logger;
@@ -30,8 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("user.rpc")
-public class UserServiceImpl extends RemoteServiceServlet implements
-        UserService {
+public class UserServiceImpl implements UserService {
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
@@ -145,7 +142,7 @@ public class UserServiceImpl extends RemoteServiceServlet implements
     }
 
     @Override
-    public ZUser updateUser(ZUser zu) throws GwtException {
+    public ZUser updateUser(ZUser zu) throws Exception {
         String uid = zu.getUid();
         if (hasPermission(uid)) {
             ZeusUser u = userManager.findByUid(uid);
@@ -156,7 +153,7 @@ public class UserServiceImpl extends RemoteServiceServlet implements
             userManager.update(u);
             return transform(userManager.findByUid(uid));
         } else {
-            throw new GwtException("您无权操作");
+            throw new Exception("您无权操作");
         }
     }
 
@@ -247,7 +244,7 @@ public class UserServiceImpl extends RemoteServiceServlet implements
         return null;
     }
 
-    private void checkpass(String uid) throws GwtException {
+    private void checkpass(String uid) throws Exception {
         ZeusUser user = userManager.findByUid(uid);
         user.setIsEffective(ZeusUser.UserStatus.CHECK_SUCCESS.value());
         userManager.update(user);
@@ -264,7 +261,7 @@ public class UserServiceImpl extends RemoteServiceServlet implements
                             log.warn("根目录下一层已存在同名组" + newUser.getUid());
                         }
                     } catch (ZeusException e) {
-                        throw new GwtException("创建group异常");
+                        throw new Exception("创建group异常");
                     }
                 }
             }
@@ -420,7 +417,7 @@ public class UserServiceImpl extends RemoteServiceServlet implements
     }
 
     @Override
-    public void checkpass(List<String> uids) throws GwtException {
+    public void checkpass(List<String> uids) throws Exception {
         if (hasAdminPermission()) {
             for (String uid : uids) {
                 try {
@@ -430,12 +427,12 @@ public class UserServiceImpl extends RemoteServiceServlet implements
                 }
             }
         } else {
-            throw new GwtException("您无权操作");
+            throw new Exception("您无权操作");
         }
     }
 
     @Override
-    public void checknotpass(List<String> uids) throws GwtException {
+    public void checknotpass(List<String> uids) throws Exception {
         if (hasAdminPermission()) {
             for (String uid : uids) {
                 try {
@@ -446,13 +443,13 @@ public class UserServiceImpl extends RemoteServiceServlet implements
             }
 
         } else {
-            throw new GwtException("您无权操作");
+            throw new Exception("您无权操作");
         }
 
     }
 
     @Override
-    public void delete(List<String> uids) throws GwtException {
+    public void delete(List<String> uids) throws Exception {
 
         if (hasAdminPermission()) {
             for (String uid : uids) {
@@ -463,7 +460,7 @@ public class UserServiceImpl extends RemoteServiceServlet implements
                 }
             }
         } else {
-            throw new GwtException("您无权操作");
+            throw new Exception("您无权操作");
         }
     }
 }

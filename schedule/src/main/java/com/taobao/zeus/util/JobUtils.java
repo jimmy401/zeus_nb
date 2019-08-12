@@ -10,7 +10,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.taobao.zeus.dal.logic.GroupManagerWithJob;
+import com.taobao.zeus.dal.model.ZeusFile;
 import com.taobao.zeus.jobs.sub.HiveBeelineJob;
+import com.taobao.zeus.model.*;
 import org.apache.commons.lang.StringUtils;
 import org.mortbay.log.Log;
 import org.springframework.context.ApplicationContext;
@@ -29,11 +31,7 @@ import com.taobao.zeus.jobs.sub.tool.OutputCheckJob;
 import com.taobao.zeus.jobs.sub.tool.OutputCleanJob;
 import com.taobao.zeus.jobs.sub.tool.WangWangJob;
 import com.taobao.zeus.jobs.sub.tool.ZooKeeperJob;
-import com.taobao.zeus.model.DebugHistory;
-import com.taobao.zeus.model.FileDescriptor;
 import com.taobao.zeus.model.JobDescriptor.JobRunType;
-import com.taobao.zeus.model.JobHistory;
-import com.taobao.zeus.model.Profile;
 import com.taobao.zeus.model.processer.DownloadProcesser;
 import com.taobao.zeus.model.processer.HiveProcesser;
 import com.taobao.zeus.model.processer.JobProcesser;
@@ -62,7 +60,7 @@ public class JobUtils {
 		HierarchyProperties hp = new HierarchyProperties(
 				new HashMap<String, String>());
 		String script = history.getScript();
-		List<Map<String, String>> resources = new ArrayList<Map<String, String>>();
+		List<FileResource> resources = new ArrayList<FileResource>();
 		// 处理脚本中的 资源引用 语句
 		script = resolvScriptResource(resources, script, applicationContext);
 		jobContext.setResources(resources);
@@ -110,7 +108,7 @@ public class JobUtils {
 			}
 		}
 		jobContext.setProperties(new RenderHierarchyProperties(hp));
-		List<Map<String, String>> resources = jobBean.getHierarchyResources();
+		List<FileResource> resources = jobBean.getHierarchyResources();
 /*		String script = jobBean.getActionDescriptor().getScript();*/
 		String tojobId = jobBean.getJobDescriptor().getJobId();
 		GroupManagerWithJob groupManagerWithJob = (GroupManagerWithJob) applicationContext
@@ -191,9 +189,7 @@ public class JobUtils {
 		return script;
 	}
 
-	private static String resolvScriptResource(
-			List<Map<String, String>> resources, String script,
-			ApplicationContext context) {
+	private static String resolvScriptResource(List<FileResource> resources, String script, ApplicationContext context) {
 		Matcher m = PT.matcher(script);
 		while (m.find()) {
 			String s = m.group();
@@ -203,11 +199,10 @@ public class JobUtils {
 			String name = "";
 			String referScript = null;
 			String path = uri.substring(uri.lastIndexOf('/') + 1);
-			Map<String, String> map = new HashMap<String, String>(2);
+			FileResource fileResource = new FileResource();
 			if (uri.startsWith("doc://")) {
-				FileManager manager = (FileManager) context
-						.getBean("mysqlFileManager");
-				FileDescriptor fd = manager.getFile(path);
+				FileManager manager = (FileManager) context.getBean("mysqlFileManager");
+				ZeusFile fd = manager.getFile(Long.valueOf(path));
 				name = fd.getName();
 				// 把脚本放到map里，减少后面一次getFile调用
 				referScript = fd.getContent();
@@ -230,21 +225,19 @@ public class JobUtils {
 				}
 			}
 			boolean exist = false;
-			for (Map<String, String> ent : resources) {
-				if (ent.get("name").equals(name)) {
+			for (FileResource ent : resources) {
+				if (ent.getName().equals(name)) {
 					exist = true;
 					break;
 				}
 			}
 			if (!exist) {
-				map.put("uri", uri);
-				map.put("name", name);
-				resources.add(map);
+				fileResource.setUri(uri);
+				fileResource.setName(name);
+				resources.add(fileResource);
 				// 把脚本放到map里，减少后面一次getFile调用
 				if (uri.startsWith("doc://") && referScript != null) {
-					map.put("zeus-doc-" + path,
-							resolvScriptResource(resources, referScript,
-									context));
+					fileResource.setScript(resolvScriptResource(resources, referScript,context));
 				}
 			}
 		}

@@ -4,62 +4,51 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.sencha.gxt.data.shared.loader.PagingLoadConfig;
-import com.sencha.gxt.data.shared.loader.PagingLoadResult;
-import com.taobao.zeus.web.platform.client.module.jobdisplay.job.JobHistoryModel;
-import com.taobao.zeus.web.platform.client.module.jobmanager.JobModel;
-import com.taobao.zeus.web.platform.client.module.jobmanager.JobModelAction;
-import com.taobao.zeus.web.platform.client.util.GwtException;
-import com.taobao.zeus.web.platform.client.util.HostGroupModel;
-import com.taobao.zeus.web.platform.client.util.ZUser;
-import com.taobao.zeus.web.platform.client.util.ZUserContactTuple;
+import com.taobao.zeus.web.platform.module.*;
 
 /**
  *
  * @author zhoufang
  */
-@RemoteServiceRelativePath("job.rpc")
-public interface JobService extends RemoteService {
+public interface JobService {
 	/**
 	 * 创建一个Job任务
 	 * @param jobData
 	 * @throws ServiceException
 	 * @throws IOException
 	 */
-	JobModel createJob(String jobName,String parentGroupId,String jobType) throws GwtException;
+	JobModel createJob(String jobName, String parentGroupId, String jobType) throws Exception;
 	
-	JobModel getUpstreamJob(String jobId) throws GwtException;
+	JobModel getUpstreamJob(String jobId) throws Exception;
 	
-	JobModel updateJob(JobModel jobModel) throws GwtException;
+	JobModel updateJob(JobModel jobModel) throws Exception;
 	/**
 	 * 开关
 	 * @param auto
-	 * @throws GwtException
+	 * @throws Exception
 	 */
-	List<Long> switchAuto(String jobId,Boolean auto) throws GwtException;
+	List<Long> switchAuto(String jobId,Boolean auto) throws Exception;
 	/**
 	 * 运行程序
 	 * 1：手动运行
 	 * 2:手动恢复
 	 * @param jobId
 	 * @param type
-	 * @throws GwtException
+	 * @throws Exception
 	 */
-	void run(String jobId,int type) throws GwtException;
+	void run(String jobId,int type) throws Exception;
 	/**
 	 * 取消一个正在执行的任务
 	 * @param historyId
-	 * @throws GwtException
+	 * @throws Exception
 	 */
-	void cancel(String historyId) throws GwtException;
+	void cancel(String historyId) throws Exception;
 	/**
 	 * 分页查询Job任务的历史日志
 	 * @param config
 	 * @return
 	 */
-	PagingLoadResult<JobHistoryModel> jobHistoryPaging(String jobId,PagingLoadConfig config);
+	PagingLoadResult<JobHistoryModel> jobHistoryPaging(String jobId, PagingLoadConfig config);
 	/**
 	 * 获取Job任务的详细日志
 	 * @param id
@@ -77,7 +66,7 @@ public interface JobService extends RemoteService {
 	 * @param groupId
 	 * @return
 	 */
-	PagingLoadResult<JobModelAction> getSubJobStatus(String groupId,PagingLoadConfig config,Date startDate, Date endDate);
+	PagingLoadResult<JobModelAction> getSubJobStatus(String groupId, PagingLoadConfig config, Date startDate, Date endDate);
 
 	/**
 	 * 获取组下正在运行的自动job
@@ -101,33 +90,33 @@ public interface JobService extends RemoteService {
 	 * 删除Job任务
 	 * @param jobId
 	 * @return
-	 * @throws GwtException
+	 * @throws Exception
 	 */
-	void deleteJob(String jobId) throws GwtException;
+	void deleteJob(String jobId) throws Exception;
 	
-	void addJobAdmin(String jobId,String uid)throws GwtException;
+	void addJobAdmin(String jobId,String uid)throws Exception;
 	
-	void removeJobAdmin(String jobId,String uid)throws GwtException;
+	void removeJobAdmin(String jobId,String uid)throws Exception;
 	
 	List<ZUser> getJobAdmins(String jobId);
 	
-	void transferOwner(String jobId,String uid) throws GwtException;
+	void transferOwner(String jobId,String uid) throws Exception;
 	/**
 	 * 移动Job
 	 * 将job移动到新的group下
 	 * @param jobId
 	 * @param newGroupId
-	 * @throws GwtException
+	 * @throws Exception
 	 */
-	void move(String jobId,String newGroupId) throws GwtException;
+	void move(String jobId,String newGroupId) throws Exception;
 	/**
 	 * 同步任务脚本
 	 * 给开发中心使用，方便开发中心直接同步脚本到调度中心
 	 * @param jobId
 	 * @param script
-	 * @throws GwtException
+	 * @throws Exception
 	 */
-	void syncScript(String jobId,String script) throws GwtException;
+	void syncScript(String jobId,String script) throws Exception;
 	
 	
 	/**
@@ -136,21 +125,21 @@ public interface JobService extends RemoteService {
 	 * @param jobId
 	 * @param script
 	 * @return 
-	 * @throws GwtException
+	 * @throws Exception
 	 */
 	List<Long> getJobACtion(String id);
 	
-	void grantImportantContact(String jobId, String uid)  throws GwtException;
+	void grantImportantContact(String jobId, String uid)  throws Exception;
 	
-	void revokeImportantContact(String jobId, String uid)  throws GwtException;
+	void revokeImportantContact(String jobId, String uid)  throws Exception;
 	
 	List<ZUserContactTuple> getAllContactList(String jobId);
 	
-	List<String> getJobDependencies(String jobId) throws GwtException;
+	List<String> getJobDependencies(String jobId) throws Exception;
 	
 	PagingLoadResult<HostGroupModel> getHostGroup(PagingLoadConfig config);
 
-	void syncScriptAndHostGroupId(String jobId, String script, String hostGroupId) throws GwtException;
+	void syncScriptAndHostGroupId(String jobId, String script, String hostGroupId) throws Exception;
 	
 	String getHostGroupNameById(String hostGroupId);
 }

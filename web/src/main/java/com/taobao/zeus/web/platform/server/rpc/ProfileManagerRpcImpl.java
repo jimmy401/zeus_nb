@@ -3,14 +3,13 @@ package com.taobao.zeus.web.platform.server.rpc;
 import java.util.Map;
 
 import com.taobao.zeus.dal.logic.ProfileManager;
+import com.taobao.zeus.web.platform.module.ProfileModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.taobao.zeus.model.Profile;
 import com.taobao.zeus.web.util.LoginUser;
-import com.taobao.zeus.web.platform.client.module.profile.ProfileModel;
-import com.taobao.zeus.web.platform.client.util.GwtException;
 import com.taobao.zeus.web.platform.shared.rpc.ProfileManagerService;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +19,7 @@ public class ProfileManagerRpcImpl implements ProfileManagerService{
 	@Autowired
 	private ProfileManager profileManager;
 	@Override
-	public void updateHadoopConf(Map<String, String> conf) throws GwtException{
+	public void updateHadoopConf(Map<String, String> conf) throws Exception{
 		String uid=LoginUser.getUser().getUid();
 		Profile p=profileManager.findByUid(uid);
 		if(p==null){
@@ -31,7 +30,7 @@ public class ProfileManagerRpcImpl implements ProfileManagerService{
 			profileManager.update(uid, p);
 		} catch (Exception e) {
 			log.error("updateHadoopConf",e);
-			throw new GwtException(e.getMessage());
+			throw new Exception(e.getMessage());
 		}
 	}
 	@Override

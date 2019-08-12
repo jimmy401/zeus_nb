@@ -1,10 +1,10 @@
 package com.taobao.zeus.web.platform.shared.rpc;
 
+import com.taobao.zeus.web.platform.module.FileModel;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.taobao.zeus.web.platform.client.module.filemanager.FileModel;
 
 public class FileClientBean implements Serializable{
 

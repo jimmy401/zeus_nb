@@ -1,6 +1,6 @@
 package com.taobao.zeus.dal.logic;
 
-import com.taobao.zeus.model.FileDescriptor;
+import com.taobao.zeus.dal.model.ZeusFile;
 
 import java.util.List;
 
@@ -15,23 +15,23 @@ public interface FileManager {
 	 * @param file
 	 * @return id
 	 */
-	FileDescriptor addFile(String uid, String parentId, String name, boolean folder);
+	void addFile(String uid, Long parentId, String name, boolean folder);
 		
 	/**
 	 * 删除文件/文件夹
 	 * @param file
 	 */
-	public void deleteFile(String fileId);
+	public void deleteFile(Long fileId);
 	/**
 	 * 后台查询File最新内容
 	 * @param id
 	 * @param callback
 	 */
-	public FileDescriptor getFile(String id);	
+	public ZeusFile getFile(Long id);
 	
-	public void update(FileDescriptor fd);
+	public void update(ZeusFile fd);
 	
-	public List<FileDescriptor> getSubFiles(String id);
+	public List<ZeusFile> getSubFiles(Long id);
 	
-	public List<FileDescriptor> getUserFiles(String uid);
+	public List<ZeusFile> getUserFiles(String uid);
 }

@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.taobao.zeus.dal.logic.ProfileManager;
 import com.taobao.zeus.dal.model.ZeusUser;
+import com.taobao.zeus.web.platform.module.TableColumnModel;
+import com.taobao.zeus.web.platform.module.TableModel;
 import com.taobao.zeus.web.util.LoginUser;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -39,8 +41,6 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import com.taobao.zeus.jobs.sub.conf.ConfUtil;
 import com.taobao.zeus.model.Profile;
 import com.taobao.zeus.util.ZeusStringUtil;
-import com.taobao.zeus.web.platform.client.module.tablemanager.model.TableColumnModel;
-import com.taobao.zeus.web.platform.client.module.tablemanager.model.TableModel;
 import com.taobao.zeus.web.platform.shared.rpc.TableManagerService;
 
 public class PartitionDownloadServlet extends HttpServlet {

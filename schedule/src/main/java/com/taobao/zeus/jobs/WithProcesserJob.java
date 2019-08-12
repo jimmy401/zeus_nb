@@ -3,9 +3,8 @@ package com.taobao.zeus.jobs;
 import java.util.List;
 
 import com.taobao.zeus.dal.logic.FileManager;
+import com.taobao.zeus.dal.model.ZeusFile;
 import org.springframework.context.ApplicationContext;
-
-import com.taobao.zeus.model.FileDescriptor;
 
 public class WithProcesserJob extends AbstractJob{
 
@@ -29,10 +28,10 @@ public class WithProcesserJob extends AbstractJob{
 		String jobId=null;
 		String historyId=null;
 		boolean isDebug=false;
-		FileDescriptor fd=null;
+		ZeusFile zeusFile=null;
 		if(jobContext.getDebugHistory()!=null){
 			isDebug = true;
-			fd = fileManager.getFile(jobContext.getDebugHistory().getFileId());
+			zeusFile = fileManager.getFile(jobContext.getDebugHistory().getFileId());
 		}else {
 			jobId=jobContext.getJobHistory().getActionId();
 			historyId = jobContext.getJobHistory().getId();

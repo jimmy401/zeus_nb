@@ -1,13 +1,11 @@
 package com.taobao.zeus.web.platform.shared.rpc;
 
+
+import com.taobao.zeus.web.platform.module.FileModel;
+
 import java.util.List;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.taobao.zeus.web.platform.client.module.filemanager.FileModel;
-
-@RemoteServiceRelativePath("file.rpc")
-public interface FileManagerService extends RemoteService{
+public interface FileManagerService{
 	FileModel addFile(String parentId, String name, boolean folder);
 
 	public void deleteFile(String fileId) ;

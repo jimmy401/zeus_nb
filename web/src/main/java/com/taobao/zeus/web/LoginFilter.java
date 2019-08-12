@@ -30,34 +30,11 @@ public class LoginFilter implements Filter {
 	private static final Logger log = LoggerFactory.getLogger(LoginFilter.class);
 
 	private UserManager userManager;
-	private SSOLogin login=new SSOLogin() {
-		public String getUid(HttpServletRequest req) {
 
-			return ZeusUser.USER.getUid();
-		}
-		public String getPhone(HttpServletRequest req) {
-			return ZeusUser.USER.getPhone();
-		}
-		public String getName(HttpServletRequest req) {
-			return ZeusUser.USER.getName();
-		}
-		public String getEmail(HttpServletRequest req) {
-			return ZeusUser.USER.getEmail();
-		}
-	};
 	@Override
 	public void destroy() {
 		// do nothing
 	}
-
-
-	public interface SSOLogin{
-		String getUid(HttpServletRequest req);
-		String getEmail(HttpServletRequest req);
-		String getName(HttpServletRequest req);
-		String getPhone(HttpServletRequest req);
-	}
-
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response,
@@ -117,9 +94,6 @@ public class LoginFilter implements Filter {
 	public void init(FilterConfig filterConfig) throws ServletException {
 		ApplicationContext applicationContext=WebApplicationContextUtils.getWebApplicationContext(filterConfig.getServletContext());
 		userManager=(UserManager) applicationContext.getBean("mysqlUserManager");
-		if(applicationContext.containsBean("ssoLogin")){
-			login=(SSOLogin)applicationContext.getBean("ssologin");
-		}
 	}
 
 }

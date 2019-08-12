@@ -1,6 +1,7 @@
 package com.taobao.zeus.schedule.mvc;
 
 import com.taobao.zeus.dal.logic.FileManager;
+import com.taobao.zeus.dal.model.ZeusFile;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -30,14 +31,14 @@ public class DebugListener extends DispatcherListener{
 			if(mvce.getAppEvent() instanceof DebugFailEvent){
 				final DebugFailEvent event=(DebugFailEvent) mvce.getAppEvent();
 				DebugHistory history=event.getHistory();
-				FileDescriptor fd=fileManager.getFile(history.getFileId());
+				ZeusFile fd=fileManager.getFile(history.getFileId());
 				
 				String msg="调试任务:"+fd.getName()+" 运行失败";
 				//此处可以发送IM消息
 			}else if(mvce.getAppEvent() instanceof DebugSuccessEvent){
 				final DebugSuccessEvent event=(DebugSuccessEvent) mvce.getAppEvent();
 				DebugHistory history=event.getHistory();
-				FileDescriptor fd=fileManager.getFile(history.getFileId());
+				ZeusFile fd=fileManager.getFile(history.getFileId());
 				
 				String msg="调试任务:"+fd.getName()+" 运行成功";
 				//此处可以发送IM消息

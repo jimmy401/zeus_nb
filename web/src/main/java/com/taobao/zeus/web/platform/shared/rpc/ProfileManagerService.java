@@ -1,16 +1,12 @@
 package com.taobao.zeus.web.platform.shared.rpc;
 
+import com.taobao.zeus.web.platform.module.ProfileModel;
+
 import java.util.Map;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.taobao.zeus.web.platform.client.module.profile.ProfileModel;
-import com.taobao.zeus.web.platform.client.util.GwtException;
+public interface ProfileManagerService{
 
-@RemoteServiceRelativePath("profile.rpc")
-public interface ProfileManagerService extends RemoteService{
-
-	void updateHadoopConf(Map<String, String> conf) throws GwtException;
+	void updateHadoopConf(Map<String, String> conf) throws Exception;
 	
 	ProfileModel getProfile();
 }

@@ -442,7 +442,7 @@ public class PersistenceAndBeanConvertWithAction {
 		debug.setEndTime(persistence.getEndTime());
 		debug.setExecuteHost(persistence.getExecuteHost());
 		debug.setFileId(persistence.getFileId() == null ? null : persistence
-				.getFileId().toString());
+				.getFileId());
 		debug.setId(persistence.getId() == null ? null : persistence.getId()
 				.toString());
 		debug.setStartTime(persistence.getStartTime());

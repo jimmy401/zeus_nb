@@ -14,8 +14,8 @@ public enum ReturnCode {
     SYSTEM_ERROR("11000", "系统出错"),
     EMPTY_PARAMETER("12000", "缺少参数"),
     INVALID_PARAMETER("12001", "参数无效"),
-    INVALID_ERROR("55555", "您没有权限操作");
-
+    INVALID_ERROR("55555", "您没有权限操作"),
+    TARGET_ERROR("40001", "目标对象不是文件夹");
     
     private String code;
 

@@ -3,6 +3,7 @@ package com.taobao.zeus.jobs.sub;
 import com.taobao.zeus.dal.tool.HierarchyProperties;
 import com.taobao.zeus.jobs.JobContext;
 import com.taobao.zeus.jobs.sub.main.MapReduceMain;
+import com.taobao.zeus.model.FileResource;
 import com.taobao.zeus.util.RunningJobKeys;
 
 import java.io.File;
@@ -51,12 +52,12 @@ public class MapReduceJob extends JavaJob{
 	
 	@Override
 	public Integer run() throws Exception {
-		List<Map<String, String>> resources=jobContext.getResources();
+		List<FileResource> resources=jobContext.getResources();
 		if(resources!=null && !resources.isEmpty()){
 			StringBuffer sb=new StringBuffer();
-			for(Map<String, String> map:jobContext.getResources()){
-				if(map.get("uri")!=null){
-					String uri=map.get("uri");
+			for(FileResource fileResource:jobContext.getResources()){
+				if(fileResource.getUri()!=null){
+					String uri=fileResource.getUri();
 					if(uri.startsWith("hdfs://") && uri.endsWith(".jar")){
 						sb.append(uri.substring("hdfs://".length())).append(",");
 					}

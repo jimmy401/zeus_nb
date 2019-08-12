@@ -11,20 +11,20 @@ import com.taobao.zeus.mvc.AppEvent;
 public class DebugFailEvent extends AppEvent{
 
 	private final DebugHistory history;
-	private final String fileId;
+	private final Long fileId;
 	private final Throwable throwable;
-	public DebugFailEvent(String jobId) {
+	public DebugFailEvent(Long jobId) {
 		this(jobId,null,null);
 	}
 	
-	public DebugFailEvent(String fileId,DebugHistory history,Throwable t){
+	public DebugFailEvent(Long fileId,DebugHistory history,Throwable t){
 		super(Events.JobFailed);
 		this.fileId=fileId;
 		this.history=history;
 		this.throwable=t;
 	}
 	
-	public String getFileId() {
+	public Long getFileId() {
 		return fileId;
 	}
 

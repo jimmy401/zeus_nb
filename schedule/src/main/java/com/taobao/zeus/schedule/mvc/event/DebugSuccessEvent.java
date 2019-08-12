@@ -9,14 +9,14 @@ import com.taobao.zeus.mvc.AppEvent;
  */
 public class DebugSuccessEvent extends AppEvent{
 	private DebugHistory history;
-	private String fileId;
-	public DebugSuccessEvent(String fileId,DebugHistory history) {
+	private Long fileId;
+	public DebugSuccessEvent(Long fileId,DebugHistory history) {
 		super(Events.JobSucceed);
 		this.fileId=fileId;
 		this.history=history;
 	}
 
-	public String getFileId() {
+	public Long getFileId() {
 		return fileId;
 	}
 

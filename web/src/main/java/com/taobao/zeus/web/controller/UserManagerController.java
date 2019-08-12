@@ -7,7 +7,6 @@ import com.taobao.zeus.web.common.CurrentUser;
 import com.taobao.zeus.web.controller.response.CommonResponse;
 import com.taobao.zeus.web.controller.response.GridContent;
 import com.taobao.zeus.web.controller.response.ReturnCode;
-import com.taobao.zeus.web.platform.client.util.ZUser;
 import com.taobao.zeus.web.util.EncryptHelper;
 import com.taobao.zeus.web.util.LoginUser;
 import org.slf4j.Logger;
@@ -60,7 +59,6 @@ public class UserManagerController extends BaseController {
             response.addCookie(cookie);
 
             CurrentUser.setUser(user);
-
             LoginUser.user.set(user);
             return user.getUid();
         }

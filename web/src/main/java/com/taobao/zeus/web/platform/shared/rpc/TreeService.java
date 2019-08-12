@@ -1,15 +1,13 @@
 package com.taobao.zeus.web.platform.shared.rpc;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.taobao.zeus.web.platform.client.module.jobmanager.GroupJobTreeModel;
+import com.taobao.zeus.web.platform.module.GroupJobTreeModel;
+
 /**
  * 提供给左侧树形结构的服务
  * @author zhoufang
  *
  */
-@RemoteServiceRelativePath("tree.rpc")
-public interface TreeService extends RemoteService{
+public interface TreeService{
 
 	public GroupJobTreeModel getTreeData();
 	

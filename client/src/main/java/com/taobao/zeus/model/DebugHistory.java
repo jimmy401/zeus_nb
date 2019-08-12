@@ -8,7 +8,7 @@ import com.taobao.zeus.model.JobStatus.Status;
 public class DebugHistory{
 
 	private String id;
-	private String fileId;
+	private Long fileId;
 	private Date startTime;
 	private Date endTime;
 	private String executeHost;
@@ -50,11 +50,11 @@ public class DebugHistory{
 		this.id = id;
 	}
 
-	public String getFileId() {
+	public Long getFileId() {
 		return fileId;
 	}
 
-	public void setFileId(String fileId) {
+	public void setFileId(Long fileId) {
 		this.fileId = fileId;
 	}
 

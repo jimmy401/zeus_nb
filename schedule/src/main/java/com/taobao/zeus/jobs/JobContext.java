@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.taobao.zeus.model.DebugHistory;
+import com.taobao.zeus.model.FileResource;
 import com.taobao.zeus.model.JobHistory;
 import com.taobao.zeus.dal.tool.HierarchyProperties;
 import com.taobao.zeus.util.DateUtil;
@@ -51,7 +52,7 @@ public class JobContext {
 	private String workDir;
 	//设置默认值，防止JobUtils.createAction()方法中产生空指针（92行）
 	private HierarchyProperties properties=new HierarchyProperties(new HashMap<String, String>());
-	private List<Map<String, String>> resources;
+	private List<FileResource> resources;
 	
 	private JobHistory jobHistory;
 	
@@ -101,10 +102,10 @@ public class JobContext {
 	public void setJobHistory(JobHistory jobHistory) {
 		this.jobHistory = jobHistory;
 	}
-	public List<Map<String, String>> getResources() {
+	public List<FileResource> getResources() {
 		return resources;
 	}
-	public void setResources(List<Map<String, String>> resources) {
+	public void setResources(List<FileResource> resources) {
 		this.resources = resources;
 	}
 	public DebugHistory getDebugHistory() {

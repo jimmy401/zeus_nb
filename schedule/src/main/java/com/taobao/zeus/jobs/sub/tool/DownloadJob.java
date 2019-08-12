@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.taobao.zeus.model.FileResource;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -37,17 +38,17 @@ public class DownloadJob extends AbstractJob {
 	@Override
 	public Integer run() throws IOException {
 		List<Job> jobs = new ArrayList<Job>();
-		for (Map<String, String> map : jobContext.getResources()) {
-			if (map.get("uri") != null) {
-				String name = map.get("name");
-				String uri = map.get("uri");
+		for (FileResource fileResource : jobContext.getResources()) {
+			if (fileResource.getUri() != null) {
+				String name = fileResource.getName();
+				String uri = fileResource.getUri();
 				if (uri.startsWith("hdfs://")) {
 					jobs.add(new DownloadHdfsFileJob(jobContext, jobContext
 							.getWorkDir() + File.separator + name, uri
 							.substring(7)));
 				} else if (uri.startsWith("doc://")) {
 					String fileId = uri.substring(uri.lastIndexOf('/')+1);
-					String script = map.get("zeus-doc-"+fileId);
+					String script = fileResource.getScript();
 					script = RenderHierarchyProperties.render(script);
 					File f = new File(jobContext
 							.getWorkDir() + File.separator + name);

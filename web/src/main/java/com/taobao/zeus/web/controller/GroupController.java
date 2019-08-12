@@ -12,8 +12,8 @@ import com.taobao.zeus.model.ZeusFollow;
 import com.taobao.zeus.web.common.CurrentUser;
 import com.taobao.zeus.web.controller.response.CommonResponse;
 import com.taobao.zeus.web.controller.response.ReturnCode;
-import com.taobao.zeus.web.platform.client.module.jobmanager.GroupModel;
-import com.taobao.zeus.web.platform.client.util.ZUser;
+import com.taobao.zeus.web.platform.module.GroupModel;
+import com.taobao.zeus.web.platform.module.ZUser;
 import com.taobao.zeus.web.util.LoginUser;
 import com.taobao.zeus.web.util.PermissionGroupManagerWithJob;
 import org.apache.commons.lang.StringUtils;
@@ -182,13 +182,16 @@ public class GroupController extends BaseController{
         }
     }
     @RequestMapping(value = "/delete_group", method = RequestMethod.GET)
-    public void deleteGroup(@RequestParam(value = "groupId") String groupId) {
+    public CommonResponse<String> deleteGroup(@RequestParam(value = "groupId") String groupId) {
         try {
             permissionGroupManagerWithJob.deleteGroup(LoginUser.getUser().getUid(), groupId);
+            return this.buildResponse(ReturnCode.SUCCESS,"");
         } catch (ZeusException e) {
             log.error("delete group failed.",e);
+            return this.buildResponse(ReturnCode.FAILED, e.getMessage());
         }
     }
+
     @RequestMapping(value = "/get_group_admins_string", method = RequestMethod.GET)
     public CommonResponse<String> getGroupAdminsString(@RequestParam(value = "groupId") String groupId) {
         List<ZeusUser> users= permissionGroupManagerWithJob.getGroupAdmins(groupId);

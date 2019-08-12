@@ -351,13 +351,13 @@
                  closed="true" buttons="#delete_group-buttons" data-options="modal:true">
                 <form id="delete_group_form" class="easyui-form" method="post" data-options="novalidate:true">
                     <div>
-                        <label>你确认删除此组:</label> <input id="delete_group_name" class="easyui-textbox">
+                        <label>你确认删除此组:</label> <label id="delete_group_name"></label>
                     </div>
                 </form>
             </div>
             <div id="delete_group-buttons">
                 <a href="javascript:void(0)" class="easyui-linkbutton" iconcls="icon-ok"
-                   onclick="deleteGroupConfirmed()"> 保存</a>
+                   onclick="deleteGroupConfirmed()"> 确认</a>
                 <a href="javascript:void(0)" class="easyui-linkbutton" iconcls="icon-cancel"
                    onclick="javascript:$('#delete_group_dialog').dialog('close')">取消</a>
             </div>

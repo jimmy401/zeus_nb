@@ -10,6 +10,8 @@ import com.taobao.zeus.dal.logic.impl.MysqlLogManager;
 import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.dal.tool.GroupBean;
 import com.taobao.zeus.model.LogDescriptor;
+import com.taobao.zeus.web.platform.module.GroupModel;
+import com.taobao.zeus.web.platform.module.ZUser;
 import com.taobao.zeus.web.util.PermissionGroupManagerWithJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +21,6 @@ import com.taobao.zeus.client.ZeusException;
 import com.taobao.zeus.model.GroupDescriptor;
 import com.taobao.zeus.model.ZeusFollow;
 import com.taobao.zeus.web.util.LoginUser;
-import com.taobao.zeus.web.platform.client.module.jobmanager.GroupModel;
-import com.taobao.zeus.web.platform.client.util.GwtException;
-import com.taobao.zeus.web.platform.client.util.ZUser;
 import com.taobao.zeus.web.platform.shared.rpc.GroupService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -44,17 +43,17 @@ public class GroupServiceImpl implements GroupService{
 
 	@Override
 	public String createGroup(String groupName, String parentGroupId,
-			boolean isDirectory) throws GwtException {
+			boolean isDirectory) throws Exception {
 		try {
 			GroupDescriptor gd= permissionGroupManagerWithJob.createGroup(LoginUser.getUser().getUid(), groupName, parentGroupId, isDirectory);
 			return gd.getId();
-		} catch (ZeusException e) {
-			throw new GwtException(e.getMessage());
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
 		}
 	}
 
 	@Override
-	public void deleteGroup(String groupId) throws GwtException {
+	public void deleteGroup(String groupId) throws Exception {
 		try {
 			permissionGroupManagerWithJob.deleteGroup(LoginUser.getUser().getUid(), groupId);
 			String user=LoginUser.getUser().getUid();
@@ -66,12 +65,12 @@ public class GroupServiceImpl implements GroupService{
 
 			mysqlLogManager.addLog(log);
 		} catch (ZeusException e) {
-			throw new GwtException(e.getMessage());
+			throw new Exception(e.getMessage());
 		}
 	}
 
 	@Override
-	public GroupModel getGroup(String groupId) throws GwtException {
+	public GroupModel getGroup(String groupId) throws Exception {
 		GroupDescriptor gd= permissionGroupManagerWithJob.getGroupDescriptor(groupId);
 		GroupModel model=new GroupModel();
 		model.setLocalResources(gd.getResources());
@@ -99,7 +98,7 @@ public class GroupServiceImpl implements GroupService{
 	}
 	
 	
-	public GroupModel getUpstreamGroup(String groupId) throws GwtException{
+	public GroupModel getUpstreamGroup(String groupId) throws Exception{
 		GroupBean bean= permissionGroupManagerWithJob.getUpstreamGroupBean(groupId);
 		GroupDescriptor gd=bean.getGroupDescriptor();
 		GroupModel model=new GroupModel();
@@ -198,7 +197,7 @@ public class GroupServiceImpl implements GroupService{
 
 
 	@Override
-	public void updateGroup(GroupModel group) throws GwtException {
+	public void updateGroup(GroupModel group) throws Exception {
 		GroupDescriptor gd=new GroupDescriptor();
 		gd.setResources(group.getLocalResources());
 		gd.setDesc(group.getDesc());
@@ -210,16 +209,16 @@ public class GroupServiceImpl implements GroupService{
 		try {
 			permissionGroupManagerWithJob.updateGroup(LoginUser.getUser().getUid(), gd);
 		} catch (ZeusException e) {
-			throw new GwtException(e.getMessage());
+			throw new Exception(e.getMessage());
 		}
 	}
 
 	@Override
-	public void addGroupAdmin(String groupId, String uid) throws GwtException {
+	public void addGroupAdmin(String groupId, String uid) throws Exception {
 		try {
 			permissionGroupManagerWithJob.addGroupAdmin(LoginUser.getUser().getUid(),uid, groupId);
 		} catch (ZeusException e) {
-			throw new GwtException(e.getMessage());
+			throw new Exception(e.getMessage());
 		}
 	}
 
@@ -238,31 +237,31 @@ public class GroupServiceImpl implements GroupService{
 
 	@Override
 	public void removeGroupAdmin(String groupId, String uid)
-			throws GwtException {
+			throws Exception {
 		try {
 			permissionGroupManagerWithJob.removeGroupAdmin(LoginUser.getUser().getUid(),uid, groupId);
 		} catch (ZeusException e) {
-			throw new GwtException(e.getMessage());
+			throw new Exception(e.getMessage());
 		}
 	}
 
 	@Override
-	public void transferOwner(String groupId, String uid) throws GwtException {
+	public void transferOwner(String groupId, String uid) throws Exception {
 		try {
 			permissionGroupManagerWithJob.grantGroupOwner(LoginUser.getUser().getUid(), uid, groupId);
 		} catch (ZeusException e) {
-			throw new GwtException(e.getMessage());
+			throw new Exception(e.getMessage());
 		}
 	}
 
 	@Override
 	public void move(String groupId, String newParentGroupId)
-			throws GwtException {
+			throws Exception {
 		try {
 			permissionGroupManagerWithJob.moveGroup(LoginUser.getUser().getUid(), groupId, newParentGroupId);
 		} catch (ZeusException e) {
 			log.error("move",e);
-			throw new GwtException(e.getMessage());
+			throw new Exception(e.getMessage());
 		}
 	}
 

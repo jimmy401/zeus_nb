@@ -52,7 +52,7 @@ public class MysqlDebugHistoryManager implements DebugHistoryManager{
 		for(ZeusDebugHistoryWithBLOBs item:list){
 			DebugHistory history=new DebugHistory();
 			history.setId(item.getId().toString());
-			history.setFileId(item.getFileId().toString());
+			history.setFileId(item.getFileId());
 			history.setStartTime(item.getStartTime());
 			history.setEndTime(item.getEndTime());
 			history.setExecuteHost(item.getExecuteHost());

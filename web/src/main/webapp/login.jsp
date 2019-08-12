@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="newcss/icon.css" />
     <link rel="stylesheet" href="newcss/custom.css" />--%>
     <script type="text/javascript" src="newjs/jquery.min.js"></script>
-    <script type="text/javascript" src="newjs/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="newjs/jquery.easyui.min-1.8.2.js"></script>
     <script type="text/javascript" src="newjs/login.js"></script>
 </head>
 <body>

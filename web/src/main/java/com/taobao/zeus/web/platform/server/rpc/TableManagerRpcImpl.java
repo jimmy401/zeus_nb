@@ -1,9 +1,5 @@
 package com.taobao.zeus.web.platform.server.rpc;
 
-import com.sencha.gxt.data.shared.loader.FilterConfig;
-import com.sencha.gxt.data.shared.loader.FilterPagingLoadConfig;
-import com.sencha.gxt.data.shared.loader.PagingLoadResult;
-import com.sencha.gxt.data.shared.loader.PagingLoadResultBean;
 import com.taobao.zeus.client.ZeusException;
 import com.taobao.zeus.dal.logic.ProfileManager;
 import com.taobao.zeus.dal.logic.TableManager;
@@ -12,14 +8,10 @@ import com.taobao.zeus.dal.tool.HierarchyProperties;
 import com.taobao.zeus.jobs.JobContext;
 import com.taobao.zeus.jobs.sub.tool.DataPreviewJob;
 import com.taobao.zeus.model.Profile;
+import com.taobao.zeus.util.Tuple;
 import com.taobao.zeus.util.ZeusStringUtil;
+import com.taobao.zeus.web.platform.module.*;
 import com.taobao.zeus.web.util.LoginUser;
-import com.taobao.zeus.web.platform.client.module.tablemanager.TablePreviewModel;
-import com.taobao.zeus.web.platform.client.module.tablemanager.component.Tuple;
-import com.taobao.zeus.web.platform.client.module.tablemanager.model.PartitionModel;
-import com.taobao.zeus.web.platform.client.module.tablemanager.model.TableColumnModel;
-import com.taobao.zeus.web.platform.client.module.tablemanager.model.TableModel;
-import com.taobao.zeus.web.platform.client.util.GwtException;
 import com.taobao.zeus.web.platform.shared.rpc.TableManagerService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
@@ -73,7 +65,7 @@ public class TableManagerRpcImpl implements TableManagerService {
 	 */
 	@Override
 	public PagingLoadResult<TableModel> getPagingTables(
-			FilterPagingLoadConfig loadConfig, String uid, String dbName) throws GwtException {
+			FilterPagingLoadConfig loadConfig, String uid, String dbName) throws Exception {
 		List<TableModel> tl;
 		int offset = loadConfig.getOffset();
 		int limit = loadConfig.getLimit();
@@ -94,7 +86,7 @@ public class TableManagerRpcImpl implements TableManagerService {
 				tl = convertList(tableManager.getPagingTables(dbName, name, offset,
 						limit));
 			} catch (ZeusException e) {
-				throw new GwtException("获取分页表失败！", e);
+				throw new Exception("获取分页表失败！", e);
 			}
 			return new PagingLoadResultBean<TableModel>(tl, totalNum,
 					loadConfig.getOffset());
@@ -179,7 +171,7 @@ public class TableManagerRpcImpl implements TableManagerService {
 	}
 
 	@Override
-	public List<PartitionModel> getPartitions(TableModel t) throws GwtException {
+	public List<PartitionModel> getPartitions(TableModel t) throws Exception {
 		List<PartitionModel> pml = null;
 		try {
 			Table tb = tableManager.getTable(t.getDbName(), t.getName());
@@ -232,7 +224,7 @@ public class TableManagerRpcImpl implements TableManagerService {
 			}
 		} catch (ZeusException e) {
 			log.error("获取分区列表出错", e);
-			throw new GwtException("获取分区列表出错", e);
+			throw new Exception("获取分区列表出错", e);
 		}
 		return pml;
 	}
@@ -265,7 +257,7 @@ public class TableManagerRpcImpl implements TableManagerService {
 
 	@Override
 	public TablePreviewModel getPreviewData(PartitionModel model)
-			throws GwtException {
+			throws Exception {
 		try {
 			TablePreviewModel result;
 			String path = model.getPath();
@@ -323,7 +315,7 @@ public class TableManagerRpcImpl implements TableManagerService {
 			return result;
 		} catch (Exception e) {
 			log.error("data preview error", e);
-			throw new GwtException(e.getMessage(), e);
+			throw new Exception(e.getMessage(), e);
 		}
 
 	}

@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.taobao.zeus.dal.logic.FileManager;
+import com.taobao.zeus.dal.model.ZeusFile;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -170,12 +171,12 @@ public class HiveJob extends ProcessJob {
 	@SuppressWarnings("unused")
 	private boolean getUdfSql() {
 		//TODO 请在此处填写udf文件对应的文档id
-		String fileID="121";
+		Long fileID=121L;
 		if(fileID==null){
 			return false;
 		}
 		try {
-			FileDescriptor file = fileManager.getFile(fileID);
+			ZeusFile file = fileManager.getFile(fileID);
 			File f = new File(jobContext.getWorkDir() + File.separator
 					+ UDF_SQL_NAME);
 			if (f.exists()) {

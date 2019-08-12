@@ -4,23 +4,23 @@ import java.util.*;
 
 import com.taobao.zeus.dal.logic.DebugHistoryManager;
 import com.taobao.zeus.dal.logic.FileManager;
+import com.taobao.zeus.dal.model.ZeusFile;
 import com.taobao.zeus.dal.tool.Super;
 import com.taobao.zeus.util.DateUtil;
+import com.taobao.zeus.web.platform.module.DebugHistoryModel;
+import com.taobao.zeus.web.platform.module.PagingLoadConfig;
+import com.taobao.zeus.web.platform.module.PagingLoadResult;
+import com.taobao.zeus.web.platform.module.PagingLoadResultBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.sencha.gxt.data.shared.loader.PagingLoadConfig;
-import com.sencha.gxt.data.shared.loader.PagingLoadResult;
-import com.sencha.gxt.data.shared.loader.PagingLoadResultBean;
 import com.taobao.zeus.model.DebugHistory;
 import com.taobao.zeus.model.FileDescriptor;
 import com.taobao.zeus.model.JobDescriptor.JobRunType;
 import com.taobao.zeus.socket.protocol.Protocol.ExecuteKind;
 import com.taobao.zeus.socket.worker.ClientWorker;
 import com.taobao.zeus.web.util.LoginUser;
-import com.taobao.zeus.web.platform.client.module.word.model.DebugHistoryModel;
-import com.taobao.zeus.web.platform.client.util.GwtException;
 import com.taobao.zeus.web.platform.shared.rpc.JobDebugService;
 import org.springframework.stereotype.Service;
 
@@ -40,14 +40,14 @@ public class JobDebugRpcImpl implements JobDebugService {
 			throws Exception {
 
 		String uid = LoginUser.getUser().getUid();
-		FileDescriptor fd = fileManager.getFile(fileId);
+		ZeusFile fd = fileManager.getFile(Long.valueOf(fileId));
 		if (!fd.getOwner().equals(uid)) {
 			return "您无权操作";
 			//throw new RuntimeException("您无权操作");
 		}
 		String now = DateUtil.date2String(new Date());
 		DebugHistory history = new DebugHistory();
-		history.setFileId(fileId);
+		history.setFileId(Long.valueOf(fileId));
 		history.setOwner(uid);
 		history.setJobRunType(JobRunType.parser(mode));
 		history.setScript(script);
@@ -68,7 +68,7 @@ public class JobDebugRpcImpl implements JobDebugService {
 		try {
 			worker.executeJobFromWeb(ExecuteKind.DebugKind, debugId);
 		} catch (Exception e) {
-			throw new GwtException(e.getMessage());
+			throw new Exception(e.getMessage());
 		}
 
 		return debugId;
@@ -125,10 +125,10 @@ public class JobDebugRpcImpl implements JobDebugService {
 	}
 
 	@Override
-	public void cancelDebug(String debugId) throws GwtException {
+	public void cancelDebug(String debugId) throws Exception {
 		String uid = LoginUser.getUser().getUid();
 		DebugHistory his = debugHistoryManager.findDebugHistory(debugId);
-		FileDescriptor fd = fileManager.getFile(his.getFileId());
+		ZeusFile fd = fileManager.getFile(his.getFileId());
 		if (!fd.getOwner().equals(uid) && !Super.getSupers().contains(uid)) {
 			throw new RuntimeException("您无权操作\nuid=" + uid + " fileOwner="
 					+ fd.getOwner());
@@ -138,7 +138,7 @@ public class JobDebugRpcImpl implements JobDebugService {
 					.getUser().getUid());
 		} catch (Exception e) {
 			log.error("cancelDebug error", e);
-			throw new GwtException(e.getMessage());
+			throw new Exception(e.getMessage());
 		}
 	}
 

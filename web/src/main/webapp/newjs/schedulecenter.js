@@ -376,6 +376,7 @@ function addGroupConfirmed() {
             if (ret != null) {
                 if (ret.msg == "success") {
                     initialTree();
+                    $('#add_group_dialog').dialog('close');
                 } else {
                     $.messager.alert('警告', '创建我的组节点信息失败', 'info');
                 }
@@ -421,8 +422,8 @@ function editGroupConfirmed() {
 
 function deleteGroup() {
     var node = $('#all_jobs').tree('getSelected');
-    var name = node.attributes.text;
-    $('#delete_group_name').val(name);
+    var name = node.text;
+    $('#delete_group_name').html(name);
     $('#delete_group_dialog').dialog('open').dialog('setTitle', '删除组');
 }
 
@@ -440,9 +441,10 @@ function deleteGroupConfirmed() {
         success: function (ret) {
             if (ret != null) {
                 if (ret.msg == "success") {
+                    $('#delete_group_dialog').dialog('close');
                     initialTree();
                 } else {
-                    $.messager.alert('警告', '删除我的组节点信息失败', 'info');
+                    $.messager.alert('警告', "删除失败，错误信息：" + ret.data, 'info');
                 }
             }
         }

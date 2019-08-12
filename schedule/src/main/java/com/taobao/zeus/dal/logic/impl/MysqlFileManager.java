@@ -23,64 +23,47 @@ public class MysqlFileManager implements FileManager {
     ZeusFileMapper zeusFileMapper;
 
     @Override
-    public FileDescriptor addFile(String uid, String parentId, String name, boolean folder) {
+    public void addFile(String uid, Long parentId, String name, boolean folder) {
         ZeusFile fp = new ZeusFile();
         fp.setName(name);
         fp.setOwner(uid);
         fp.setParent(Long.valueOf(parentId));
         fp.setType(folder ? ZeusFile.FOLDER : ZeusFile.FILE);
         zeusFileMapper.insertSelective(fp);
-
-        HashMap<String, Object> params = new HashMap<>();
-        params.put("name", name);
-        params.put("owner", uid);
-        params.put("parent", Long.valueOf(parentId));
-        params.put("type", folder ? ZeusFile.FOLDER : ZeusFile.FILE);
-
-        ZeusFile result = zeusFileMapper.selectByParams(params);
-        return PersistenceAndBeanConvertWithAction.convert(result);
     }
 
     @Override
-    public void deleteFile(String fileId) {
-        zeusFileMapper.deleteByPrimaryKey(Long.valueOf(fileId));
+    public void deleteFile(Long fileId) {
+        zeusFileMapper.deleteByPrimaryKey(fileId);
     }
 
     @Override
-    public FileDescriptor getFile(String id) {
-        ZeusFile fp = zeusFileMapper.selectByPrimaryKey(Long.valueOf(id));
-        if (fp != null) {
-            return PersistenceAndBeanConvertWithAction.convert(fp);
-        }
-        return null;
+    public ZeusFile getFile(Long id) {
+        return zeusFileMapper.selectByPrimaryKey(id);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<FileDescriptor> getSubFiles(final String id) {
+    public List<ZeusFile> getSubFiles(Long id) {
 
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("parent", Long.valueOf(id));
+        params.put("parent", id);
 
         List<ZeusFile> fps = zeusFileMapper.findByParent(params);
 
-        List<FileDescriptor> list = new ArrayList<FileDescriptor>();
-        for (ZeusFile fp : fps) {
-            list.add(PersistenceAndBeanConvertWithAction.convert(fp));
-        }
-        return list;
+        return fps;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<FileDescriptor> getUserFiles(final String uid) {
+    public List<ZeusFile> getUserFiles(String uid) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("owner", uid);
 
-        List<FileDescriptor> result = new ArrayList<FileDescriptor>();
+        List<ZeusFile> list = new ArrayList<ZeusFile>();
 
         synchronized (locker) {
-            List<ZeusFile> list = zeusFileMapper.findByOwner(params);
+            list = zeusFileMapper.findByOwner(params);
             if (list == null || list.isEmpty()) {
                 if (list == null) {
                     list = new ArrayList<ZeusFile>();
@@ -115,13 +98,8 @@ public class MysqlFileManager implements FileManager {
                 list.add(common);
             }
 
-            if (list != null) {
-                for (ZeusFile fp : list) {
-                    result.add(PersistenceAndBeanConvertWithAction.convert(fp));
-                }
-            }
         }
-        return result;
+        return list;
     }
 
     public List<ZeusFile> getPersonalFiles(String uid) {
@@ -132,9 +110,9 @@ public class MysqlFileManager implements FileManager {
     }
 
     @Override
-    public void update(FileDescriptor fd) {
+    public void update(ZeusFile fd) {
         fd.setGmtModified(new Date());
-        zeusFileMapper.updateByPrimaryKeySelective(PersistenceAndBeanConvertWithAction.convert(fd));
+        zeusFileMapper.updateByPrimaryKeySelective(fd);
     }
 
 }

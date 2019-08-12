@@ -1,5 +1,6 @@
 package com.taobao.zeus.dal.tool;
 
+import com.taobao.zeus.model.FileResource;
 import com.taobao.zeus.model.JobDescriptor;
 import com.taobao.zeus.model.JobStatus;
 import com.taobao.zeus.dal.tool.GroupBean;
@@ -48,9 +49,9 @@ public class JobBean {
 		return new HierarchyProperties(jobDescriptor.getProperties());
 	}
 	
-	public List<Map<String, String>> getHierarchyResources(){
+	public List<FileResource> getHierarchyResources(){
 		List<String> existList=new ArrayList<String>();
-		List<Map<String, String>> local = new ArrayList<>();
+		List<FileResource> local = new ArrayList<>();
 		/*List<Map<String, String>> local=new ArrayList<Map<String,String>>(jobDescriptor.getResources());
 		if(local==null){
 			local=new ArrayList<Map<String,String>>();

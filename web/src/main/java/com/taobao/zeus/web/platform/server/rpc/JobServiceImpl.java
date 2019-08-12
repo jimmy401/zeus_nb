@@ -18,6 +18,7 @@ import com.taobao.zeus.dal.tool.ProcesserUtil;
 import com.taobao.zeus.model.*;
 import com.taobao.zeus.util.ContentUtil;
 import com.taobao.zeus.web.common.CurrentUser;
+import com.taobao.zeus.web.platform.module.*;
 import com.taobao.zeus.web.util.PermissionGroupManagerWithAction;
 import com.taobao.zeus.web.util.PermissionGroupManagerWithJob;
 import net.sf.json.JSONObject;
@@ -26,9 +27,6 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.sencha.gxt.data.shared.loader.PagingLoadConfig;
-import com.sencha.gxt.data.shared.loader.PagingLoadResult;
-import com.sencha.gxt.data.shared.loader.PagingLoadResultBean;
 import com.taobao.zeus.client.ZeusException;
 import com.taobao.zeus.model.JobStatus.Status;
 import com.taobao.zeus.model.JobStatus.TriggerType;
@@ -39,13 +37,6 @@ import com.taobao.zeus.util.DateUtil;
 import com.taobao.zeus.util.Environment;
 import com.taobao.zeus.util.Tuple;
 import com.taobao.zeus.web.util.LoginUser;
-import com.taobao.zeus.web.platform.client.module.jobdisplay.job.JobHistoryModel;
-import com.taobao.zeus.web.platform.client.module.jobmanager.JobModel;
-import com.taobao.zeus.web.platform.client.module.jobmanager.JobModelAction;
-import com.taobao.zeus.web.platform.client.util.GwtException;
-import com.taobao.zeus.web.platform.client.util.HostGroupModel;
-import com.taobao.zeus.web.platform.client.util.ZUser;
-import com.taobao.zeus.web.platform.client.util.ZUserContactTuple;
 import com.taobao.zeus.web.platform.shared.rpc.JobService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -83,7 +74,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobModel createJob(String jobName, String parentGroupId,
-                              String jobType) throws GwtException {
+                              String jobType) throws Exception {
         JobDescriptor.JobRunType type = null;
         JobModel model = new JobModel();
         if (JobModel.MapReduce.equals(jobType)) {
@@ -111,12 +102,12 @@ public class JobServiceImpl implements JobService {
             return model;
         } catch (ZeusException e) {
             log.error(e);
-            throw new GwtException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
     @Override
-    public JobModel getUpstreamJob(String jobId) throws GwtException {
+    public JobModel getUpstreamJob(String jobId) throws Exception {
         JobBean jobBean = permissionGroupManagerWithJob
                 .getUpstreamJobBean(jobId);
         JobModel jobModel = new JobModel();
@@ -290,7 +281,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public JobModel updateJob(JobModel jobModel) throws GwtException {
+    public JobModel updateJob(JobModel jobModel) throws Exception {
         if (!jobModel.getOwner().equalsIgnoreCase(ADMIN.getUid())) {
             if (ContentUtil.containInvalidContent(jobModel.getScript())) {
                 throw new RuntimeException("没有数据仓库DDL权限！");
@@ -363,7 +354,7 @@ public class JobServiceImpl implements JobService {
             return getUpstreamJob(jd.getId());
         } catch (ZeusException e) {
             log.error(e);
-            throw new GwtException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
@@ -380,7 +371,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public List<Long> switchAuto(String jobId, Boolean auto)
-            throws GwtException {
+            throws Exception {
         Tuple<JobDescriptor, JobStatus> job = permissionGroupManagerWithJob
                 .getJobDescriptor(jobId);
         JobDescriptor jd = job.getX();
@@ -484,7 +475,7 @@ public class JobServiceImpl implements JobService {
     }
 
     private void ChangeAuto(Boolean auto, JobDescriptor jd)
-            throws GwtException {
+            throws Exception {
         jd.setAuto(auto);
         try {
             permissionGroupManagerWithJob.updateJob(LoginUser.getUser().getUid(),
@@ -504,12 +495,12 @@ public class JobServiceImpl implements JobService {
 //			}
         } catch (ZeusException e) {
             log.error(e);
-            throw new GwtException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
     @Override
-    public void run(String actionId, int type) throws GwtException {
+    public void run(String actionId, int type) throws Exception {
         TriggerType triggerType = null;
         JobDescriptor jobDescriptor = null;
         ExecuteKind kind = null;
@@ -522,7 +513,7 @@ public class JobServiceImpl implements JobService {
         }
         if (!permissionManager.hasActionPermission(
                 LoginUser.getUser().getUid(), actionId)) {
-            GwtException e = new GwtException("你没有权限执行该操作");
+            Exception e = new Exception("你没有权限执行该操作");
             log.error(e);
             throw e;
         }/*
@@ -574,16 +565,16 @@ public class JobServiceImpl implements JobService {
             worker.executeJobFromWeb(kind, history.getId());
         } catch (Exception e) {
             log.error("error", e);
-            throw new GwtException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
     @Override
-    public void cancel(String historyId) throws GwtException {
+    public void cancel(String historyId) throws Exception {
         JobHistory history = jobHistoryManager.findJobHistory(historyId);
         if (!permissionManager.hasActionPermission(
                 LoginUser.getUser().getUid(), history.getActionId())) {
-            throw new GwtException("你没有权限执行该操作");
+            throw new Exception("你没有权限执行该操作");
         }
         ExecuteKind kind = null;
         if (history.getTriggerType() == TriggerType.MANUAL) {
@@ -596,7 +587,7 @@ public class JobServiceImpl implements JobService {
                     .getUid());
         } catch (Exception e) {
             log.error("error", e);
-            throw new GwtException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
@@ -782,7 +773,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public void deleteJob(String jobId) throws GwtException {
+    public void deleteJob(String jobId) throws Exception {
         try {
             permissionGroupManagerWithJob.deleteJob(LoginUser.getUser().getUid(),
                     jobId);
@@ -798,37 +789,37 @@ public class JobServiceImpl implements JobService {
 
         } catch (ZeusException e) {
             log.error("删除Job失败", e);
-            throw new GwtException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
     @Override
-    public void addJobAdmin(String jobId, String uid) throws GwtException {
+    public void addJobAdmin(String jobId, String uid) throws Exception {
         try {
             permissionGroupManagerWithJob.addJobAdmin(LoginUser.getUser().getUid(),
                     uid, jobId);
         } catch (ZeusException e) {
-            throw new GwtException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
     @Override
-    public void removeJobAdmin(String jobId, String uid) throws GwtException {
+    public void removeJobAdmin(String jobId, String uid) throws Exception {
         try {
             permissionGroupManagerWithJob.removeJobAdmin(LoginUser.getUser()
                     .getUid(), uid, jobId);
         } catch (ZeusException e) {
-            throw new GwtException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
     @Override
-    public void transferOwner(String jobId, String uid) throws GwtException {
+    public void transferOwner(String jobId, String uid) throws Exception {
         try {
             permissionGroupManagerWithJob.grantJobOwner(LoginUser.getUser()
                     .getUid(), uid, jobId);
         } catch (ZeusException e) {
-            throw new GwtException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
@@ -1054,18 +1045,18 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public void move(String jobId, String newGroupId) throws GwtException {
+    public void move(String jobId, String newGroupId) throws Exception {
         try {
             permissionGroupManagerWithJob.moveJob(LoginUser.getUser().getUid(),
                     jobId, newGroupId);
         } catch (ZeusException e) {
             log.error("move", e);
-            throw new GwtException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
     @Override
-    public void syncScript(String jobId, String script) throws GwtException {
+    public void syncScript(String jobId, String script) throws Exception {
         JobDescriptor jd = permissionGroupManagerWithJob.getJobDescriptor(jobId)
                 .getX();
         jd.setScript(script);
@@ -1075,7 +1066,7 @@ public class JobServiceImpl implements JobService {
             permissionGroupManagerWithJob.updateActionList(jd);
         } catch (ZeusException e) {
             log.error("syncScript", e);
-            throw new GwtException(
+            throw new Exception(
                     "同步失败，可能是因为目标任务没有配置一些必填项。请去调度中心配置完整的必填项. cause:"
                             + e.getMessage());
         }
@@ -1103,20 +1094,20 @@ public class JobServiceImpl implements JobService {
 
 
     @Override
-    public void grantImportantContact(String jobId, String uid) throws GwtException {
+    public void grantImportantContact(String jobId, String uid) throws Exception {
         if (permissionGroupManagerWithJob.hasJobPermission(LoginUser.getUser().getUid(), jobId)) {
             followManager.grantImportantContact(jobId, uid);
         } else {
-            throw new GwtException("您无权进行操作!");
+            throw new Exception("您无权进行操作!");
         }
     }
 
     @Override
-    public void revokeImportantContact(String jobId, String uid) throws GwtException {
+    public void revokeImportantContact(String jobId, String uid) throws Exception {
         if (permissionGroupManagerWithJob.hasJobPermission(LoginUser.getUser().getUid(), jobId)) {
             followManager.revokeImportantContact(jobId, uid);
         } else {
-            throw new GwtException("您无权进行操作!");
+            throw new Exception("您无权进行操作!");
         }
 
     }
@@ -1177,7 +1168,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<String> getJobDependencies(String jobId) throws GwtException {
+    public List<String> getJobDependencies(String jobId) throws Exception {
         JobModel job = getUpstreamJob(jobId);
         List<String> dependencies = job.getDependencies();
         return dependencies;
@@ -1219,7 +1210,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public void syncScriptAndHostGroupId(String jobId, String script,
-                                         String hostGroupId) throws GwtException {
+                                         String hostGroupId) throws Exception {
         JobDescriptor jd = permissionGroupManagerWithJob.getJobDescriptor(jobId)
                 .getX();
         jd.setScript(script);
@@ -1234,7 +1225,7 @@ public class JobServiceImpl implements JobService {
             permissionGroupManagerWithJob.updateActionList(jd);
         } catch (ZeusException e) {
             log.error("syncScript", e);
-            throw new GwtException(
+            throw new Exception(
                     "同步失败，可能是因为目标任务没有配置一些必填项。请去调度中心配置完整的必填项. cause:"
                             + e.getMessage());
         }
