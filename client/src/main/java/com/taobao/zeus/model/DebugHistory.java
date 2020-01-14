@@ -2,7 +2,7 @@ package com.taobao.zeus.model;
 
 import java.util.Date;
 
-import com.taobao.zeus.model.JobDescriptor.JobRunType;
+import com.taobao.zeus.model.ActionDescriptor.JobRunType;
 import com.taobao.zeus.model.JobStatus.Status;
 
 public class DebugHistory{

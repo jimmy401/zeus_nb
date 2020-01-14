@@ -34,7 +34,7 @@ public class MemUseRateJob extends ShellJob{
 		}
 		Integer exitCode=super.run();
 		if(exitCode==0){
-			String[] content=getJobContext().getJobHistory().getLog().getContent().split("\n");
+			String[] content=getJobContext().getZeusActionHistory().getLog().getContent().split("\n");
 			for(String s:content){
 				if(s.contains("buffers/cache")){
 					String line=s.substring(s.indexOf("buffers/cache:"));

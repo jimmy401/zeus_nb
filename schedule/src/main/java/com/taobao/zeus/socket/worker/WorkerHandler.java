@@ -15,7 +15,7 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
 import com.taobao.zeus.model.DebugHistory;
-import com.taobao.zeus.model.JobHistory;
+import com.taobao.zeus.model.ZeusActionHistory;
 import com.taobao.zeus.schedule.mvc.ScheduleInfoLog;
 import com.taobao.zeus.socket.SocketLog;
 import com.taobao.zeus.socket.protocol.Protocol.Operate;
@@ -97,7 +97,7 @@ public class WorkerHandler extends SimpleChannelUpstreamHandler{
 		//断开连接，如果还有运行中的job，将这些job取消掉
 		try{
 			for(String jobId:new HashSet<String>(context.getRunnings().keySet())){
-				JobHistory his = context.getRunnings().get(jobId).getJobContext().getJobHistory();
+				ZeusActionHistory his = context.getRunnings().get(jobId).getJobContext().getZeusActionHistory();
 				if(his != null){
 					his.setIllustrate("worker断开连接，主动取消该任务");
 					his.getLog().appendZeus("worker与master断开连接，worker主动取消该任务");
@@ -113,7 +113,7 @@ public class WorkerHandler extends SimpleChannelUpstreamHandler{
 				}
 			}
 			for(String historyId:new HashSet<String>(context.getManualRunnings().keySet())){
-				JobHistory his = context.getManualRunnings().get(historyId).getJobContext().getJobHistory();
+				ZeusActionHistory his = context.getManualRunnings().get(historyId).getJobContext().getZeusActionHistory();
 				if(his != null){
 					his.setIllustrate("worker断开连接，主动取消该任务");
 					his.getLog().appendZeus("worker与master断开连接，worker主动取消该任务");

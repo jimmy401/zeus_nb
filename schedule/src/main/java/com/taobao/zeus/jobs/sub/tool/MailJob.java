@@ -20,12 +20,12 @@ public class MailJob extends AbstractJob{
 	@Override
 	public Integer run() throws Exception {
 		String render=processer.getTemplate();
-		jobContext.getJobHistory().getLog().appendZeus("开始执行发送邮件job");
+		jobContext.getZeusActionHistory().getLog().appendZeus("开始执行发送邮件job");
 		try {
-			mailAlarm.alarm(getJobContext().getJobHistory().getId(), processer.getSubject(), render);
-			jobContext.getJobHistory().getLog().appendZeus("邮件发送成功");
+			mailAlarm.alarm(getJobContext().getZeusActionHistory().getId(), processer.getSubject(), render);
+			jobContext.getZeusActionHistory().getLog().appendZeus("邮件发送成功");
 		} catch (Exception e) {
-			jobContext.getJobHistory().getLog().appendZeusException(e);
+			jobContext.getZeusActionHistory().getLog().appendZeusException(e);
 		}
 		
 		return 0;

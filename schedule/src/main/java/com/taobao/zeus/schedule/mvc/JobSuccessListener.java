@@ -5,8 +5,8 @@ import com.taobao.zeus.dal.logic.JobHistoryManager;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import com.taobao.zeus.model.JobDescriptor;
-import com.taobao.zeus.model.JobHistory;
+import com.taobao.zeus.model.ActionDescriptor;
+import com.taobao.zeus.model.ZeusActionHistory;
 import com.taobao.zeus.model.JobStatus.TriggerType;
 import com.taobao.zeus.mvc.DispatcherListener;
 import com.taobao.zeus.mvc.MvcEvent;
@@ -24,8 +24,8 @@ public class JobSuccessListener extends DispatcherListener{
 	
 	private JobHistoryManager jobHistoryManager;
 	public JobSuccessListener(MasterContext context){
-		groupManager=(GroupManagerWithAction) context.getGroupManagerWithAction();
-		jobHistoryManager=(JobHistoryManager)context.getJobHistoryManager();
+		groupManager=context.getGroupManagerWithAction();
+		jobHistoryManager=context.getJobHistoryManager();
 	}
 	@Override
 	public void beforeDispatch(MvcEvent mvce) {
@@ -36,8 +36,8 @@ public class JobSuccessListener extends DispatcherListener{
 					return;
 				}
 				log.info("The event history id is " + event.getHistoryId());
-				JobHistory history=jobHistoryManager.findJobHistory(event.getHistoryId());
-				final JobDescriptor jd=groupManager.getActionDescriptor(history.getActionId()).getX();
+				ZeusActionHistory history=jobHistoryManager.findJobHistory(event.getHistoryId());
+				final ActionDescriptor jd=groupManager.getActionDescriptor(history.getActionId()).getX();
 				if(history.getOperator()!=null){
 					//此处可以发送IM消息
 				}

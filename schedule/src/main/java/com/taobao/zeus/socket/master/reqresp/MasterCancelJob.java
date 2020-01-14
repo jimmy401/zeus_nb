@@ -2,13 +2,12 @@ package com.taobao.zeus.socket.master.reqresp;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import com.taobao.zeus.model.JobHistory;
+import com.taobao.zeus.model.ZeusActionHistory;
 import com.taobao.zeus.socket.SocketLog;
 import com.taobao.zeus.socket.master.JobElement;
 import com.taobao.zeus.socket.master.MasterWorkerHolder;
@@ -62,7 +61,7 @@ public class MasterCancelJob {
     }
 
     public boolean processScheduleCancel(MasterContext context,
-                                         JobHistory history, MasterWorkerHolder worker) {
+                                         ZeusActionHistory history, MasterWorkerHolder worker) {
         boolean cancelStatus = false;
         try {
             SocketLog.info("receive runtime over cancel request," + ",actionId=" + history.getActionId());

@@ -10,6 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.taobao.zeus.model.ZeusActionHistory;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
@@ -29,7 +30,6 @@ import org.springframework.context.ApplicationContext;
 import com.taobao.zeus.client.ZeusException;
 import com.taobao.zeus.jobs.Job;
 import com.taobao.zeus.model.DebugHistory;
-import com.taobao.zeus.model.JobHistory;
 import com.taobao.zeus.schedule.mvc.ScheduleInfoLog;
 import com.taobao.zeus.socket.SocketLog;
 import com.taobao.zeus.socket.protocol.Protocol;
@@ -122,7 +122,7 @@ public class ClientWorker {
 
 			private void exLog(Job job,Exception e){
 				try {
-					JobHistory his = job.getJobContext().getJobHistory();
+					ZeusActionHistory his = job.getJobContext().getZeusActionHistory();
 					String jlog = his.getLog().getContent();
 					if (jlog == null) {
 						jlog = "";
@@ -160,9 +160,8 @@ public class ClientWorker {
 
 				for (Job job : new HashSet<Job>(context.getRunnings().values())) {
 					try {
-						JobHistory his = job.getJobContext().getJobHistory();
-						context.getJobHistoryManager().updateJobHistoryLog(
-								his.getId(), his.getLog().getContent());
+						ZeusActionHistory his = job.getJobContext().getZeusActionHistory();
+						context.getJobHistoryManager().updateJobHistoryLog(his.getId(), his.getLog().getContent());
 					} catch (Exception e) {
 						exLog(job, e);
 					}
@@ -170,9 +169,8 @@ public class ClientWorker {
 				for (Job job : new HashSet<Job>(context.getManualRunnings()
 						.values())) {
 					try {
-						JobHistory his = job.getJobContext().getJobHistory();
-						context.getJobHistoryManager().updateJobHistoryLog(
-								his.getId(), his.getLog().getContent());
+						ZeusActionHistory his = job.getJobContext().getZeusActionHistory();
+						context.getJobHistoryManager().updateJobHistoryLog(his.getId(), his.getLog().getContent());
 					} catch (Exception e) {
 						exLog(job, e);
 					}
@@ -180,10 +178,8 @@ public class ClientWorker {
 				for (Job job : new HashSet<Job>(context.getDebugRunnings()
 						.values())) {
 					try {
-						DebugHistory his = job.getJobContext()
-								.getDebugHistory();
-						context.getDebugHistoryManager().updateDebugHistoryLog(
-								his.getId(), his.getLog().getContent());
+						DebugHistory his = job.getJobContext().getDebugHistory();
+						context.getDebugHistoryManager().updateDebugHistoryLog(his.getId(), his.getLog().getContent());
 					} catch (Exception e) {
 						exDebugLog(job, e);
 					}
@@ -257,7 +253,7 @@ public class ClientWorker {
 		context.getManualRunnings().remove(historyId);
 		job.cancel();
 
-		JobHistory his = job.getJobContext().getJobHistory();
+		ZeusActionHistory his = job.getJobContext().getZeusActionHistory();
 		his.setEndTime(new Date());
 		String illustrate = his.getIllustrate();
 		if(illustrate!=null && illustrate.trim().length()>0){
@@ -277,7 +273,7 @@ public class ClientWorker {
 		context.getRunnings().remove(jobId);
 		job.cancel();
 
-		JobHistory his = job.getJobContext().getJobHistory();
+		ZeusActionHistory his = job.getJobContext().getZeusActionHistory();
 		his.setEndTime(new Date());
 		String illustrate = his.getIllustrate();
 		if(illustrate!=null && illustrate.trim().length()>0){
@@ -288,8 +284,7 @@ public class ClientWorker {
 		his.setStatus(com.taobao.zeus.model.JobStatus.Status.FAILED);
 		context.getJobHistoryManager().updateJobHistory(his);
 		his.getLog().appendZeus("任务被取消");
-		context.getJobHistoryManager().updateJobHistoryLog(his.getId(),
-				his.getLog().getContent());
+		context.getJobHistoryManager().updateJobHistoryLog(his.getId(),his.getLog().getContent());
 	}
 
 	/**
@@ -309,8 +304,7 @@ public class ClientWorker {
 
 	public void cancelJobFromWeb(ExecuteKind kind, String id, String operator)
 			throws Exception {
-		WebResponse resp = new WorkerWebCancel().cancel(context, kind, id,
-				operator).get();
+		WebResponse resp = new WorkerWebCancel().cancel(context, kind, id,operator).get();
 		if (resp.getStatus() == Status.ERROR) {
 			throw new ZeusException(resp.getErrorText());
 		}

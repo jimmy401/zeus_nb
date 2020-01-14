@@ -196,8 +196,8 @@ public abstract class ProcessJob extends AbstractJob implements Job {
             final InputStream errorStream = process.getErrorStream();
 			
 			String threadName=null;
-			if(jobContext.getJobHistory()!=null && jobContext.getJobHistory().getActionId()!=null){
-				threadName="jobId="+jobContext.getJobHistory().getActionId();
+			if(jobContext.getZeusActionHistory()!=null && jobContext.getZeusActionHistory().getActionId()!=null){
+				threadName="jobId="+jobContext.getZeusActionHistory().getActionId();
 			}else if(jobContext.getDebugHistory()!=null && jobContext.getDebugHistory().getId()!=null){
 				threadName="debugId="+jobContext.getDebugHistory().getId();
 			}else{

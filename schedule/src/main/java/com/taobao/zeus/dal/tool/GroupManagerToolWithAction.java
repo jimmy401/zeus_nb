@@ -1,9 +1,10 @@
 package com.taobao.zeus.dal.tool;
 
 import com.taobao.zeus.dal.logic.GroupManagerWithAction;
+import com.taobao.zeus.dal.model.ZeusGroupWithBLOBs;
 import com.taobao.zeus.model.GroupDescriptor;
-import com.taobao.zeus.model.JobDescriptor;
-import com.taobao.zeus.model.JobDescriptor.JobScheduleType;
+import com.taobao.zeus.model.ActionDescriptor;
+import com.taobao.zeus.model.ActionDescriptor.JobScheduleType;
 import com.taobao.zeus.model.JobStatus;
 import com.taobao.zeus.util.Tuple;
 import org.slf4j.Logger;
@@ -17,10 +18,10 @@ public class GroupManagerToolWithAction {
 	private static Logger log = LoggerFactory.getLogger(GroupManagerToolWithAction.class);
 
 	public static GroupBean getUpstreamGroupBean(String groupId,GroupManagerWithAction groupManager) {
-		GroupDescriptor group=groupManager.getGroupDescriptor(groupId);
+		ZeusGroupWithBLOBs group=groupManager.getGroupDescriptor(groupId);
 		GroupBean result=new GroupBean(group);
 		if(group.getParent()!=null){
-			GroupBean parent=groupManager.getUpstreamGroupBean(group.getParent());
+			GroupBean parent=groupManager.getUpstreamGroupBean(group.getParent().toString());
 			result.setParentGroupBean(parent);
 		}
 		return result;
@@ -38,14 +39,14 @@ public class GroupManagerToolWithAction {
 		//2.将JobBean中的依赖关系在内存模型中关联起来
 		Map<String, JobBean> allJobBeans=root.getAllSubJobBeans();
 		for(JobBean j1:allJobBeans.values()){
-			if(j1.getJobDescriptor().getScheduleType()==JobScheduleType.Dependent){
-				for(String depId:j1.getJobDescriptor().getDependencies()){
+			if(j1.getActionDescriptor().getScheduleType()==JobScheduleType.Dependent){
+				for(String depId:j1.getActionDescriptor().getDependencies()){
 					try{
 						JobBean depJob=allJobBeans.get(depId);
 						j1.addDependee(depJob);
 						depJob.addDepender(j1);
 					}catch(Exception e){
-						log.error("the jobid is " + j1.getJobDescriptor().getId() + ", the depId is " + depId, e);
+						log.error("the jobid is " + j1.getActionDescriptor().getId() + ", the depId is " + depId, e);
 					}
 				}
 			}
@@ -62,23 +63,23 @@ public class GroupManagerToolWithAction {
 		return root;
 	}
 	public static GroupBean getDownstreamGroupBean(String groupId,GroupManagerWithAction groupManager) {
-		GroupDescriptor group=groupManager.getGroupDescriptor(groupId);
+		ZeusGroupWithBLOBs group=groupManager.getGroupDescriptor(groupId);
 		GroupBean result=new GroupBean(group);
 		return groupManager.getDownstreamGroupBean(result);
 	}
 
 	public static GroupBean getDownstreamGroupBean(GroupBean parent,GroupManagerWithAction groupManager) {
 		if(parent.isDirectory()){
-			List<GroupDescriptor> children=groupManager.getChildrenGroup(parent.getGroupDescriptor().getId());
-			for(GroupDescriptor child:children){
+			List<ZeusGroupWithBLOBs> children=groupManager.getChildrenGroup(parent.getGroupDescriptor().getId().toString());
+			for(ZeusGroupWithBLOBs child:children){
 				GroupBean childBean=new GroupBean(child);
 				groupManager.getDownstreamGroupBean(childBean);
 				childBean.setParentGroupBean(parent);
 				parent.getChildrenGroupBeans().add(childBean);
 			}
 		}else{
-			List<Tuple<JobDescriptor, JobStatus>> jobs=groupManager.getChildrenAction(parent.getGroupDescriptor().getId());
-			for(Tuple<JobDescriptor, JobStatus> tuple:jobs){
+			List<Tuple<ActionDescriptor, JobStatus>> jobs=groupManager.getChildrenAction(parent.getGroupDescriptor().getId().toString());
+			for(Tuple<ActionDescriptor, JobStatus> tuple:jobs){
 				JobBean jobBean=new JobBean(tuple.getX(),tuple.getY());
 				jobBean.setGroupBean(parent);
 				parent.getJobBeans().put(tuple.getX().getId(), jobBean);
@@ -89,10 +90,10 @@ public class GroupManagerToolWithAction {
 	}
 
 	public static JobBean getUpstreamJobBean(String jobId,GroupManagerWithAction groupManager) {
-		Tuple<JobDescriptor, JobStatus> tuple=groupManager.getActionDescriptor(jobId);
+		Tuple<ActionDescriptor, JobStatus> tuple=groupManager.getActionDescriptor(jobId);
 		if(tuple!=null){
 			JobBean result=new JobBean(tuple.getX(),tuple.getY());
-			result.setGroupBean(groupManager.getUpstreamGroupBean(result.getJobDescriptor().getGroupId()));
+			result.setGroupBean(groupManager.getUpstreamGroupBean(result.getActionDescriptor().getGroupId()));
 			return result;
 		}else{
 			return null;

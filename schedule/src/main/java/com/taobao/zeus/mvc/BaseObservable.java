@@ -51,23 +51,23 @@ public class BaseObservable implements Observable {
    * Fires an event.
    * 
    * @param eventType eventType the event type
-   * @param be the base event
+   * @param baseEvent the base event
    * @return false if any listeners cancel the event.
    */
-  public boolean fireEvent(EventType eventType, BaseEvent be) {
+  public boolean fireEvent(EventType eventType, BaseEvent baseEvent) {
     if (firesEvents && listeners != null) {
       activeEvent = true;
-      be.setType(eventType);
+      baseEvent.setType(eventType);
 
       List<Listener<BaseEvent>> list = listeners.get(getKey(eventType));
       if (list != null) {
         List<Listener<BaseEvent>> copy = new ArrayList<Listener<BaseEvent>>(list);
         for (Listener<BaseEvent> l : copy) {
-          callListener(l, be);
+          callListener(l, baseEvent);
         }
       }
       activeEvent = false;
-      return !be.isCancelled();
+      return !baseEvent.isCancelled();
     }
     return true;
   }

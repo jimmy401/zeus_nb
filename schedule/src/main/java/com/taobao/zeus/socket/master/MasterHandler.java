@@ -71,8 +71,7 @@ public class MasterHandler extends SimpleChannelUpstreamHandler{
 	private MasterBeWebDebug beDebug=new MasterBeWebDebug();
 	
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
-			throws Exception {
+	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)throws Exception {
 		final Channel channel=ctx.getChannel();
 		SocketMessage sm=(SocketMessage) e.getMessage();
 		if(sm.getKind()==Kind.REQUEST){
@@ -121,8 +120,7 @@ public class MasterHandler extends SimpleChannelUpstreamHandler{
 		super.messageReceived(ctx, e);
 	}
 	@Override
-	public void channelConnected(ChannelHandlerContext ctx,
-			ChannelStateEvent e) throws Exception {
+	public void channelConnected(ChannelHandlerContext ctx,ChannelStateEvent e) throws Exception {
 		context.getWorkers().put(ctx.getChannel(), new MasterWorkerHolder(ctx.getChannel()));
 		Channel channel=ctx.getChannel();
 		SocketAddress addr=channel.getRemoteAddress();
@@ -130,8 +128,7 @@ public class MasterHandler extends SimpleChannelUpstreamHandler{
 		super.channelConnected(ctx, e);
 	}
 	@Override
-	public void channelDisconnected(ChannelHandlerContext ctx,
-			ChannelStateEvent e) throws Exception {
+	public void channelDisconnected(ChannelHandlerContext ctx,ChannelStateEvent e) throws Exception {
 		SocketLog.info("worker disconnect :"+ctx.getChannel().getRemoteAddress().toString());
 		context.getMaster().workerDisconnectProcess(ctx.getChannel());
 		super.channelDisconnected(ctx, e);

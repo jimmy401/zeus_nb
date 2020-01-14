@@ -3,17 +3,17 @@ $(function() {
     initialTabs();
 });
 
+var fileId;
+var fileName;
+var myCodeMirror;
+
 function initialTabs() {
-    $('#tt').tabs('add',{
-        title:'New Tab',
-        content:'Tab Body',
-        closable:true,
-        tools:[{
-            iconCls:'icon-mini-refresh',
-            handler:function(){
-                alert('refresh');
-            }
-        }]
+    $('#file_tabs').tabs({
+        onSelect: function(title,index){
+            fileId =title.split('|')[0];
+            fileName = title.split('|')[1];
+            //myCodeMirror = CodeMirror.fromTextArea(document.getElementById(fileId));
+        }
     });
 }
 var activeNode;
@@ -155,7 +155,7 @@ function addNewNode(node,type){
                 if (ret.msg == "success") {
                     initialTree();
                 } else {
-                    $.messager.alert('警告', '添加失败,信息：' + ret.data, 'info');
+                    $.messager.alert('警告', '添加失败,信息：' + ret.msg, 'info');
                 }
             }
         }
@@ -176,7 +176,7 @@ function editNode(node){
             if (ret != null) {
                 if (ret.msg == "success") {
                 } else {
-                    $.messager.alert('警告', '编辑失败,信息：' + ret.data, 'info');
+                    $.messager.alert('警告', '编辑失败,信息：' + ret.msg, 'info');
                 }
             }
         }
@@ -241,10 +241,6 @@ function rename() {
 
 }
 
-function openFile() {
-    
-}
-
 function deleteFile() {
     $.messager.confirm('确认', '删除: ' + activeNode.text + '?', function (r) {
         if (r) {
@@ -261,7 +257,7 @@ function deleteFile() {
                         if (ret.msg == "success") {
                             $('#personal_files').tree('remove', activeNode.target);
                         } else {
-                            $.messager.alert('警告', '删除失败,信息：' + ret.data, 'info');
+                            $.messager.alert('警告', '删除失败,信息：' + ret.msg, 'info');
                         }
                     }
                 }
@@ -271,5 +267,176 @@ function deleteFile() {
 }
 
 function openFile(node) {
-    alert("open file " + node.text);
+    fileId = node.id;
+    fileName=node.text;
+    var getData = {
+        fileId: fileId
+    };
+    $.ajax({
+        type: "GET",
+        url: "file/get_file_content",
+        data: getData,
+        success: function (ret) {
+            if (ret != null) {
+                if (ret.msg == "success") {
+                    var file_id = node.id;
+                    var title = node.id+ "|" + node.text;
+                    if(!$('#file_tabs').tabs('exists',title))
+                    {
+                        $('#file_tabs').tabs('add',{
+                        title: title,
+                        content: '<div id="tabs_' + file_id+
+                        '" class="easyui-tabs" style="width:700px;min-height:500px">' +
+                        '<div id="edit_file_' +file_id+
+                        '" title="编辑">' + '<div id="file_content_'+file_id + '"></div>' +
+                        '<div id="debug_tabs_' +file_id+
+                        '" class="easyui-tabs" style="display: none;"></div></div>' +
+                        '<div id="debug_history_' +file_id+
+                        '"  title="调试历史"></div></div>',
+                        closable:true
+                        });
+
+                        var textfile = '<textarea id="' + file_id+ '" style="min-height: 300px;min-width: 600px;" name="fileText">'+ ret.data +'</textarea>';
+                        $('#file_content_'+file_id).html(textfile);
+
+                            myCodeMirror = CodeMirror.fromTextArea(document.getElementById(file_id),
+                            {lineNumbers: true,
+                                mode:"shell",
+                                lineWrapping:true});
+
+                            var t1;
+                            myCodeMirror.on("change", function (editor, change) {
+                                  if(t1!=null)
+                                  {
+                                      window.clearTimeout(t1);
+                                  }
+                                  t1=window.setTimeout(updateFileContent, 3000);
+                                });
+                    }else{
+                        $('#file_tabs').tabs('select',title);
+                    }
+                } else {
+                    $.messager.alert('警告', '打开文件失败,信息：' + ret.msg, 'info');
+                }
+
+            }
+        }
+    });
+}
+
+function updateFileContent() {
+    var getData = {
+        fileId: fileId,
+        content:myCodeMirror.getValue()
+    };
+
+    $.ajax({
+        type: "POST",
+        url: "file/update_file_content",
+        data: getData,
+        success: function (ret) {
+            if (ret != null) {
+                if (ret.msg == "success") {
+
+                } else {
+                    $.messager.alert('警告', '保存内容失败,信息：' + ret.msg, 'info');
+                }
+            }
+        }
+    });
+}
+
+function runCode() {
+    var suffix = fileName.split('.')[1];
+    var debugId = "";
+    var mode = "";
+    if (suffix == "sh")
+    {
+        mode="shell";
+    }else if(suffix == "hive"){
+        mode="hive";
+    }
+
+    var postData = {
+        fileId: fileId,
+        mode:mode,
+        script:myCodeMirror.getValue(),
+        hostGroupId:""
+    };
+    $('#debug_tabs_'+fileId).show();
+
+
+    $('#debug_tabs_'+fileId).tabs({
+        onClose: function (title, index) {
+            alert(index);
+            if (index == 0) {
+                $('#debug_tabs_' + fileId).hide();
+            }
+        }
+    });
+
+    $.ajax({
+        type: "POST",
+        url: "develop_center/debug",
+        data: postData,
+        success: function (ret) {
+            if (ret != null) {
+                if (ret.msg == "success") {
+                    debugId = ret.data;
+                    $('#debug_tabs_'+fileId).tabs('add',{
+                        title:'ID:' + debugId,
+                        closable:true,
+                        selected: true
+                    });
+                    getDebugLog(debugId);
+                } else {
+                    $.messager.alert('警告', '执行脚本失败,信息：' + ret.msg, 'info');
+                }
+            }
+        }
+    });
+}
+
+function getDebugLog(debugId) {
+    var postData = {
+        debugId: debugId
+    };
+
+    $.ajax({
+        type: "POST",
+        url: "develop_center/get_log",
+        data: postData,
+        success: function (ret) {
+            if (ret != null) {
+                if (ret.msg == "success") {
+                    if(ret.data.status!="success" || ret.data.status!="failed" )
+                        var tab = $('#debug_tabs_'+fileId).tabs('getTab',"ID:" + debugId);
+                        $('#tt').tabs('update', {
+                            tab: tab,
+                            options: {
+                                content: ret.data
+                            }
+                        });
+                        setTimeout("getDebugLog("+ debugId+")",1000);
+                } else if(ret.data.status="success"){
+
+                }
+                else {
+                    $.messager.alert('警告', '获取日志失败,信息：' + ret.msg, 'info');
+                }
+            }
+        }
+    });
+}
+
+function runSelected() {
+    alert(myCodeMirror.getSelection());
+}
+
+function uploadResources(){
+    
+}
+
+function chooseHost() {
+    
 }

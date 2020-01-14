@@ -2,7 +2,7 @@ package com.taobao.zeus.dal.tool;
 
 import com.taobao.zeus.client.ZeusException;
 import com.taobao.zeus.dal.logic.impl.ReadOnlyGroupManagerWithJob;
-import com.taobao.zeus.model.JobDescriptor;
+import com.taobao.zeus.model.ActionDescriptor;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.CronTrigger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +16,14 @@ public class JobValidateWithJob {
 	@Autowired
 	private ReadOnlyGroupManagerWithJob readOnlyGroupManager;
 
-	public boolean valide(JobDescriptor job) throws ZeusException {
+	public boolean valide(ActionDescriptor job) throws ZeusException {
 		if(job.getJobType()==null){
 			throw new ZeusException("任务类型必须填写");
 		}
 		if(job.getGroupId()==null){
 			throw new ZeusException("所属组必须填写");
 		}
-		if(job.getJobType()== JobDescriptor.JobRunType.MapReduce){
+		if(job.getJobType()== ActionDescriptor.JobRunType.MapReduce){
 			if(job.getName()==null || job.getName().trim().equals("")){
 				throw new ZeusException("name字段不能为空");
 			}
@@ -35,14 +35,14 @@ public class JobValidateWithJob {
 				if(job.getScheduleType()==null){
 					throw new ZeusException("调度类型必须填写");
 				}
-				if(job.getScheduleType()== JobDescriptor.JobScheduleType.Independent){
+				if(job.getScheduleType()== ActionDescriptor.JobScheduleType.Independent){
 					if(job.getCronExpression()==null || job.getCronExpression().trim().equals("")){
 						throw new ZeusException("独立任务的定时表达式必须填写");
 					}
 					job.setDependencies(new ArrayList<String>());
 				}
 				//如果是依赖任务
-				if(job.getScheduleType()== JobDescriptor.JobScheduleType.Dependent){
+				if(job.getScheduleType()== ActionDescriptor.JobScheduleType.Dependent){
 					//必须填写依赖项
 					if(job.getDependencies()==null || job.getDependencies().isEmpty()){
 						throw new ZeusException("依赖任务必须填写依赖项");
@@ -51,11 +51,11 @@ public class JobValidateWithJob {
 				}
 
 			}
-		}else if(job.getJobType()== JobDescriptor.JobRunType.Shell){
+		}else if(job.getJobType()== ActionDescriptor.JobRunType.Shell){
 			if(job.getScript()==null){
 				throw new ZeusException("Shell 脚本不得为空");
 			}
-		}else if(job.getJobType()== JobDescriptor.JobRunType.Hive){
+		}else if(job.getJobType()== ActionDescriptor.JobRunType.Hive){
 			if(job.getScript()==null){
 				throw new ZeusException("Hive 脚本不得为空");
 			}
@@ -73,7 +73,7 @@ public class JobValidateWithJob {
 		GroupBean root=readOnlyGroupManager.getGlobeGroupBean();
 		Map<String, JobBean> allJobBeans=root.getAllSubJobBeans();
 		Set<JobBean> deps=new HashSet<JobBean>();
-		if(job.getScheduleType()== JobDescriptor.JobScheduleType.Dependent){
+		if(job.getScheduleType()== ActionDescriptor.JobScheduleType.Dependent){
 			for(String jobId:job.getDependencies()){
 				if(allJobBeans.get(jobId)==null){
 					throw new ZeusException("依赖任务："+jobId+" 不存在");
@@ -87,10 +87,10 @@ public class JobValidateWithJob {
 	//判断死循环问题
 	private void check(String parentJobId,Set<JobBean> deps) throws ZeusException {
 		for(JobBean job:deps){
-			if(job.getJobDescriptor().getId().equals(parentJobId)){
+			if(job.getActionDescriptor().getId().equals(parentJobId)){
 				throw new ZeusException("存在死循环依赖，请检查JobId: " + parentJobId);
 			}
-			if(job.getJobDescriptor().getScheduleType()== JobDescriptor.JobScheduleType.Dependent){
+			if(job.getActionDescriptor().getScheduleType()== ActionDescriptor.JobScheduleType.Dependent){
 				check(parentJobId,job.getDependee());
 			}
 		}
@@ -99,10 +99,10 @@ public class JobValidateWithJob {
 	 * 周期任务无法依赖不同周期，且小时任务无法依赖天的任务
 	 * @author YangFei
 	 */
-	public void checkCycleJob(JobDescriptor job,List<JobDescriptor> jobs) throws ZeusException {
+	public void checkCycleJob(ActionDescriptor job, List<ActionDescriptor> jobs) throws ZeusException {
 		if(jobs!=null&&jobs.size()!=0){
-			JobDescriptor tmp=jobs.get(0);
-			for(JobDescriptor j:jobs){
+			ActionDescriptor tmp=jobs.get(0);
+			for(ActionDescriptor j:jobs){
 				if(StringUtils.isNotEmpty(tmp.getCycle())&&StringUtils.isNotEmpty(j.getCycle())&&!tmp.getCycle().equals(j.getCycle())){
 					throw new ZeusException("周期任务不能依赖不同的周期，请检查!");
 				}

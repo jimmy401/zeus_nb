@@ -9,7 +9,7 @@ import com.taobao.zeus.model.JobStatus.TriggerType;
 import com.taobao.zeus.util.DateUtil;
 
 
-public class JobHistory {
+public class ZeusActionHistory {
 
     private String id;
     private String actionId;

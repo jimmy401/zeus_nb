@@ -63,7 +63,7 @@ public class WorkerHeartBeat {
 			}
 			if (exitCode != 0) {
 				ScheduleInfoLog.error("HeartBeat Shell Error", new Exception(
-						jobContext.getJobHistory().getLog().getContent()));
+						jobContext.getZeusActionHistory().getLog().getContent()));
 				// 防止后面NPE
 				jobContext.putData("mem", 1.0);
 			}

@@ -29,8 +29,8 @@ public class CancelHadoopJob extends ProcessJob {
 		List<String> list = new ArrayList<String>();
 		// 检测日志，如果有hadoop的job，先kill 这些job
 		String log = null;
-		if (jobContext.getJobHistory() != null) {
-			log = jobContext.getJobHistory().getLog().getContent();
+		if (jobContext.getZeusActionHistory() != null) {
+			log = jobContext.getZeusActionHistory().getLog().getContent();
 		} else if (jobContext.getDebugHistory() != null) {
 			log = jobContext.getDebugHistory().getLog().getContent();
 		}

@@ -1,13 +1,10 @@
 package com.taobao.zeus.jobs.sub.tool;
 
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -64,7 +61,7 @@ public class OutputCleanJob extends AbstractJob{
 				String yyyyMMdd=tmpPath.substring(tmpPath.indexOf("/pt=")+4,tmpPath.indexOf("/pt=")+12);
 				Date fdate=format.parse(yyyyMMdd);
 				if(fdate.before(limit)){
-					jobContext.getJobHistory().getLog().appendZeus("删除目录：" +tmpPath);
+					jobContext.getZeusActionHistory().getLog().appendZeus("删除目录：" +tmpPath);
 					fs.delete(f.getPath(),true);
 				}
 			}

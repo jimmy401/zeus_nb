@@ -5,6 +5,7 @@ import com.taobao.zeus.dal.model.*;
 import com.taobao.zeus.model.*;
 import com.taobao.zeus.model.JobStatus.Status;
 import com.taobao.zeus.model.JobStatus.TriggerType;
+import com.taobao.zeus.model.ZeusActionHistory;
 import com.taobao.zeus.model.processer.Processer;
 import com.taobao.zeus.util.DateUtil;
 import com.taobao.zeus.util.Environment;
@@ -43,7 +44,7 @@ public class PersistenceAndBeanConvertWithJob {
 		return persiste;
 	}
 
-	public static ZeusJobWithBLOBs convert(Tuple<JobDescriptor, JobStatus> job) {
+	public static ZeusJobWithBLOBs convert(Tuple<ActionDescriptor, JobStatus> job) {
 		if (job == null) {
 			return null;
 		}
@@ -55,11 +56,11 @@ public class PersistenceAndBeanConvertWithJob {
 		return persist;
 	}
 
-	public static Tuple<JobDescriptor, JobStatus> convert(ZeusJobWithBLOBs persist) {
+	public static Tuple<ActionDescriptor, JobStatus> convert(ZeusJobWithBLOBs persist) {
 		if (persist == null) {
 			return null;
 		}
-		JobDescriptor jd = new JobDescriptor();
+		ActionDescriptor jd = new ActionDescriptor();
 		jd.setId(String.valueOf(persist.getId()));
 		jd.setName(persist.getName());
 		jd.setDesc(persist.getDescr());
@@ -82,8 +83,8 @@ public class PersistenceAndBeanConvertWithJob {
 					",")));
 		}
 
-		jd.setJobType(JobDescriptor.JobRunType.parser(persist.getRunType()));
-		jd.setScheduleType(JobDescriptor.JobScheduleType.parser(persist.getScheduleType()));
+		jd.setJobType(ActionDescriptor.JobRunType.parser(persist.getRunType()));
+		jd.setScheduleType(ActionDescriptor.JobScheduleType.parser(persist.getScheduleType()));
 		String res = persist.getResources();
 		if (res != null) {
 			List<FileResource> resources = JSON.parseArray(res, FileResource.class);
@@ -145,7 +146,7 @@ public class PersistenceAndBeanConvertWithJob {
 						o.getString(key.toString()));
 			}
 		}
-		return new Tuple<JobDescriptor, JobStatus>(jd, status);
+		return new Tuple<ActionDescriptor, JobStatus>(jd, status);
 	}
 
 	public static ZeusJobWithBLOBs convert(JobStatus jobStatus) {
@@ -166,7 +167,7 @@ public class PersistenceAndBeanConvertWithJob {
 		return persist;
 	}
 
-	public static ZeusJobWithBLOBs convert(JobDescriptor jd) {
+	public static ZeusJobWithBLOBs convert(ActionDescriptor jd) {
 		if (jd == null) {
 			return null;
 		}
@@ -262,8 +263,7 @@ public class PersistenceAndBeanConvertWithJob {
 			JSONObject object = JSONObject.fromObject(persist.getConfigs());
 			gd.setProperties(new HashMap<String, String>());
 			for (Object key : object.keySet()) {
-				gd.getProperties().put(key.toString(),
-						object.getString(key.toString()));
+				gd.getProperties().put(key.toString(),object.getString(key.toString()));
 			}
 		}
 		String cp = persist.getResources();
@@ -297,11 +297,11 @@ public class PersistenceAndBeanConvertWithJob {
 		return persist;
 	}
 
-	public static JobHistory convert(ZeusActionHistory persist) {
+	public static ZeusActionHistory convert(com.taobao.zeus.dal.model.ZeusActionHistory persist) {
 		if (persist == null) {
 			return null;
 		}
-		JobHistory history = new JobHistory();
+		ZeusActionHistory history = new ZeusActionHistory();
 		history.setId(String.valueOf(persist.getId()));
 		history.setActionId(String.valueOf(persist.getActionId()));
 		history.setJobId(String.valueOf(persist.getJobId() == null ? null : persist.getJobId()));
@@ -334,11 +334,11 @@ public class PersistenceAndBeanConvertWithJob {
 		return history;
 	}
 
-	public static ZeusActionHistory convert(JobHistory history) {
+	public static com.taobao.zeus.dal.model.ZeusActionHistory convert(ZeusActionHistory history) {
 		if (history == null) {
 			return null;
 		}
-		ZeusActionHistory persist = new ZeusActionHistory();
+		com.taobao.zeus.dal.model.ZeusActionHistory persist = new com.taobao.zeus.dal.model.ZeusActionHistory();
 		persist.setEndTime(history.getEndTime());
 		persist.setExecuteHost(history.getExecuteHost());
 		persist.setId(history.getId() == null ? null : Long.valueOf(history

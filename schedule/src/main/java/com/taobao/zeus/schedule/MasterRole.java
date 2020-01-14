@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.taobao.zeus.socket.master.MasterContext;
 
@@ -13,24 +13,22 @@ import com.taobao.zeus.socket.master.MasterContext;
  * @author zhoufang
  *
  */
-public class ZeusSchedule{
+public class MasterRole {
 	
-	private static Logger log = LoggerFactory.getLogger(ZeusSchedule.class);
+	private static Logger log = LoggerFactory.getLogger(MasterRole.class);
 	private AtomicBoolean running=new AtomicBoolean(false);
-	
+
+	@Autowired
 	private MasterContext context;
-	private ApplicationContext applicationContext;
-	public ZeusSchedule(ApplicationContext applicationContext){
-		this.applicationContext=applicationContext;
+
+	public MasterRole(){
 	}
 	
 	public void startup(int port){
 		if(!running.compareAndSet(false, true)){
 			return;
 		}
-		log.info("begin to initialize master context");
-		context=new MasterContext(applicationContext);
-		log.info("begin to init");
+		log.info("begin to init master");
 		context.init(port);
 	}
 	

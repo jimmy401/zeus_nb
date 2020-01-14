@@ -7,7 +7,7 @@ import com.taobao.zeus.dal.logic.UserManager;
 import com.taobao.zeus.dal.logic.impl.ReadOnlyGroupManagerWithJob;
 import com.taobao.zeus.dal.tool.GroupBean;
 import com.taobao.zeus.dal.tool.JobBean;
-import com.taobao.zeus.model.JobHistory;
+import com.taobao.zeus.model.ZeusActionHistory;
 import com.taobao.zeus.model.ZeusFollow;
 import com.taobao.zeus.util.DateUtil;
 import com.taobao.zeus.web.common.CurrentUser;
@@ -59,7 +59,7 @@ public class TreeController extends BaseController {
             for (String key : allJobs.keySet()) {
                 JobBean bean = allJobs.get(key);
                 //不是owner，删除
-                if (!bean.getJobDescriptor().getOwner().equals(uid)) {
+                if (!bean.getActionDescriptor().getOwner().equals(uid)) {
                     bean.getGroupBean().getJobBeans().remove(key);
                 }
             }
@@ -135,7 +135,7 @@ public class TreeController extends BaseController {
 
         GroupJobTreeModel root = new GroupJobTreeModel();
         root.setName(rootGroup.getGroupDescriptor().getName());
-        root.setId(rootGroup.getGroupDescriptor().getId());
+        root.setId(rootGroup.getGroupDescriptor().getId().toString());
         root.setGroup(true);
         root.setDirectory(true);
         root.setJob(false);
@@ -157,7 +157,7 @@ public class TreeController extends BaseController {
             if (g.isExisted()) {
                 GroupJobTreeModel group = new GroupJobTreeModel();
                 group.setName(g.getGroupDescriptor().getName());
-                group.setId(g.getGroupDescriptor().getId());
+                group.setId(g.getGroupDescriptor().getId().toString());
                 group.setGroup(true);
                 group.setJob(false);
                 group.setOwner(g.getGroupDescriptor().getOwner());
@@ -174,19 +174,19 @@ public class TreeController extends BaseController {
                     }
                     Collections.sort(list, new Comparator<JobBean>() {
                         public int compare(JobBean o1, JobBean o2) {
-                            return o1.getJobDescriptor().getName().compareTo(o2.getJobDescriptor().getName());
+                            return o1.getActionDescriptor().getName().compareTo(o2.getActionDescriptor().getName());
                         }
                     });
                     for (JobBean jb : list) {
                         GroupJobTreeModel job = new GroupJobTreeModel();
-                        job.setId(jb.getJobDescriptor().getId());
+                        job.setId(jb.getActionDescriptor().getId());
                         job.setGroup(false);
                         job.setDirectory(false);
-                        job.setName(jb.getJobDescriptor().getName());
+                        job.setName(jb.getActionDescriptor().getName());
                         job.setJob(true);
                         Boolean jFollow = jobFollow.get(job.getId());
                         job.setFollow(jFollow == null ? false : (jFollow ? true : false));
-                        job.setScheduleType(jb.getJobDescriptor().getScheduleType().getType());
+                        job.setScheduleType(jb.getActionDescriptor().getScheduleType().getType());
                         group.getChildren().add(job);
                     }
                 }
@@ -210,8 +210,8 @@ public class TreeController extends BaseController {
         jobRelationInfo.setId(result.getId() + "-" + new Random().nextInt(1000));
         jobRelationInfo.setName(result.getName());
 
-        Map<String, JobHistory> map = jobHistoryManager.findLastHistoryByList(Arrays.asList(result.getId()));
-        JobHistory his = map.get(result.getId());
+        Map<String, ZeusActionHistory> map = jobHistoryManager.findLastHistoryByList(Arrays.asList(result.getId()));
+        ZeusActionHistory his = map.get(result.getId());
         if (his == null) {
             jobRelationInfo.setJobId(result.getId());
             jobRelationInfo.setHistoryId("");
@@ -258,12 +258,12 @@ public class TreeController extends BaseController {
         JobBean jb = globe.getAllSubJobBeans().get(jobId);
         if (jb != null) {
             GroupJobTreeModel root = new GroupJobTreeModel();
-            root.setName(jb.getJobDescriptor().getName());
-            root.setId(jb.getJobDescriptor().getId());
+            root.setName(jb.getActionDescriptor().getName());
+            root.setId(jb.getActionDescriptor().getId());
             root.setGroup(false);
             root.setDirectory(jb.getDependee().isEmpty() ? false : true);
             root.setJob(true);
-            root.setOwner(jb.getJobDescriptor().getOwner());
+            root.setOwner(jb.getActionDescriptor().getOwner());
 
             setJob(root, jb.getDependee(), true);
             return root;
@@ -276,12 +276,12 @@ public class TreeController extends BaseController {
         JobBean jb = globe.getAllSubJobBeans().get(jobId);
         if (jb != null) {
             GroupJobTreeModel root = new GroupJobTreeModel();
-            root.setName(jb.getJobDescriptor().getName());
-            root.setId(jb.getJobDescriptor().getId());
+            root.setName(jb.getActionDescriptor().getName());
+            root.setId(jb.getActionDescriptor().getId());
             root.setGroup(false);
             root.setDirectory(jb.getDepender().isEmpty() ? false : true);
             root.setJob(true);
-            root.setOwner(jb.getJobDescriptor().getOwner());
+            root.setOwner(jb.getActionDescriptor().getOwner());
 
             setJob(root, jb.getDepender(), false);
             return root;
@@ -292,11 +292,11 @@ public class TreeController extends BaseController {
     private void setJob(GroupJobTreeModel parent, Collection<JobBean> children, boolean dependee) {
         for (JobBean g : children) {
             GroupJobTreeModel job = new GroupJobTreeModel();
-            job.setName(g.getJobDescriptor().getName());
-            job.setId(g.getJobDescriptor().getId());
+            job.setName(g.getActionDescriptor().getName());
+            job.setId(g.getActionDescriptor().getId());
             job.setGroup(false);
             job.setJob(true);
-            job.setOwner(g.getJobDescriptor().getOwner());
+            job.setOwner(g.getActionDescriptor().getOwner());
             Boolean dir = false;
             Collection<JobBean> childs = null;
             if (dependee) {

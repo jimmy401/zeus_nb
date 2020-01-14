@@ -2,20 +2,18 @@ package com.taobao.zeus.web.util;
 
 import com.taobao.zeus.dal.logic.impl.MysqlZeusAction;
 import com.taobao.zeus.dal.logic.impl.MysqlZeusActionBak;
-import com.taobao.zeus.dal.mapper.ZeusActionBakMapper;
-import com.taobao.zeus.dal.mapper.ZeusActionMapper;
 import com.taobao.zeus.dal.model.ZeusActionBakWithBLOBs;
 import com.taobao.zeus.dal.model.ZeusActionWithBLOBs;
 import com.taobao.zeus.dal.model.ZeusJobWithBLOBs;
 import com.taobao.zeus.dal.tool.PersistenceAndBeanConvertWithAction;
+import com.taobao.zeus.model.ActionDescriptor;
 import com.taobao.zeus.model.HostGroupCache;
-import com.taobao.zeus.model.JobDescriptor;
 import com.taobao.zeus.model.JobStatus;
 import com.taobao.zeus.model.JobStatus.Status;
 import com.taobao.zeus.mvc.Controller;
 import com.taobao.zeus.mvc.Dispatcher;
 import com.taobao.zeus.schedule.DistributeLocker;
-import com.taobao.zeus.schedule.ZeusSchedule;
+import com.taobao.zeus.schedule.MasterRole;
 import com.taobao.zeus.schedule.mvc.JobController;
 import com.taobao.zeus.schedule.mvc.event.Events;
 import com.taobao.zeus.schedule.mvc.event.JobMaintenanceEvent;
@@ -30,7 +28,6 @@ import org.jboss.netty.channel.Channel;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -80,14 +77,14 @@ public class ScheduleDump extends HttpServlet {
                 Field zeusScheduleField = locker.getClass().getDeclaredField(
                         "zeusSchedule");
                 zeusScheduleField.setAccessible(true);
-                ZeusSchedule zeusSchedule = (ZeusSchedule) zeusScheduleField
+                MasterRole masterRole = (MasterRole) zeusScheduleField
                         .get(locker);
-                if (zeusSchedule != null) {
-                    Field masterContextField = zeusSchedule.getClass()
+                if (masterRole != null) {
+                    Field masterContextField = masterRole.getClass()
                             .getDeclaredField("context");
                     masterContextField.setAccessible(true);
                     MasterContext context = (MasterContext) masterContextField
-                            .get(zeusSchedule);
+                            .get(masterRole);
                     if (context != null) {
                         String op = req.getParameter("op");
                         if ("workers".equals(op)) {
@@ -357,14 +354,14 @@ public class ScheduleDump extends HttpServlet {
                                 List<Controller> controllers = dispatcher.getControllers();
                                 if (controllers != null && controllers.size() > 0) {
                                     resp.getWriter().println("开始清理内存中controller id为" + dateStr + "以前的controller：");
-                                    List<JobDescriptor> toBeTransferred = new ArrayList<JobDescriptor>();
+                                    List<ActionDescriptor> toBeTransferred = new ArrayList<ActionDescriptor>();
                                     Iterator<Controller> iter = controllers.iterator();
                                     while (iter.hasNext()) {
                                         sum++;
                                         JobController jobc = (JobController) iter.next();
                                         String jobId = jobc.getActionId();
                                         if (Long.parseLong(jobId) < Long.parseLong(dateStr)) {
-                                            Tuple<JobDescriptor, JobStatus> tuple = context.getGroupManagerWithAction().getActionDescriptor(jobId);
+                                            Tuple<ActionDescriptor, JobStatus> tuple = context.getGroupManagerWithAction().getActionDescriptor(jobId);
                                             JobStatus status = tuple.getY();
                                             if (!Status.RUNNING.equals(status.getStatus())) {
                                                 toBeTransferred.add(tuple.getX());
@@ -383,7 +380,7 @@ public class ScheduleDump extends HttpServlet {
                                             //String sqlDel = "delete JobPersistence where id<" + dateStr + " and status<>'running'";
                                             //delCount = session.createSQLQuery(sqlDel).executeUpdate();
                                             resp.getWriter().println("<br><br>开始备份action表");
-                                            for (JobDescriptor job : toBeTransferred) {
+                                            for (ActionDescriptor job : toBeTransferred) {
                                                 ZeusActionWithBLOBs persist = PersistenceAndBeanConvertWithAction.convert(job);
                                                 ZeusActionBakWithBLOBs backup = new ZeusActionBakWithBLOBs(persist);
                                                 resp.getWriter().println("<br>备份数据库中id为" + backup.getId() + "的action");

@@ -2,12 +2,13 @@ package com.taobao.zeus.web.util;
 
 import com.taobao.zeus.client.ZeusException;
 import com.taobao.zeus.dal.logic.GroupManagerWithJob;
+import com.taobao.zeus.dal.model.ZeusGroupWithBLOBs;
 import com.taobao.zeus.dal.model.ZeusJobWithBLOBs;
 import com.taobao.zeus.dal.model.ZeusWorker;
 import com.taobao.zeus.dal.tool.GroupBean;
 import com.taobao.zeus.dal.tool.JobBean;
+import com.taobao.zeus.model.ActionDescriptor;
 import com.taobao.zeus.model.GroupDescriptor;
-import com.taobao.zeus.model.JobDescriptor;
 import com.taobao.zeus.model.JobStatus;
 import com.taobao.zeus.socket.worker.ClientWorker;
 import com.taobao.zeus.util.Tuple;
@@ -39,15 +40,14 @@ public class ScheduleGroupManagerWithJob implements GroupManagerWithJob{
 	@Autowired
 	private ClientWorker worker;
 	@Override
-	public GroupDescriptor createGroup(String user, String groupName,
-                                       String parentGroup, boolean isDirectory) throws ZeusException {
+	public ZeusGroupWithBLOBs createGroup(String user, String groupName,String parentGroup, boolean isDirectory) throws ZeusException {
 		return groupManager.createGroup(user, groupName, parentGroup, isDirectory);
 	}
 
 	@Override
-	public JobDescriptor createJob(String user, String jobName,
-			String parentGroup, JobDescriptor.JobRunType jobType) throws ZeusException {
-		JobDescriptor jd=groupManager.createJob(user, jobName, parentGroup, jobType);
+	public ActionDescriptor createJob(String user, String jobName,
+                                      String parentGroup, ActionDescriptor.JobRunType jobType) throws ZeusException {
+		ActionDescriptor jd=groupManager.createJob(user, jobName, parentGroup, jobType);
 //		try {
 //			worker.updateJobFromWeb(jd.getId());
 //		} catch (Exception e) {
@@ -86,12 +86,7 @@ public class ScheduleGroupManagerWithJob implements GroupManagerWithJob{
 	}
 
 	@Override
-	public GroupDescriptor getGroupDescriptor(String groupId) {
-		return groupManager.getGroupDescriptor(groupId);
-	}
-
-	@Override
-	public Tuple<JobDescriptor, JobStatus> getJobDescriptor(String jobId) {
+	public Tuple<ActionDescriptor, JobStatus> getJobDescriptor(String jobId) {
 		return groupManager.getJobDescriptor(jobId);
 	}
 
@@ -112,13 +107,12 @@ public class ScheduleGroupManagerWithJob implements GroupManagerWithJob{
 	}
 
 	@Override
-	public void updateGroup(String user, GroupDescriptor group)
-			throws ZeusException {
+	public void updateGroup(String user, ZeusGroupWithBLOBs group)throws ZeusException {
 		groupManager.updateGroup(user, group);
 	}
 
 	@Override
-	public void updateJob(String user, JobDescriptor job) throws ZeusException {
+	public void updateJob(String user, ActionDescriptor job) throws ZeusException {
 		groupManager.updateJob(user, job);
 		groupManager.updateActionList(job);
 		try {
@@ -131,7 +125,7 @@ public class ScheduleGroupManagerWithJob implements GroupManagerWithJob{
 	}
 
 	@Override
-	public Map<String, Tuple<JobDescriptor, JobStatus>> getJobDescriptor(Collection<String> jobIds) {
+	public Map<String, Tuple<ActionDescriptor, JobStatus>> getJobDescriptor(Collection<String> jobIds) {
 		return groupManager.getJobDescriptor(jobIds);
 	}
 
@@ -158,18 +152,23 @@ public class ScheduleGroupManagerWithJob implements GroupManagerWithJob{
 	}
 
 	@Override
-	public List<GroupDescriptor> getChildrenGroup(String groupId) {
+	public List<ZeusGroupWithBLOBs> getChildrenGroup(String groupId) {
 		return groupManager.getChildrenGroup(groupId);
 	}
 
 	@Override
-	public List<Tuple<JobDescriptor, JobStatus>> getChildrenJob(String groupId) {
+	public List<Tuple<ActionDescriptor, JobStatus>> getChildrenJob(String groupId) {
 		return groupManager.getChildrenJob(groupId);
 	}
 
 	@Override
 	public GroupBean getDownstreamGroupBean(GroupBean parent) {
 		return groupManager.getDownstreamGroupBean(parent);
+	}
+
+	@Override
+	public ZeusGroupWithBLOBs getZeusGroupById(String groupId) {
+		return null;
 	}
 
 	@Override
@@ -221,7 +220,7 @@ public class ScheduleGroupManagerWithJob implements GroupManagerWithJob{
 	}
 
 	@Override
-	public void updateActionList(JobDescriptor job) {
+	public void updateActionList(ActionDescriptor job) {
 		groupManager.updateActionList(job);
 	}
 	

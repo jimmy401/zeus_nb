@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.taobao.zeus.model.DebugHistory;
 import com.taobao.zeus.model.FileResource;
-import com.taobao.zeus.model.JobHistory;
+import com.taobao.zeus.model.ZeusActionHistory;
 import com.taobao.zeus.dal.tool.HierarchyProperties;
 import com.taobao.zeus.util.DateUtil;
 import com.taobao.zeus.util.Environment;
@@ -22,8 +22,8 @@ public class JobContext {
 	
 	public static JobContext getTempJobContext(int runType){
 		JobContext jobContext=new JobContext(runType);
-		JobHistory history=new JobHistory();
-		jobContext.setJobHistory(history);
+		ZeusActionHistory history=new ZeusActionHistory();
+		jobContext.setZeusActionHistory(history);
 		File f=new File(Environment.getZeusTempWorkPath() + "/" +DateUtil.getToday());
 		if(!f.exists()){
 			f.mkdir();
@@ -54,7 +54,7 @@ public class JobContext {
 	private HierarchyProperties properties=new HierarchyProperties(new HashMap<String, String>());
 	private List<FileResource> resources;
 	
-	private JobHistory jobHistory;
+	private ZeusActionHistory zeusActionHistory;
 	
 	private DebugHistory debugHistory;
 	
@@ -96,11 +96,11 @@ public class JobContext {
 	public void setProperties(HierarchyProperties properties) {
 		this.properties = properties;
 	}
-	public JobHistory getJobHistory() {
-		return jobHistory;
+	public ZeusActionHistory getZeusActionHistory() {
+		return zeusActionHistory;
 	}
-	public void setJobHistory(JobHistory jobHistory) {
-		this.jobHistory = jobHistory;
+	public void setZeusActionHistory(ZeusActionHistory zeusActionHistory) {
+		this.zeusActionHistory = zeusActionHistory;
 	}
 	public List<FileResource> getResources() {
 		return resources;

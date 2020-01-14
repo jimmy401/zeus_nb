@@ -7,6 +7,7 @@ import com.taobao.zeus.dal.logic.FollowManagerWithJob;
 import com.taobao.zeus.dal.logic.PermissionManager;
 import com.taobao.zeus.dal.logic.UserManager;
 import com.taobao.zeus.dal.logic.impl.MysqlLogManager;
+import com.taobao.zeus.dal.model.ZeusGroupWithBLOBs;
 import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.dal.tool.GroupBean;
 import com.taobao.zeus.model.LogDescriptor;
@@ -45,8 +46,8 @@ public class GroupServiceImpl implements GroupService{
 	public String createGroup(String groupName, String parentGroupId,
 			boolean isDirectory) throws Exception {
 		try {
-			GroupDescriptor gd= permissionGroupManagerWithJob.createGroup(LoginUser.getUser().getUid(), groupName, parentGroupId, isDirectory);
-			return gd.getId();
+			ZeusGroupWithBLOBs gd= permissionGroupManagerWithJob.createGroup(LoginUser.getUser().getUid(), groupName, parentGroupId, isDirectory);
+			return gd.getId().toString();
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
 		}
@@ -71,16 +72,16 @@ public class GroupServiceImpl implements GroupService{
 
 	@Override
 	public GroupModel getGroup(String groupId) throws Exception {
-		GroupDescriptor gd= permissionGroupManagerWithJob.getGroupDescriptor(groupId);
+		ZeusGroupWithBLOBs gd= permissionGroupManagerWithJob.getGroupDescriptor(groupId);
 		GroupModel model=new GroupModel();
-		model.setLocalResources(gd.getResources());
+		model.setLocalResources(gd.getFileResources());
 		model.setLocalProperties(gd.getProperties());
-		model.setDesc(gd.getDesc());
-		model.setDirectory(gd.isDirectory());
-		model.setId(gd.getId());
+		model.setDesc(gd.getDescr());
+		model.setDirectory(gd.getbDirectory());
+		model.setId(gd.getId().toString());
 		model.setName(gd.getName());
 		model.setOwner(gd.getOwner());
-		model.setParent(gd.getParent());
+		model.setParent(gd.getParent().toString());
 		model.setAdmin(permissionGroupManagerWithJob.hasGroupPermission(LoginUser.getUser().getUid(), groupId));
 		List<ZeusFollow> follows= followManager.findGroupFollowers(Arrays.asList(groupId));
 		if(follows!=null){
@@ -100,15 +101,15 @@ public class GroupServiceImpl implements GroupService{
 	
 	public GroupModel getUpstreamGroup(String groupId) throws Exception{
 		GroupBean bean= permissionGroupManagerWithJob.getUpstreamGroupBean(groupId);
-		GroupDescriptor gd=bean.getGroupDescriptor();
+		ZeusGroupWithBLOBs gd=bean.getGroupDescriptor();
 		GroupModel model=new GroupModel();
-		model.setParent(bean.getParentGroupBean()==null?null:bean.getParentGroupBean().getGroupDescriptor().getId());
-		model.setLocalResources(gd.getResources());
+		model.setParent(bean.getParentGroupBean()==null?null:bean.getParentGroupBean().getGroupDescriptor().getId().toString());
+		model.setLocalResources(gd.getFileResources());
 		model.setAllResources(bean.getHierarchyResources());
 		model.setLocalProperties(new HashMap<String, String>(gd.getProperties()));
-		model.setDesc(gd.getDesc());
-		model.setDirectory(gd.isDirectory());
-		model.setId(gd.getId());
+		model.setDesc(gd.getDescr());
+		model.setDirectory(gd.getbDirectory());
+		model.setId(gd.getId().toString());
 		model.setName(gd.getName());
 		model.setOwner(gd.getOwner());
 		String ownerName=userManager.findByUid(gd.getOwner()).getName();
@@ -116,7 +117,7 @@ public class GroupServiceImpl implements GroupService{
 			ownerName=gd.getOwner();
 		}
 		model.setOwnerName(ownerName);
-		model.setParent(gd.getParent());
+		model.setParent(gd.getParent().toString());
 		model.setAllProperties(bean.getHierarchyProperties().getAllProperties());
 		model.setAdmin(permissionGroupManagerWithJob.hasGroupPermission(LoginUser.getUser().getUid(), groupId));
 		List<ZeusFollow> follows= followManager.findGroupFollowers(Arrays.asList(groupId));
@@ -132,7 +133,7 @@ public class GroupServiceImpl implements GroupService{
 			model.setFollows(followsName);
 		}
 		
-		List<String> ladmins=permissionManager.getGroupAdmins(bean.getGroupDescriptor().getId());
+		List<String> ladmins=permissionManager.getGroupAdmins(bean.getGroupDescriptor().getId().toString());
 		List<String> admins=new ArrayList<String>();
 		for(String s:ladmins){
 			String name=userManager.findByUid(s).getName();
@@ -198,13 +199,13 @@ public class GroupServiceImpl implements GroupService{
 
 	@Override
 	public void updateGroup(GroupModel group) throws Exception {
-		GroupDescriptor gd=new GroupDescriptor();
-		gd.setResources(group.getLocalResources());
-		gd.setDesc(group.getDesc());
-		gd.setId(group.getId());
+		ZeusGroupWithBLOBs gd=new ZeusGroupWithBLOBs();
+		gd.setFileResources(group.getLocalResources());
+		gd.setDescr(group.getDesc());
+		gd.setId(Integer.valueOf(group.getId()));
 		gd.setName(group.getName());
 		gd.setProperties(group.getLocalProperties());
-		gd.setExisted(true);
+		gd.setExisted(1);
 		
 		try {
 			permissionGroupManagerWithJob.updateGroup(LoginUser.getUser().getUid(), gd);

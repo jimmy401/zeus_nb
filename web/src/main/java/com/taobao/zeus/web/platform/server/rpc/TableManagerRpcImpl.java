@@ -279,7 +279,7 @@ public class TableManagerRpcImpl implements TableManagerService {
 			}
 			DataPreviewJob job = new DataPreviewJob(jobContext);
 			job.run();
-			String logContent = job.getJobContext().getJobHistory().getLog()
+			String logContent = job.getJobContext().getZeusActionHistory().getLog()
 					.getContent();
 			// log.error("---\n" + logContent + "============\n");
 			List<Tuple<Integer, List<String>>> datas = new ArrayList<Tuple<Integer, List<String>>>();

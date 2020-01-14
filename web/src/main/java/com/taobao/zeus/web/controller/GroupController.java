@@ -2,9 +2,11 @@ package com.taobao.zeus.web.controller;
 
 import com.taobao.zeus.client.ZeusException;
 import com.taobao.zeus.dal.logic.FollowManagerWithJob;
+import com.taobao.zeus.dal.logic.GroupManagerWithJob;
 import com.taobao.zeus.dal.logic.PermissionManager;
 import com.taobao.zeus.dal.logic.UserManager;
 import com.taobao.zeus.dal.logic.impl.ReadOnlyGroupManagerWithJob;
+import com.taobao.zeus.dal.model.ZeusGroupWithBLOBs;
 import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.dal.tool.GroupBean;
 import com.taobao.zeus.model.GroupDescriptor;
@@ -20,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,7 +39,8 @@ public class GroupController extends BaseController{
     private static final Logger log = LoggerFactory.getLogger(GroupController.class);
 
     @Autowired
-    private ReadOnlyGroupManagerWithJob readOnlyGroupManagerWithJob;
+    @Qualifier("mysqlGroupManagerWithJob")
+    private GroupManagerWithJob mysqlGroupManagerWithJob;
     @Autowired
     private PermissionGroupManagerWithJob permissionGroupManagerWithJob;
     @Autowired
@@ -50,16 +54,16 @@ public class GroupController extends BaseController{
     public CommonResponse<GroupModel> getUpstreamGroup(@RequestParam(value = "groupId") String groupId) {
         try {
 
-            GroupBean bean = permissionGroupManagerWithJob.getUpstreamGroupBean(groupId);
-            GroupDescriptor gd = bean.getGroupDescriptor();
+            GroupBean bean = mysqlGroupManagerWithJob.getUpstreamGroupBean(groupId);
+            ZeusGroupWithBLOBs gd = bean.getGroupDescriptor();
             GroupModel model = new GroupModel();
-            model.setParent(bean.getParentGroupBean() == null ? null : bean.getParentGroupBean().getGroupDescriptor().getId());
-            model.setLocalResources(gd.getResources());
+            model.setParent(bean.getParentGroupBean() == null ? null : bean.getParentGroupBean().getGroupDescriptor().getId().toString());
+            model.setLocalResources(gd.getFileResources());
             model.setAllResources(bean.getHierarchyResources());
             model.setLocalProperties(new HashMap<String, String>(gd.getProperties()));
-            model.setDesc(gd.getDesc());
-            model.setDirectory(gd.isDirectory());
-            model.setId(gd.getId());
+            model.setDesc(gd.getDescr());
+            model.setDirectory(gd.getbDirectory());
+            model.setId(gd.getId().toString());
             model.setName(gd.getName());
             model.setOwner(gd.getOwner());
             String ownerName = userManager.findByUid(gd.getOwner()).getName();
@@ -67,7 +71,7 @@ public class GroupController extends BaseController{
                 ownerName = gd.getOwner();
             }
             model.setOwnerName(ownerName);
-            model.setParent(gd.getParent());
+            model.setParent(gd.getParent().toString());
             model.setAllProperties(bean.getHierarchyProperties().getAllProperties());
             model.setAdmin(permissionGroupManagerWithJob.hasGroupPermission(CurrentUser.getUser().getUid(), groupId));
             List<ZeusFollow> follows = followManager.findGroupFollowers(Arrays.asList(groupId));
@@ -83,7 +87,7 @@ public class GroupController extends BaseController{
                 model.setFollows(followsName);
             }
 
-            List<String> ladmins = permissionManager.getGroupAdmins(bean.getGroupDescriptor().getId());
+            List<String> ladmins = permissionManager.getGroupAdmins(bean.getGroupDescriptor().getId().toString());
             List<String> admins = new ArrayList<String>();
             for (String s : ladmins) {
                 String name = userManager.findByUid(s).getName();
@@ -106,42 +110,42 @@ public class GroupController extends BaseController{
             model.setOwners(owners);
 
             //所有secret. 开头的配置项都进行权限控制
-            for (String key : model.getAllProperties().keySet()) {
-                boolean isLocal = model.getLocalProperties().get(key) == null ? false : true;
-                if (key.startsWith("secret.")) {
-                    if (!isLocal) {
-                        model.getAllProperties().put(key, "*");
-                    } else {
-                        if (!model.isAdmin() && !model.getOwner().equals(LoginUser.getUser().getUid())) {
-                            model.getLocalProperties().put(key, "*");
-                        }
-                    }
-                }
-            }
-            //本地配置项中的hadoop.hadoop.job.ugi 只有管理员和owner才能查看，继承配置项不能查看
-            String SecretKey = "hadoop.hadoop.job.ugi";
-            if (model.getLocalProperties().containsKey(SecretKey)) {
-                String value = model.getLocalProperties().get(SecretKey);
-                if (value.lastIndexOf("#") == -1) {
-                    value = "*";
-                } else {
-                    value = value.substring(0, value.lastIndexOf("#"));
-                    value += "#*";
-                }
-                if (!model.isAdmin() && !model.getOwner().equals(LoginUser.getUser().getUid())) {
-                    model.getLocalProperties().put(SecretKey, value);
-                }
-                model.getAllProperties().put(SecretKey, value);
-            } else if (model.getAllProperties().containsKey(SecretKey)) {
-                String value = model.getAllProperties().get(SecretKey);
-                if (value.lastIndexOf("#") == -1) {
-                    value = "*";
-                } else {
-                    value = value.substring(0, value.lastIndexOf("#"));
-                    value += "#*";
-                }
-                model.getAllProperties().put(SecretKey, value);
-            }
+//            for (String key : model.getAllProperties().keySet()) {
+//                boolean isLocal = model.getLocalProperties().get(key) == null ? false : true;
+//                if (key.startsWith("secret.")) {
+//                    if (!isLocal) {
+//                        model.getAllProperties().put(key, "*");
+//                    } else {
+//                        if (!model.isAdmin() && !model.getOwner().equals(LoginUser.getUser().getUid())) {
+//                            model.getLocalProperties().put(key, "*");
+//                        }
+//                    }
+//                }
+//            }
+//            //本地配置项中的hadoop.hadoop.job.ugi 只有管理员和owner才能查看，继承配置项不能查看
+//            String SecretKey = "hadoop.hadoop.job.ugi";
+//            if (model.getLocalProperties().containsKey(SecretKey)) {
+//                String value = model.getLocalProperties().get(SecretKey);
+//                if (value.lastIndexOf("#") == -1) {
+//                    value = "*";
+//                } else {
+//                    value = value.substring(0, value.lastIndexOf("#"));
+//                    value += "#*";
+//                }
+//                if (!model.isAdmin() && !model.getOwner().equals(LoginUser.getUser().getUid())) {
+//                    model.getLocalProperties().put(SecretKey, value);
+//                }
+//                model.getAllProperties().put(SecretKey, value);
+//            } else if (model.getAllProperties().containsKey(SecretKey)) {
+//                String value = model.getAllProperties().get(SecretKey);
+//                if (value.lastIndexOf("#") == -1) {
+//                    value = "*";
+//                } else {
+//                    value = value.substring(0, value.lastIndexOf("#"));
+//                    value += "#*";
+//                }
+//                model.getAllProperties().put(SecretKey, value);
+//            }
             return this.buildResponse(model);
 
         } catch (Exception e) {
@@ -154,8 +158,8 @@ public class GroupController extends BaseController{
                               @RequestParam(value = "parentGroupId") String parentGroupId,
                               @RequestParam(value = "isDirectory") boolean isDirectory) {
         try {
-            GroupDescriptor gd= permissionGroupManagerWithJob.createGroup(LoginUser.getUser().getUid(), groupName, parentGroupId, isDirectory);
-            return buildResponse(gd.getId());
+            ZeusGroupWithBLOBs gd= permissionGroupManagerWithJob.createGroup(LoginUser.getUser().getUid(), groupName, parentGroupId, isDirectory);
+            return buildResponse(gd.getId().toString());
         } catch (ZeusException e) {
             return this.buildResponse(ReturnCode.SYSTEM_ERROR,null);
         }
@@ -167,13 +171,13 @@ public class GroupController extends BaseController{
             @RequestParam(value = "groupDesc") String groupDesc,
                             @RequestParam(value = "groupConfigInfo") String groupConfigInfo,
                             @RequestParam(value = "groupResourceInfo") String groupResourceInfo) {
-        GroupDescriptor gd=new GroupDescriptor();
+        ZeusGroupWithBLOBs gd=new ZeusGroupWithBLOBs();
         gd.setResources(null);
-        gd.setDesc(groupDesc);
-        gd.setId(groupId);
+        gd.setDescr(groupDesc);
+        gd.setId(Integer.valueOf(groupId));
         gd.setName(groupName);
         gd.setProperties(null);
-        gd.setExisted(true);
+        gd.setExisted(1);
 
         try {
             permissionGroupManagerWithJob.updateGroup(LoginUser.getUser().getUid(), gd);
@@ -215,7 +219,7 @@ public class GroupController extends BaseController{
         return result;
     }
 
-    @RequestMapping(value = "/add_group_admins", method = RequestMethod.GET)
+    @RequestMapping(value = "/add_group_admin", method = RequestMethod.GET)
     public CommonResponse<Void> addGroupAdmin(@RequestParam(value = "groupId") String groupId,@RequestParam(value = "uid") String uid) {
         try {
             permissionGroupManagerWithJob.addGroupAdmin(LoginUser.getUser().getUid(),uid, groupId);
@@ -225,7 +229,7 @@ public class GroupController extends BaseController{
             return this.buildResponse(ReturnCode.SYSTEM_ERROR);
         }
     }
-    @RequestMapping(value = "/delete_group_admins", method = RequestMethod.GET)
+    @RequestMapping(value = "/delete_group_admin", method = RequestMethod.GET)
     public CommonResponse<Void> removeGroupAdmin(@RequestParam(value = "groupId") String groupId,@RequestParam(value = "uid") String uid){
         try {
             permissionGroupManagerWithJob.removeGroupAdmin(LoginUser.getUser().getUid(),uid, groupId);

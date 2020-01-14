@@ -4,7 +4,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
-import com.taobao.zeus.model.JobHistory;
+import com.taobao.zeus.model.ZeusActionHistory;
 import com.taobao.zeus.socket.SocketLog;
 import com.taobao.zeus.socket.master.AtomicIncrease;
 import com.taobao.zeus.socket.master.MasterContext;
@@ -25,7 +25,7 @@ public class MasterExecuteJob {
 	/**
 	 * master向worker发送执行job的指令
 	 * @param context
-	 * @param jobId
+	 * @param id
 	 * @return
 	 */
 	public Future<Response> executeJob(final MasterContext context,final MasterWorkerHolder holder,ExecuteKind ek,final String id){
@@ -44,11 +44,11 @@ public class MasterExecuteJob {
 		// 等待worker响应
 		// 响应OK 则添加监听器，继续等待任务完成的消息n
 		// 响应失败，返回失败退出码
-		JobHistory history=context.getJobHistoryManager().findJobHistory(id);
-		final String jobId=history.getActionId();
+		ZeusActionHistory history=context.getJobHistoryManager().findJobHistory(id);
+		final String actionId=history.getActionId();
 //		QueueInfoLog.info("put runnings"+holder.getRunnings().size()+"");
 //		holder.getRunnings().put(jobId,false);
-		ExecuteMessage em=ExecuteMessage.newBuilder().setJobId(jobId).build();
+		ExecuteMessage em=ExecuteMessage.newBuilder().setJobId(actionId).build();
 		final Request req=Request.newBuilder().setRid(AtomicIncrease.getAndIncrement()).setOperate(Operate.Schedule)
 			.setBody(em.toByteString()).build();
 		SocketMessage sm=SocketMessage.newBuilder().setKind(Kind.REQUEST).setBody(req.toByteString()).build();
@@ -69,13 +69,13 @@ public class MasterExecuteJob {
 				try {
 					latch.await();
 				} finally{
-					holder.getRunnings().remove(jobId);
+					holder.getRunnings().remove(actionId);
 				}
 				return response;
 			}
 		});
 		holder.getChannel().write(sm);
-		SocketLog.info("master send execute command to worker,rid="+req.getRid()+",jobId="+jobId);
+		SocketLog.info("master send execute command to worker,rid="+req.getRid()+",actionId="+actionId);
 		return f;
 	}
 	private Future<Response> processManual(final MasterContext context,final MasterWorkerHolder holder,final String historyId){

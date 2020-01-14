@@ -28,11 +28,11 @@ public class ZooKeeperJob extends AbstractJob{
 			
 			if(processer==null){
 				JSONObject content=new JSONObject();
-				content.put("id",getJobContext().getJobHistory().getActionId());
-				content.put("historyId", getJobContext().getJobHistory().getId());
+				content.put("id",getJobContext().getZeusActionHistory().getActionId());
+				content.put("historyId", getJobContext().getZeusActionHistory().getId());
 				content.put("status", jobContext.getCoreExitCode()==0?true:false);
 				content.put("time", new Date().getTime());
-				zkResultNotify.send(jobContext.getJobHistory().getId(), content.toString());
+				zkResultNotify.send(jobContext.getZeusActionHistory().getId(), content.toString());
 			}else{
 				String host=processer.getHost();
 				String path=processer.getPath();

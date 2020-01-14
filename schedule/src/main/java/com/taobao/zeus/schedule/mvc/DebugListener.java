@@ -23,7 +23,7 @@ public class DebugListener extends DispatcherListener{
 	
 	private FileManager fileManager;
 	public DebugListener(MasterContext context){
-		fileManager=(FileManager) context.getFileManager();
+		fileManager=context.getFileManager();
 	}
 	@Override
 	public void beforeDispatch(MvcEvent mvce) {

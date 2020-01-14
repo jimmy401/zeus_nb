@@ -2,14 +2,12 @@ package com.taobao.zeus.dal.logic;
 
 import com.taobao.zeus.client.ZeusException;
 import com.taobao.zeus.dal.model.ZeusActionWithBLOBs;
-import com.taobao.zeus.dal.model.ZeusJobWithBLOBs;
-import com.taobao.zeus.dal.model.ZeusUser;
+import com.taobao.zeus.dal.model.ZeusGroupWithBLOBs;
 import com.taobao.zeus.dal.model.ZeusWorker;
 import com.taobao.zeus.dal.tool.GroupBean;
 import com.taobao.zeus.dal.tool.JobBean;
-import com.taobao.zeus.model.GroupDescriptor;
-import com.taobao.zeus.model.JobDescriptor;
-import com.taobao.zeus.model.JobDescriptor.JobRunType;
+import com.taobao.zeus.model.ActionDescriptor;
+import com.taobao.zeus.model.ActionDescriptor.JobRunType;
 import com.taobao.zeus.model.JobStatus;
 import com.taobao.zeus.util.Tuple;
 
@@ -33,7 +31,7 @@ public interface GroupManagerWithAction {
 	/**
 	 * 根据组ID查询组信息
 	 * 向上查询该组上的所有组信息
-	 * @param groupName
+	 * @param groupId
 	 * @return
 	 */
 	GroupBean getUpstreamGroupBean(String groupId);
@@ -51,13 +49,13 @@ public interface GroupManagerWithAction {
 	 * @param groupId
 	 * @return
 	 */
-	GroupDescriptor getGroupDescriptor(String groupId);
+	ZeusGroupWithBLOBs getGroupDescriptor(String groupId);
 	/**
 	 * 获取组下的组
 	 * @param groupId
 	 * @return
 	 */
-	List<GroupDescriptor> getChildrenGroup(String groupId);
+	List<ZeusGroupWithBLOBs> getChildrenGroup(String groupId);
 	/**
 	 * 根据JobId查询Job信息
 	 * 向上查询所有的组信息
@@ -70,13 +68,13 @@ public interface GroupManagerWithAction {
 	 * @param jobId
 	 * @return
 	 */
-	Tuple<JobDescriptor,JobStatus> getActionDescriptor(String jobId);
+	Tuple<ActionDescriptor,JobStatus> getActionDescriptor(String jobId);
 	/**
 	 * 获取组下的job
 	 * @param groupId
 	 * @return
 	 */
-	List<Tuple<JobDescriptor,JobStatus>> getChildrenAction(String groupId);
+	List<Tuple<ActionDescriptor,JobStatus>> getChildrenAction(String groupId);
 	/**
 	 * 查询Job状态
 	 * @param jobId
@@ -88,20 +86,20 @@ public interface GroupManagerWithAction {
 	 * @param jobIds
 	 * @return
 	 */
-	Map<String, Tuple<JobDescriptor, JobStatus>> getActionDescriptor(Collection<String> jobIds);
+	Map<String, Tuple<ActionDescriptor, JobStatus>> getActionDescriptor(Collection<String> jobIds);
 	/**
 	 * 创建一个group
 	 * @param user
 	 * @return
 	 */
-	GroupDescriptor createGroup(String user, String groupName, String parentGroup, boolean isDirectory) throws ZeusException;
+	ZeusGroupWithBLOBs createGroup(String user, String groupName, String parentGroup, boolean isDirectory) throws ZeusException;
 	/**
 	 * 创建一个Job
 	 * @param user
 	 * @param group
 	 * @return
 	 */
-	JobDescriptor createAction(String user, String jobName, String parentGroup, JobRunType jobType) throws ZeusException;
+	ActionDescriptor createAction(String user, String jobName, String parentGroup, JobRunType jobType) throws ZeusException;
 	/**
 	 * 删除组，成功删除需要的条件：
 	 * 1.操作人是该组的创建者
@@ -126,13 +124,13 @@ public interface GroupManagerWithAction {
 	 * @param job
 	 * @return
 	 */
-	void updateAction(String user, JobDescriptor job) throws ZeusException;
+	void updateAction(String user, ActionDescriptor job) throws ZeusException;
 	/**
 	 * 更新Group
 	 * @param group
 	 * @return
 	 */
-	void updateGroup(String user, GroupDescriptor group) throws ZeusException;
+	void updateGroup(String user, ZeusGroupWithBLOBs group) throws ZeusException;
 	/**
 	 * 更新Job状态
 	 * @param jobStatus
@@ -179,13 +177,13 @@ public interface GroupManagerWithAction {
 	 * 保存jobAction
 	 * @throws ZeusException
 	 */
-	void updateAction(JobDescriptor actionPer) throws ZeusException;
+	void updateAction(ActionDescriptor actionPer) throws ZeusException;
 
 	/**
 	 * 获取jobAction列表
 	 * @throws ZeusException
 	 */
-	List<Tuple<JobDescriptor, JobStatus>> getActionList(String jobId);
+	List<Tuple<ActionDescriptor, JobStatus>> getActionList(String jobId);
 
 	/**
 	 * 移除jobAction

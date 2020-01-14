@@ -16,8 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.taobao.zeus.model.DebugHistory;
-import com.taobao.zeus.model.FileDescriptor;
-import com.taobao.zeus.model.JobDescriptor.JobRunType;
+import com.taobao.zeus.model.ActionDescriptor.JobRunType;
 import com.taobao.zeus.socket.protocol.Protocol.ExecuteKind;
 import com.taobao.zeus.socket.worker.ClientWorker;
 import com.taobao.zeus.web.util.LoginUser;

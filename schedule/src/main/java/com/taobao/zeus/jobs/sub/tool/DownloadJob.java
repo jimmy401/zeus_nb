@@ -2,26 +2,21 @@ package com.taobao.zeus.jobs.sub.tool;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.taobao.zeus.model.FileResource;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 
 import com.taobao.zeus.jobs.AbstractJob;
 import com.taobao.zeus.jobs.Job;
 import com.taobao.zeus.jobs.JobContext;
 import com.taobao.zeus.jobs.RenderHierarchyProperties;
-import com.taobao.zeus.jobs.sub.conf.ConfUtil;
 
 /**
  * 下载文件的Job
@@ -131,7 +126,7 @@ public class DownloadJob extends AbstractJob {
 			try {
 				exitCode = job.run();
 			} catch (Exception e) {
-				jobContext.getJobHistory().getLog().appendZeusException(e);
+				jobContext.getZeusActionHistory().getLog().appendZeusException(e);
 			}
 		}
 		return exitCode;

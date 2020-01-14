@@ -60,7 +60,7 @@ public class ShellJob extends ProcessJob{
 			writer.write(script);
 			getProperties().setProperty(PropertyKeys.RUN_SHELLPATH, f.getAbsolutePath());
 		} catch (Exception e) {
-			jobContext.getJobHistory().getLog().appendZeusException(e);
+			jobContext.getZeusActionHistory().getLog().appendZeusException(e);
 		} finally{
 			IOUtils.closeQuietly(writer);
 		}
@@ -75,7 +75,7 @@ public class ShellJob extends ProcessJob{
 		String shellPrefix = "";
 		String user = "";
 		if (jobContext.getRunType() == 1 || jobContext.getRunType() == 2) {
-			user = jobContext.getJobHistory().getOperator();
+			user = jobContext.getZeusActionHistory().getOperator();
 			shellPrefix = "sudo -u " + user;
 		} else if (jobContext.getRunType() == 3) {
 			user = jobContext.getDebugHistory().getOwner();
@@ -109,7 +109,7 @@ public class ShellJob extends ProcessJob{
 		}
 
 		//执行shell
-		// run shell as current user
+		// runAction shell as current user
 		if(shellPrefix.trim().length() > 0){
 			String envFilePath = this.getClass().getClassLoader().getResource("/").getPath()+"env.sh";
 			String tmpFilePath = jobContext.getWorkDir()+File.separator+"tmp.sh";
@@ -126,7 +126,7 @@ public class ShellJob extends ProcessJob{
 					tmpWriter=new OutputStreamWriter(new FileOutputStream(tmpFile),Charset.forName(jobContext.getProperties().getProperty("zeus.fs.encode", "utf-8")));
 					tmpWriter.write("source " + localEnvFilePath + "; source " + shellFilePath);
 				} catch (Exception e) {
-					jobContext.getJobHistory().getLog().appendZeusException(e);
+					jobContext.getZeusActionHistory().getLog().appendZeusException(e);
 				} finally{
 					IOUtils.closeQuietly(tmpWriter);
 				}

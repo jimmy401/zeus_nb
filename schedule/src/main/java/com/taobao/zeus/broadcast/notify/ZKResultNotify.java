@@ -13,7 +13,7 @@ import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 
-import com.taobao.zeus.model.JobHistory;
+import com.taobao.zeus.model.ZeusActionHistory;
 
 public class ZKResultNotify extends AbstractJobResultNotify{
 
@@ -24,7 +24,7 @@ public class ZKResultNotify extends AbstractJobResultNotify{
 		if(host==null || "".equals(host.trim())){
 			return;
 		}
-		JobHistory history=jobHistoryManager.findJobHistory(historyId);
+		ZeusActionHistory history=jobHistoryManager.findJobHistory(historyId);
 		String jobId=history.getActionId();
 
 

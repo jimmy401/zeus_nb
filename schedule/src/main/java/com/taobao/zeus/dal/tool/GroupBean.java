@@ -1,5 +1,6 @@
 package com.taobao.zeus.dal.tool;
 
+import com.taobao.zeus.dal.model.ZeusGroupWithBLOBs;
 import com.taobao.zeus.model.FileResource;
 import com.taobao.zeus.model.GroupDescriptor;
 import com.taobao.zeus.dal.tool.HierarchyProperties;
@@ -16,14 +17,14 @@ public class GroupBean implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private GroupBean parentGroupBean;
 	
-	private final GroupDescriptor groupDescriptor;
+	private final ZeusGroupWithBLOBs groupDescriptor;
 	
 
 	private Map<String, JobBean> jobBeanMap=new HashMap<String, JobBean>();
 
 	private List<GroupBean> children=new ArrayList<GroupBean>();
 
-	public GroupBean(GroupDescriptor g){
+	public GroupBean(ZeusGroupWithBLOBs g){
 		this.groupDescriptor=g;
 	}
 	/**
@@ -46,7 +47,7 @@ public class GroupBean implements Serializable{
 		if (groupDescriptor.getResources()==null){
 			local=new ArrayList<FileResource>();
 		}else{
-			local=new ArrayList<FileResource>(groupDescriptor.getResources());
+			local=new ArrayList<FileResource>(groupDescriptor.getFileResources());
 		}
 		if(local==null){
 			local=new ArrayList<FileResource>();
@@ -64,7 +65,7 @@ public class GroupBean implements Serializable{
 		Map<String, GroupBean> map=new HashMap<String, GroupBean>();
 		for(GroupBean gb:getChildrenGroupBeans()){
 			for(GroupBean child:getChildrenGroupBeans()){
-				map.put(child.getGroupDescriptor().getId(), child);
+				map.put(child.getGroupDescriptor().getId().toString(), child);
 			}
 			map.putAll(gb.getAllSubGroupBeans());
 		}
@@ -112,17 +113,17 @@ public class GroupBean implements Serializable{
 		return children;
 	}
 	
-	public GroupDescriptor getGroupDescriptor(){
+	public ZeusGroupWithBLOBs getGroupDescriptor(){
 		return groupDescriptor;
 	}
 	
 	public boolean isDirectory(){
-		return groupDescriptor.isDirectory();
+		return groupDescriptor.getbDirectory();
 	}
 	public void setParentGroupBean(GroupBean parentGroupBean) {
 		this.parentGroupBean = parentGroupBean;
 	}
 	public boolean isExisted(){
-		return groupDescriptor.isExisted();
+		return groupDescriptor.getbExisted();
 	}
 }

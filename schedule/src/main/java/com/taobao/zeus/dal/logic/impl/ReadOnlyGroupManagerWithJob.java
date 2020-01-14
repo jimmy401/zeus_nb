@@ -1,15 +1,14 @@
 package com.taobao.zeus.dal.logic.impl;
 
 import com.taobao.zeus.client.ZeusException;
-import com.taobao.zeus.dal.logic.GroupManagerWithAction;
 import com.taobao.zeus.dal.logic.GroupManagerWithJob;
 import com.taobao.zeus.dal.mapper.ZeusGroupMapper;
 import com.taobao.zeus.dal.mapper.ZeusJobMapper;
 import com.taobao.zeus.dal.model.*;
 import com.taobao.zeus.dal.tool.*;
+import com.taobao.zeus.model.ActionDescriptor;
 import com.taobao.zeus.model.FileResource;
 import com.taobao.zeus.model.GroupDescriptor;
-import com.taobao.zeus.model.JobDescriptor;
 import com.taobao.zeus.model.JobStatus;
 import com.taobao.zeus.model.processer.Processer;
 import com.taobao.zeus.schedule.mvc.DebugInfoLog;
@@ -77,7 +76,7 @@ public class ReadOnlyGroupManagerWithJob{
 			jobrealtime.stamp=new Date();
 		}
 
-		List<JobDescriptor> changedJobs=new ArrayList<JobDescriptor>();
+		List<ActionDescriptor> changedJobs=new ArrayList<ActionDescriptor>();
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("gmtModified", ignoreContentJobJudge.lastModified);
 		List<ZeusJobWithBLOBs> list =zeusJobMapper.selectGreatThanGmtModified(params);
@@ -108,11 +107,7 @@ public class ReadOnlyGroupManagerWithJob{
 
 		Map<String,Object> groupParams = new HashMap<String,Object>();
 		groupParams.put("gmtModified", ignoreContentGroupJudge.lastModified);
-		List<ZeusGroupWithBLOBs> zeusGroups = zeusGroupMapper.selectGreatThanModified(groupParams);
-		List<GroupDescriptor> changedGroups=new ArrayList<GroupDescriptor>();
-		for(ZeusGroupWithBLOBs p:zeusGroups){
-			changedGroups.add(PersistenceAndBeanConvertWithJob.convert(p));
-		}
+		List<ZeusGroupWithBLOBs> changedGroups = zeusGroupMapper.selectGreatThanModified(groupParams);
 		
 		if(grouprealtime!=null && grouprealtime.count.equals(ignoreContentGroupJudge.count) && grouprealtime.maxId.equals(ignoreContentGroupJudge.maxId)
 				&& isAllGroupsNotChangeThese(ignoreGlobe, changedGroups)){
@@ -133,15 +128,15 @@ public class ReadOnlyGroupManagerWithJob{
 	 * @param list
 	 * @return
 	 */
-	private boolean isAllJobsNotChangeParent(GroupBean gb,List<JobDescriptor> list){
+	private boolean isAllJobsNotChangeParent(GroupBean gb,List<ActionDescriptor> list){
 		Map<String, JobBean> allJobs=gb.getAllSubJobBeans();
-		for(JobDescriptor jd:list){
+		for(ActionDescriptor jd:list){
 			JobBean bean=allJobs.get(jd.getId());
 			if(bean==null){
 				DebugInfoLog.info("isAllJobsNotChangeParent job id="+ jd.getId()+" has changed");
 				return false;
 			}
-			JobDescriptor old=bean.getJobDescriptor();
+			ActionDescriptor old=bean.getActionDescriptor();
 			if(!old.getGroupId().equals(jd.getGroupId())){
 				DebugInfoLog.info("isAllJobsNotChangeParent job id="+ jd.getId()+" has changed");
 				return false;
@@ -175,19 +170,19 @@ public class ReadOnlyGroupManagerWithJob{
 //		return true;
 //	}
 	
-	private boolean isGroupsNotChangeExisted(Map<String, GroupBean> allGroups,List<GroupDescriptor> list){
-		for(GroupDescriptor tmp:list){
+	private boolean isGroupsNotChangeExisted(Map<String, GroupBean> allGroups,List<ZeusGroupWithBLOBs> list){
+		for(ZeusGroupWithBLOBs tmp:list){
 			GroupBean bean=allGroups.get(tmp.getId());
-			if (bean!=null && bean.isExisted()!=tmp.isExisted()) {
+			if (bean!=null && bean.isExisted()!=tmp.getbExisted()) {
 				return false;
 			}
 		}
 		return true;
 	}
 
-	private boolean isAllGroupsNotChangeThese(GroupBean gb,List<GroupDescriptor> list){
+	private boolean isAllGroupsNotChangeThese(GroupBean gb,List<ZeusGroupWithBLOBs> list){
 		Map<String, GroupBean> allGroups=gb.getAllSubGroupBeans();
-		for(GroupDescriptor gd:list){
+		for(ZeusGroupWithBLOBs gd:list){
 			GroupBean bean=allGroups.get(gd.getId());
 			if(gd.getId().equals(gb.getGroupDescriptor().getId())){
 				break;
@@ -196,7 +191,7 @@ public class ReadOnlyGroupManagerWithJob{
 				DebugInfoLog.info("isAllGroupsNotChangeParent group id="+ gd.getId()+" has changed");
 				return false;
 			}
-			GroupDescriptor old=bean.getGroupDescriptor();
+			ZeusGroupWithBLOBs old=bean.getGroupDescriptor();
 			if(!old.getParent().equals(gd.getParent())){
 				DebugInfoLog.info("isAllGroupsNotChangeParent group id="+ gd.getId()+" has changed");
 				return false;
@@ -276,7 +271,7 @@ public class ReadOnlyGroupManagerWithJob{
 			ignoreGlobe=new ReadOnlyGroupManagerAssemblyWithJob(groupManagerWithJob).getGlobeGroupBean();
 		}
 		if(copy){
-			return GroupManagerToolWithJob.buildGlobeGroupBeanWithoutDepend(new CopyGroupManagerAssembly(ignoreGlobe));
+			return GroupManagerWithJobTool.buildGlobeGroupBeanWithoutDepend(new CopyGroupManagerAssembly(ignoreGlobe));
 		}else{
 			return ignoreGlobe;
 		}
@@ -284,7 +279,7 @@ public class ReadOnlyGroupManagerWithJob{
 	
 	public GroupBean getCopyGlobeGroupBean(){
 		GroupBean gb=getGlobeGroupBean();
-		return GroupManagerToolWithJob.buildGlobeGroupBean(new CopyGroupManagerAssembly(gb));
+		return GroupManagerWithJobTool.buildGlobeGroupBean(new CopyGroupManagerAssembly(gb));
 	}
 	
 	private class CopyGroupManagerAssembly extends ReadOnlyGroupManagerAssemblyWithJob{
@@ -295,17 +290,17 @@ public class ReadOnlyGroupManagerWithJob{
 		}
 		@Override
 		public String getRootGroupId() {
-			return globe.getGroupDescriptor().getId();
+			return globe.getGroupDescriptor().getId().toString();
 		}
 		@Override
-		public List<GroupDescriptor> getChildrenGroup(String groupId) {
+		public List<ZeusGroupWithBLOBs> getChildrenGroup(String groupId) {
 			List<GroupBean> list=null;
 			if(globe.getGroupDescriptor().getId().equals(groupId)){
 				list=globe.getChildrenGroupBeans();
 			}else{
 				list=globe.getAllSubGroupBeans().get(groupId).getChildrenGroupBeans();
 			}
-			List<GroupDescriptor> result=new ArrayList<GroupDescriptor>();
+			List<ZeusGroupWithBLOBs> result=new ArrayList<ZeusGroupWithBLOBs>();
 			if(list!=null){
 				for(GroupBean gb:list){
 					result.add(gb.getGroupDescriptor());
@@ -314,7 +309,7 @@ public class ReadOnlyGroupManagerWithJob{
 			return result;
 		}
 		@Override
-		public GroupDescriptor getGroupDescriptor(String groupId) {
+		public ZeusGroupWithBLOBs getGroupDescriptor(String groupId) {
 			if(globe.getGroupDescriptor().getId().equals(groupId)){
 				return globe.getGroupDescriptor();
 			}else{
@@ -322,12 +317,12 @@ public class ReadOnlyGroupManagerWithJob{
 			}
 		}
 		@Override
-		public List<Tuple<JobDescriptor, JobStatus>> getChildrenJob(
+		public List<Tuple<ActionDescriptor, JobStatus>> getChildrenJob(
 				String groupId) {
 			Map<String, JobBean> map=globe.getAllSubGroupBeans().get(groupId).getJobBeans();
-			List<Tuple<JobDescriptor, JobStatus>> result=new ArrayList<Tuple<JobDescriptor,JobStatus>>();
+			List<Tuple<ActionDescriptor, JobStatus>> result=new ArrayList<Tuple<ActionDescriptor,JobStatus>>();
 			for(JobBean jb:map.values()){
-				result.add(new Tuple<JobDescriptor, JobStatus>(jb.getJobDescriptor(), jb.getJobStatus()));
+				result.add(new Tuple<ActionDescriptor, JobStatus>(jb.getActionDescriptor(), jb.getJobStatus()));
 			}
 			return result;
 		}
@@ -339,18 +334,16 @@ public class ReadOnlyGroupManagerWithJob{
 			this.groupManager=gm;
 		}
 		@Override
-		public GroupDescriptor createGroup(String user, String groupName,
-                                           String parentGroup, boolean isDirectory) throws ZeusException {
+		public ZeusGroupWithBLOBs createGroup(String user, String groupName,String parentGroup, boolean isDirectory) throws ZeusException {
 			throw new UnsupportedOperationException();
 		}
 		@Override
-		public JobDescriptor createJob(String user, String jobName,
-				String parentGroup, JobDescriptor.JobRunType jobType) throws ZeusException {
+		public ActionDescriptor createJob(String user, String jobName,
+                                          String parentGroup, ActionDescriptor.JobRunType jobType) throws ZeusException {
 			throw new UnsupportedOperationException();
 		}
 		@Override
-		public void deleteGroup(String user, String groupId)
-				throws ZeusException {
+		public void deleteGroup(String user, String groupId)throws ZeusException {
 			throw new UnsupportedOperationException();
 		}
 		@Override
@@ -359,22 +352,22 @@ public class ReadOnlyGroupManagerWithJob{
 		}
 
 		@Override
-		public List<GroupDescriptor> getChildrenGroup(String groupId) {
-			List<GroupDescriptor> list= groupManager.getChildrenGroup(groupId);
-			List<GroupDescriptor> result=new ArrayList<GroupDescriptor>();
-			for(GroupDescriptor gd:list){
+		public List<ZeusGroupWithBLOBs> getChildrenGroup(String groupId) {
+			List<ZeusGroupWithBLOBs> list= groupManager.getChildrenGroup(groupId);
+			List<ZeusGroupWithBLOBs> result=new ArrayList<ZeusGroupWithBLOBs>();
+			for(ZeusGroupWithBLOBs gd:list){
 				result.add(new ReadOnlyGroupDescriptor(gd));
 			}
 			return result;
 		}
 
 		@Override
-		public List<Tuple<JobDescriptor, JobStatus>> getChildrenJob(
+		public List<Tuple<ActionDescriptor, JobStatus>> getChildrenJob(
 				String groupId) {
-			List<Tuple<JobDescriptor, JobStatus>> list=groupManager.getChildrenJob(groupId);
-			List<Tuple<JobDescriptor, JobStatus>> result=new ArrayList<Tuple<JobDescriptor,JobStatus>>();
-			for(Tuple<JobDescriptor, JobStatus> tuple:list){
-				Tuple<JobDescriptor, JobStatus> t=new Tuple<JobDescriptor, JobStatus>(new ReadOnlyJobDescriptor(tuple.getX()),new ReadOnlyJobStatus(tuple.getY()));
+			List<Tuple<ActionDescriptor, JobStatus>> list=groupManager.getChildrenJob(groupId);
+			List<Tuple<ActionDescriptor, JobStatus>> result=new ArrayList<Tuple<ActionDescriptor,JobStatus>>();
+			for(Tuple<ActionDescriptor, JobStatus> tuple:list){
+				Tuple<ActionDescriptor, JobStatus> t=new Tuple<ActionDescriptor, JobStatus>(new ReadOnlyActionDescriptor(tuple.getX()),new ReadOnlyJobStatus(tuple.getY()));
 				result.add(t);
 			}
 			return result;
@@ -383,7 +376,7 @@ public class ReadOnlyGroupManagerWithJob{
 		@Override
 		public GroupBean getDownstreamGroupBean(String groupId) {
 			ReadOnlyGroupDescriptor readGd=null;
-			GroupDescriptor group=getGroupDescriptor(groupId);
+			ZeusGroupWithBLOBs group=getGroupDescriptor(groupId);
 			if(group instanceof ReadOnlyGroupDescriptor){
 				readGd=(ReadOnlyGroupDescriptor) group;
 			}else{
@@ -403,15 +396,20 @@ public class ReadOnlyGroupManagerWithJob{
 			}
 		}
 
+		@Override
+		public ZeusGroupWithBLOBs getZeusGroupById(String groupId) {
+			return null;
+		}
+
 		private Future<GroupBean> getDownstreamGroupBean(final GroupBean parent, final int depth) throws Exception{
 			Callable<GroupBean> callable = new Callable<GroupBean>(){
 				
 				@Override
 				public GroupBean call() throws Exception {
 					if(parent.isDirectory()){
-						List<GroupDescriptor> children=getChildrenGroup(parent.getGroupDescriptor().getId());
+						List<ZeusGroupWithBLOBs> children=getChildrenGroup(parent.getGroupDescriptor().getId().toString());
 						ArrayList<Future<GroupBean>> futures = new ArrayList<Future<GroupBean>>(children.size());
-						for(GroupDescriptor child:children){
+						for(ZeusGroupWithBLOBs child:children){
 							ReadOnlyGroupDescriptor readGd=null;
 							if(child instanceof ReadOnlyGroupDescriptor){
 								readGd=(ReadOnlyGroupDescriptor) child;
@@ -431,8 +429,8 @@ public class ReadOnlyGroupManagerWithJob{
 							f.get(10,TimeUnit.SECONDS);
 						}
 					}else{
-						List<Tuple<JobDescriptor, JobStatus>> jobs=getChildrenJob(parent.getGroupDescriptor().getId());
-						for(Tuple<JobDescriptor, JobStatus> tuple:jobs){
+						List<Tuple<ActionDescriptor, JobStatus>> jobs=getChildrenJob(parent.getGroupDescriptor().getId().toString());
+						for(Tuple<ActionDescriptor, JobStatus> tuple:jobs){
 							JobBean jobBean=new JobBean(tuple.getX(),tuple.getY());
 							jobBean.setGroupBean(parent);
 							parent.getJobBeans().put(tuple.getX().getId(), jobBean);
@@ -467,21 +465,20 @@ public class ReadOnlyGroupManagerWithJob{
 
 		@Override
 		public GroupBean getGlobeGroupBean() {
-			return GroupManagerToolWithJob.buildGlobeGroupBean(this);
+			return GroupManagerWithJobTool.buildGlobeGroupBean(this);
+		}
+
+		public ZeusGroupWithBLOBs getGroupDescriptor(String groupId) {
+			return new ReadOnlyGroupDescriptor(groupManager.getZeusGroupById(groupId));
 		}
 
 		@Override
-		public GroupDescriptor getGroupDescriptor(String groupId) {
-			return new ReadOnlyGroupDescriptor(groupManager.getGroupDescriptor(groupId));
-		}
-
-		@Override
-		public Tuple<JobDescriptor, JobStatus> getJobDescriptor(String jobId) {
+		public Tuple<ActionDescriptor, JobStatus> getJobDescriptor(String jobId) {
 			return groupManager.getJobDescriptor(jobId);
 		}
 
 		@Override
-		public Map<String, Tuple<JobDescriptor, JobStatus>> getJobDescriptor(
+		public Map<String, Tuple<ActionDescriptor, JobStatus>> getJobDescriptor(
 				Collection<String> jobIds) {
 			return groupManager.getJobDescriptor(jobIds);
 		}
@@ -498,12 +495,12 @@ public class ReadOnlyGroupManagerWithJob{
 
 		@Override
 		public GroupBean getUpstreamGroupBean(String groupId) {
-			return GroupManagerToolWithJob.getUpstreamGroupBean(groupId, this);
+			return GroupManagerWithJobTool.getUpstreamGroupBean(groupId, this);
 		}
 
 		@Override
 		public JobBean getUpstreamJobBean(String jobId) {
-			return GroupManagerToolWithJob.getUpstreamJobBean(jobId, this);
+			return GroupManagerWithJobTool.getUpstreamJobBean(jobId, this);
 		}
 		@Override
 		public void grantGroupOwner(String granter, String uid, String groupId)
@@ -525,16 +522,20 @@ public class ReadOnlyGroupManagerWithJob{
 				throws ZeusException {
 			throw new UnsupportedOperationException();
 		}
-		@Override
-		public void updateGroup(String user, GroupDescriptor group)
-				throws ZeusException {
+		public void updateGroup(String user, GroupDescriptor group)throws ZeusException {
 			throw new UnsupportedOperationException();
 		}
 		@Override
-		public void updateJob(String user, JobDescriptor job)
+		public void updateJob(String user, ActionDescriptor job)
 				throws ZeusException {
 			throw new UnsupportedOperationException();
 		}
+
+		@Override
+		public void updateGroup(String user, ZeusGroupWithBLOBs group) throws ZeusException {
+
+		}
+
 		@Override
 		public void updateJobStatus(JobStatus jobStatus) {
 			throw new UnsupportedOperationException();
@@ -569,7 +570,7 @@ public class ReadOnlyGroupManagerWithJob{
 			return null;
 		}
 		@Override
-		public void updateActionList(JobDescriptor job) {
+		public void updateActionList(ActionDescriptor job) {
 			// TODO Auto-generated method stub
 			
 		}
@@ -580,43 +581,24 @@ public class ReadOnlyGroupManagerWithJob{
 	 * @author zhoufang
 	 *
 	 */
-	public class ReadOnlyGroupDescriptor extends GroupDescriptor {
+	public class ReadOnlyGroupDescriptor extends ZeusGroupWithBLOBs {
 		private static final long serialVersionUID = 1L;
-		private GroupDescriptor gd;
-		public ReadOnlyGroupDescriptor(GroupDescriptor gd){
+		private ZeusGroupWithBLOBs gd;
+		public ReadOnlyGroupDescriptor(ZeusGroupWithBLOBs gd){
 			this.gd=gd;
 		}
-		@Override
 		public String getDesc() {
-			return gd.getDesc();
-		}
-
-		@Override
-		public String getId() {
-			return gd.getId();
-		}
-
-		@Override
-		public String getName() {
-			return gd.getName();
-		}
-
-		@Override
-		public String getOwner() {
-			return gd.getOwner();
+			return gd.getDescr();
 		}
 		
-		@Override
 		public boolean isExisted(){
-			return gd.isExisted();
+			return gd.getbExisted();
 		}
 
-		@Override
 		public boolean isDirectory() {
-			return gd.isDirectory();
+			return gd.getbDirectory();
 		}
 
-		@Override
 		public void setDesc(String desc) {
 			throw new UnsupportedOperationException();
 		}
@@ -631,23 +613,14 @@ public class ReadOnlyGroupManagerWithJob{
 			throw new UnsupportedOperationException();
 		}
 
-
-		@Override
-		public String getParent() {
-			return gd.getParent();
-		}
-
-		@Override
 		public void setParent(String parent) {
 			throw new UnsupportedOperationException();
 		}
 
-		@Override
 		public void setId(String id) {
 			throw new UnsupportedOperationException();
 		}
 
-		@Override
 		public void setDirectory(boolean directory) {
 			throw new UnsupportedOperationException();
 		}
@@ -669,10 +642,10 @@ public class ReadOnlyGroupManagerWithJob{
 	 * @author zhoufang
 	 *
 	 */
-	public class ReadOnlyJobDescriptor extends JobDescriptor{
+	public class ReadOnlyActionDescriptor extends ActionDescriptor {
 		private static final long serialVersionUID = 1L;
-		private JobDescriptor jd;
-		public ReadOnlyJobDescriptor(JobDescriptor jd){
+		private ActionDescriptor jd;
+		public ReadOnlyActionDescriptor(ActionDescriptor jd){
 			this.jd=jd;
 		}
 

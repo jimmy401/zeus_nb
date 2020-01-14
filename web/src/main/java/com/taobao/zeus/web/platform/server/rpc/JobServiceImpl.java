@@ -10,7 +10,6 @@ import com.taobao.zeus.dal.logic.impl.ReadOnlyGroupManagerWithAction;
 import com.taobao.zeus.dal.mapper.ZeusJobMapper;
 import com.taobao.zeus.dal.model.ZeusHostGroup;
 import com.taobao.zeus.dal.model.ZeusJobWithBLOBs;
-import com.taobao.zeus.dal.model.ZeusLog;
 import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.dal.tool.GroupBean;
 import com.taobao.zeus.dal.tool.JobBean;
@@ -75,17 +74,17 @@ public class JobServiceImpl implements JobService {
     @Override
     public JobModel createJob(String jobName, String parentGroupId,
                               String jobType) throws Exception {
-        JobDescriptor.JobRunType type = null;
+        ActionDescriptor.JobRunType type = null;
         JobModel model = new JobModel();
         if (JobModel.MapReduce.equals(jobType)) {
-            type = JobDescriptor.JobRunType.MapReduce;
+            type = ActionDescriptor.JobRunType.MapReduce;
         } else if (JobModel.SHELL.equals(jobType)) {
-            type = JobDescriptor.JobRunType.Shell;
+            type = ActionDescriptor.JobRunType.Shell;
         } else if (JobModel.HIVE.equals(jobType)) {
-            type = JobDescriptor.JobRunType.Hive;
+            type = ActionDescriptor.JobRunType.Hive;
         }
         try {
-            JobDescriptor jd = permissionGroupManagerWithJob.createJob(LoginUser
+            ActionDescriptor jd = permissionGroupManagerWithJob.createJob(LoginUser
                     .getUser().getUid(), jobName, parentGroupId, type);
 
             String user = LoginUser.getUser().getUid();
@@ -112,52 +111,52 @@ public class JobServiceImpl implements JobService {
                 .getUpstreamJobBean(jobId);
         JobModel jobModel = new JobModel();
 
-        jobModel.setCronExpression(jobBean.getJobDescriptor()
+        jobModel.setCronExpression(jobBean.getActionDescriptor()
                 .getCronExpression());
-        jobModel.setDependencies(jobBean.getJobDescriptor().getDependencies());
-        jobModel.setDesc(jobBean.getJobDescriptor().getDesc());
-        jobModel.setGroupId(jobBean.getJobDescriptor().getGroupId());
-        jobModel.setId(jobBean.getJobDescriptor().getId());
+        jobModel.setDependencies(jobBean.getActionDescriptor().getDependencies());
+        jobModel.setDesc(jobBean.getActionDescriptor().getDesc());
+        jobModel.setGroupId(jobBean.getActionDescriptor().getGroupId());
+        jobModel.setId(jobBean.getActionDescriptor().getId());
         String jobRunType = null;
-        if (jobBean.getJobDescriptor().getJobType() == JobDescriptor.JobRunType.MapReduce) {
+        if (jobBean.getActionDescriptor().getJobType() == ActionDescriptor.JobRunType.MapReduce) {
             jobRunType = JobModel.MapReduce;
-        } else if (jobBean.getJobDescriptor().getJobType() == JobDescriptor.JobRunType.Shell) {
+        } else if (jobBean.getActionDescriptor().getJobType() == ActionDescriptor.JobRunType.Shell) {
             jobRunType = JobModel.SHELL;
-        } else if (jobBean.getJobDescriptor().getJobType() == JobDescriptor.JobRunType.Hive) {
+        } else if (jobBean.getActionDescriptor().getJobType() == ActionDescriptor.JobRunType.Hive) {
             jobRunType = JobModel.HIVE;
         }
         jobModel.setJobRunType(jobRunType);
         String jobScheduleType = null;
-        if (jobBean.getJobDescriptor().getScheduleType() == JobDescriptor.JobScheduleType.Dependent) {
+        if (jobBean.getActionDescriptor().getScheduleType() == ActionDescriptor.JobScheduleType.Dependent) {
             jobScheduleType = JobModel.DEPEND_JOB;
         }
-        if (jobBean.getJobDescriptor().getScheduleType() == JobDescriptor.JobScheduleType.Independent) {
+        if (jobBean.getActionDescriptor().getScheduleType() == ActionDescriptor.JobScheduleType.Independent) {
             jobScheduleType = JobModel.INDEPEN_JOB;
         }
-        if (jobBean.getJobDescriptor().getScheduleType() == JobDescriptor.JobScheduleType.CyleJob) {
+        if (jobBean.getActionDescriptor().getScheduleType() == ActionDescriptor.JobScheduleType.CyleJob) {
             jobScheduleType = JobModel.CYCLE_JOB;
         }
         jobModel.setJobScheduleType(jobScheduleType);
-        jobModel.setLocalProperties(jobBean.getJobDescriptor().getProperties());
-        jobModel.setName(jobBean.getJobDescriptor().getName());
-        jobModel.setOwner(jobBean.getJobDescriptor().getOwner());
+        jobModel.setLocalProperties(jobBean.getActionDescriptor().getProperties());
+        jobModel.setName(jobBean.getActionDescriptor().getName());
+        jobModel.setOwner(jobBean.getActionDescriptor().getOwner());
         String ownerName = userManager.findByUid(jobModel.getOwner()).getName();
         if (ownerName == null || "".equals(ownerName.trim())
                 || "null".equals(ownerName)) {
             ownerName = jobModel.getOwner();
         }
         jobModel.setOwnerName(ownerName);
-        jobModel.setLocalResources(jobBean.getJobDescriptor().getResources());
+        jobModel.setLocalResources(jobBean.getActionDescriptor().getResources());
         jobModel.setAllProperties(jobBean.getHierarchyProperties()
                 .getAllProperties());
         jobModel.setAllResources(jobBean.getHierarchyResources());
 
-        jobModel.setAuto(jobBean.getJobDescriptor().getAuto());
-        jobModel.setScript(jobBean.getJobDescriptor().getScript());
+        jobModel.setAuto(jobBean.getActionDescriptor().getAuto());
+        jobModel.setScript(jobBean.getActionDescriptor().getScript());
 
         List<String> preList = new ArrayList<String>();
-        if (!jobBean.getJobDescriptor().getPreProcessers().isEmpty()) {
-            for (Processer p : jobBean.getJobDescriptor().getPreProcessers()) {
+        if (!jobBean.getActionDescriptor().getPreProcessers().isEmpty()) {
+            for (Processer p : jobBean.getActionDescriptor().getPreProcessers()) {
                 JSONObject o = new JSONObject();
                 o.put("id", p.getId());
                 o.put("config", p.getConfig());
@@ -167,8 +166,8 @@ public class JobServiceImpl implements JobService {
         jobModel.setPreProcessers(preList);
 
         List<String> postList = new ArrayList<String>();
-        if (!jobBean.getJobDescriptor().getPostProcessers().isEmpty()) {
-            for (Processer p : jobBean.getJobDescriptor().getPostProcessers()) {
+        if (!jobBean.getActionDescriptor().getPostProcessers().isEmpty()) {
+            for (Processer p : jobBean.getActionDescriptor().getPostProcessers()) {
                 JSONObject o = new JSONObject();
                 o.put("id", p.getId());
                 o.put("config", p.getConfig());
@@ -206,7 +205,7 @@ public class JobServiceImpl implements JobService {
 
 
         List<String> owners = new ArrayList<String>();
-        owners.add(jobBean.getJobDescriptor().getOwner());
+        owners.add(jobBean.getActionDescriptor().getOwner());
         GroupBean parent = jobBean.getGroupBean();
         while (parent != null) {
             if (!owners.contains(parent.getGroupDescriptor().getOwner())) {
@@ -267,16 +266,16 @@ public class JobServiceImpl implements JobService {
                 jobModel.setScript("脚本已加密,如需查看请联系相关负责人分配权限");
             }
         }
-        if (jobBean.getJobDescriptor().getTimezone() == null
-                || "".equals(jobBean.getJobDescriptor().getTimezone())) {
+        if (jobBean.getActionDescriptor().getTimezone() == null
+                || "".equals(jobBean.getActionDescriptor().getTimezone())) {
             jobModel.setDefaultTZ(DateUtil.getDefaultTZStr());
         } else {
-            jobModel.setDefaultTZ(jobBean.getJobDescriptor().getTimezone());
+            jobModel.setDefaultTZ(jobBean.getActionDescriptor().getTimezone());
         }
-        jobModel.setOffRaw(jobBean.getJobDescriptor().getOffRaw());
-        jobModel.setJobCycle(jobBean.getJobDescriptor().getCycle());
-        jobModel.setHost(jobBean.getJobDescriptor().getHost());
-        jobModel.setHostGroupId(jobBean.getJobDescriptor().getHostGroupId());
+        jobModel.setOffRaw(jobBean.getActionDescriptor().getOffRaw());
+        jobModel.setJobCycle(jobBean.getActionDescriptor().getCycle());
+        jobModel.setHost(jobBean.getActionDescriptor().getHost());
+        jobModel.setHostGroupId(jobBean.getActionDescriptor().getHostGroupId());
         return jobModel;
     }
 
@@ -289,30 +288,30 @@ public class JobServiceImpl implements JobService {
                 throw new RuntimeException("不能使用rm删除非许可文件路径！");
             }
         }
-        JobDescriptor jd = new JobDescriptor();
+        ActionDescriptor jd = new ActionDescriptor();
         jd.setCronExpression(jobModel.getCronExpression());
         jd.setDependencies(jobModel.getDependencies());
         jd.setDesc(jobModel.getDesc());
         jd.setGroupId(jobModel.getGroupId());
         jd.setId(jobModel.getId());
-        JobDescriptor.JobRunType type = null;
+        ActionDescriptor.JobRunType type = null;
         if (jobModel.getJobRunType().equals(JobModel.MapReduce)) {
-            type = JobDescriptor.JobRunType.MapReduce;
+            type = ActionDescriptor.JobRunType.MapReduce;
         } else if (jobModel.getJobRunType().equals(JobModel.SHELL)) {
-            type = JobDescriptor.JobRunType.Shell;
+            type = ActionDescriptor.JobRunType.Shell;
         } else if (jobModel.getJobRunType().equals(JobModel.HIVE)) {
-            type = JobDescriptor.JobRunType.Hive;
+            type = ActionDescriptor.JobRunType.Hive;
         }
         jd.setJobType(type);
-        JobDescriptor.JobScheduleType scheduleType = null;
+        ActionDescriptor.JobScheduleType scheduleType = null;
         if (JobModel.DEPEND_JOB.equals(jobModel.getJobScheduleType())) {
-            scheduleType = JobDescriptor.JobScheduleType.Dependent;
+            scheduleType = ActionDescriptor.JobScheduleType.Dependent;
         }
         if (JobModel.INDEPEN_JOB.equals(jobModel.getJobScheduleType())) {
-            scheduleType = JobDescriptor.JobScheduleType.Independent;
+            scheduleType = ActionDescriptor.JobScheduleType.Independent;
         }
         if (JobModel.CYCLE_JOB.equals(jobModel.getJobScheduleType())) {
-            scheduleType = JobDescriptor.JobScheduleType.CyleJob;
+            scheduleType = ActionDescriptor.JobScheduleType.CyleJob;
         }
         jd.setName(jobModel.getName());
         jd.setOwner(jobModel.getOwner());
@@ -372,14 +371,14 @@ public class JobServiceImpl implements JobService {
     @Override
     public List<Long> switchAuto(String jobId, Boolean auto)
             throws Exception {
-        Tuple<JobDescriptor, JobStatus> job = permissionGroupManagerWithJob
+        Tuple<ActionDescriptor, JobStatus> job = permissionGroupManagerWithJob
                 .getJobDescriptor(jobId);
-        JobDescriptor jd = job.getX();
+        ActionDescriptor jd = job.getX();
         // 如果是周期任务，在开启自动调度时，需要计算下一次任务执行时间
         // 2 代表周期调度
         List<Long> notSatisfied = new ArrayList<Long>();
         if (auto
-                && jd.getScheduleType() == JobDescriptor.JobScheduleType.CyleJob) {
+                && jd.getScheduleType() == ActionDescriptor.JobScheduleType.CyleJob) {
             String tz = jd.getTimezone();
             // 小时任务，计算下一个小时的开始时间
             if (jd.getCycle().equals("hour")) {
@@ -429,9 +428,9 @@ public class JobServiceImpl implements JobService {
                 List<String> depdidlst = permissionGroupManagerWithJob
                         .getAllDependencied(jobId);
                 if (depdidlst != null && depdidlst.size() != 0) {
-                    Map<String, Tuple<JobDescriptor, JobStatus>> depdlst = permissionGroupManagerWithJob
+                    Map<String, Tuple<ActionDescriptor, JobStatus>> depdlst = permissionGroupManagerWithJob
                             .getJobDescriptor(depdidlst);
-                    for (Map.Entry<String, Tuple<JobDescriptor, JobStatus>> entry : depdlst
+                    for (Map.Entry<String, Tuple<ActionDescriptor, JobStatus>> entry : depdlst
                             .entrySet()) {
                         if (entry.getValue().getX().getAuto()) {
                             notSatisfied.add(Long.parseLong(entry.getValue()
@@ -452,9 +451,9 @@ public class JobServiceImpl implements JobService {
                 List<String> depidlst = permissionGroupManagerWithJob
                         .getAllDependencies(jobId);
                 if (depidlst != null && depidlst.size() != 0) {
-                    Map<String, Tuple<JobDescriptor, JobStatus>> deplst = permissionGroupManagerWithJob
+                    Map<String, Tuple<ActionDescriptor, JobStatus>> deplst = permissionGroupManagerWithJob
                             .getJobDescriptor(depidlst);
-                    for (Map.Entry<String, Tuple<JobDescriptor, JobStatus>> entry : deplst
+                    for (Map.Entry<String, Tuple<ActionDescriptor, JobStatus>> entry : deplst
                             .entrySet()) {
                         if (!entry.getValue().getX().getAuto()) {
                             notSatisfied.add(Long.parseLong(entry.getValue()
@@ -474,16 +473,16 @@ public class JobServiceImpl implements JobService {
         return notSatisfied;
     }
 
-    private void ChangeAuto(Boolean auto, JobDescriptor jd)
+    private void ChangeAuto(Boolean auto, ActionDescriptor jd)
             throws Exception {
         jd.setAuto(auto);
         try {
             permissionGroupManagerWithJob.updateJob(LoginUser.getUser().getUid(),
                     jd);
-//			List<Tuple<JobDescriptor, JobStatus>> actionlst = permissionGroupManagerWithJob
+//			List<Tuple<ActionDescriptor, JobStatus>> actionlst = permissionGroupManagerWithJob
 //					.getActionList(jd.getId());
 //			if (actionlst != null && actionlst.size() != 0) {
-//				for (Tuple<JobDescriptor, JobStatus> actionPer : actionlst) {
+//				for (Tuple<ActionDescriptor, JobStatus> actionPer : actionlst) {
 //					if (!Status.RUNNING.equals(actionPer.getY().getStatus())){
 //						actionPer.getX().setAuto(auto);
 //						permissionGroupManagerWithJob.updateAction(actionPer.getX());
@@ -502,7 +501,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public void run(String actionId, int type) throws Exception {
         TriggerType triggerType = null;
-        JobDescriptor jobDescriptor = null;
+        ActionDescriptor actionDescriptor = null;
         ExecuteKind kind = null;
         if (type == 1) {
             triggerType = TriggerType.MANUAL;
@@ -534,21 +533,21 @@ public class JobServiceImpl implements JobService {
             }
         }*/
         try {
-            Tuple<JobDescriptor, JobStatus> job = permissionGroupManagerWithAction
+            Tuple<ActionDescriptor, JobStatus> job = permissionGroupManagerWithAction
                     .getActionDescriptor(actionId);
-            jobDescriptor = job.getX();
-            JobHistory history = new JobHistory();
+            actionDescriptor = job.getX();
+            ZeusActionHistory history = new ZeusActionHistory();
             history.setActionId(actionId);
-            history.setJobId(jobDescriptor.getJobId());
+            history.setJobId(actionDescriptor.getJobId());
             history.setTriggerType(triggerType);
             history.setOperator(LoginUser.getUser().getUid());
-            //history.setOperator(jobDescriptor.getOwner());
+            //history.setOperator(actionDescriptor.getOwner());
             history.setIllustrate("触发人：" + CurrentUser.getUser().getUid());
             history.setStatus(Status.RUNNING);
-            history.setStatisEndTime(jobDescriptor.getStatisEndTime());
-            history.setTimezone(jobDescriptor.getTimezone());
-//		history.setExecuteHost(jobDescriptor.getHost());
-            history.setHostGroupId(jobDescriptor.getHostGroupId());
+            history.setStatisEndTime(actionDescriptor.getStatisEndTime());
+            history.setTimezone(actionDescriptor.getTimezone());
+//		history.setExecuteHost(actionDescriptor.getHost());
+            history.setHostGroupId(actionDescriptor.getHostGroupId());
             jobHistoryManager.addJobHistory(history);
 
 
@@ -571,7 +570,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public void cancel(String historyId) throws Exception {
-        JobHistory history = jobHistoryManager.findJobHistory(historyId);
+        ZeusActionHistory history = jobHistoryManager.findJobHistory(historyId);
         if (!permissionManager.hasActionPermission(
                 LoginUser.getUser().getUid(), history.getActionId())) {
             throw new Exception("你没有权限执行该操作");
@@ -593,7 +592,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobHistoryModel getJobHistory(String id) {
-        JobHistory his = jobHistoryManager.findJobHistory(id);
+        ZeusActionHistory his = jobHistoryManager.findJobHistory(id);
         JobHistoryModel d = new JobHistoryModel();
         d.setId(his.getId());
         d.setActionId(his.getActionId());
@@ -626,12 +625,12 @@ public class JobServiceImpl implements JobService {
                                                               PagingLoadConfig config) {
         log.info("jobId : " + jobId);
         log.info("offset : " + config.getOffset() + ",limit " + config.getLimit());
-        List<JobHistory> list = jobHistoryManager.pagingList(jobId,
+        List<ZeusActionHistory> list = jobHistoryManager.pagingList(jobId,
                 config.getOffset(), config.getLimit());
         int total = jobHistoryManager.pagingTotal(jobId);
 
         List<JobHistoryModel> data = new ArrayList<JobHistoryModel>();
-        for (JobHistory his : list) {
+        for (ZeusActionHistory his : list) {
             JobHistoryModel d = new JobHistoryModel();
             d.setId(his.getId());
             d.setActionId(his.getActionId());
@@ -685,7 +684,7 @@ public class JobServiceImpl implements JobService {
         int limit = config.getLimit();
         GroupBean gb = permissionGroupManagerWithAction.getDownstreamGroupBean(groupId);
         Map<String, JobBean> map = gb.getAllSubJobBeans();
-        List<Tuple<JobDescriptor, JobStatus>> allJobs = new ArrayList<Tuple<JobDescriptor, JobStatus>>();
+        List<Tuple<ActionDescriptor, JobStatus>> allJobs = new ArrayList<Tuple<ActionDescriptor, JobStatus>>();
         if (startDate != null && endDate != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
             Integer startInt = Integer.parseInt(dateFormat.format(startDate));
@@ -693,8 +692,8 @@ public class JobServiceImpl implements JobService {
             for (String key : map.keySet()) {
                 Integer subkeyInt = Integer.parseInt(key.substring(0, 8));
                 if (subkeyInt < endInt && subkeyInt >= startInt) {
-                    Tuple<JobDescriptor, JobStatus> tuple = new Tuple<JobDescriptor, JobStatus>(
-                            map.get(key).getJobDescriptor(), map.get(key)
+                    Tuple<ActionDescriptor, JobStatus> tuple = new Tuple<ActionDescriptor, JobStatus>(
+                            map.get(key).getActionDescriptor(), map.get(key)
                             .getJobStatus());
                     allJobs.add(tuple);
                 }
@@ -702,10 +701,10 @@ public class JobServiceImpl implements JobService {
         }
         // 按名次排序
         Collections.sort(allJobs,
-                new Comparator<Tuple<JobDescriptor, JobStatus>>() {
+                new Comparator<Tuple<ActionDescriptor, JobStatus>>() {
                     @Override
-                    public int compare(Tuple<JobDescriptor, JobStatus> o1,
-                                       Tuple<JobDescriptor, JobStatus> o2) {
+                    public int compare(Tuple<ActionDescriptor, JobStatus> o1,
+                                       Tuple<ActionDescriptor, JobStatus> o2) {
                         return o1.getX().getName()
                                 .compareToIgnoreCase(o2.getX().getName());
                     }
@@ -719,7 +718,7 @@ public class JobServiceImpl implements JobService {
                 Math.min(start + limit, allJobs.size()));
 
         List<String> jobIds = new ArrayList<String>();
-        for (Tuple<JobDescriptor, JobStatus> tuple : allJobs) {
+        for (Tuple<ActionDescriptor, JobStatus> tuple : allJobs) {
             jobIds.add(tuple.getX().getId());
             if (tuple.getX().getDependencies() != null) {
                 for (String deps : tuple.getX().getDependencies()) {
@@ -729,12 +728,12 @@ public class JobServiceImpl implements JobService {
                 }
             }
         }
-        Map<String, JobHistory> jobHisMap = jobHistoryManager
+        Map<String, ZeusActionHistory> jobHisMap = jobHistoryManager
                 .findLastHistoryByList(jobIds);
         List<JobModelAction> result = new ArrayList<JobModelAction>();
-        for (Tuple<JobDescriptor, JobStatus> job : allJobs) {
+        for (Tuple<ActionDescriptor, JobStatus> job : allJobs) {
             JobStatus status = job.getY();
-            JobDescriptor jd = job.getX();
+            ActionDescriptor jd = job.getX();
             JobModelAction model = new JobModelAction();
             model.setId(status.getJobId());
             Map<String, String> dep = new HashMap<String, String>();
@@ -759,7 +758,7 @@ public class JobServiceImpl implements JobService {
             model.setName(jd.getName());
             model.setAuto(jd.getAuto());
             model.setToJobId(jd.getJobId());
-            JobHistory his = jobHisMap.get(jd.getId());
+            ZeusActionHistory his = jobHisMap.get(jd.getId());
             if (his != null && his.getStartTime() != null) {
                 SimpleDateFormat format = new SimpleDateFormat("MM-dd HH:mm:ss");
                 model.setLastStatus(format.format(his.getStartTime())
@@ -834,7 +833,7 @@ public class JobServiceImpl implements JobService {
     // jobs.add(beans.get(key).getActionStatus());
     // }
     // }
-    // List<JobHistory> hiss=new ArrayList<JobHistory>();
+    // List<ZeusActionHistory> hiss=new ArrayList<ZeusActionHistory>();
     // for(JobStatus js:jobs){
     // if(js.getHistoryId()==null){
     // hiss.add(jobHistoryManager.findLastHistoryByList(Arrays.asList(js.getActionId())).get(js.getActionId()));
@@ -842,7 +841,7 @@ public class JobServiceImpl implements JobService {
     // hiss.add(jobHistoryManager.findJobHistory(js.getHistoryId()));
     // }
     // }
-    // for(JobHistory his:hiss){
+    // for(ZeusActionHistory his:hiss){
     // JobHistoryModel d=new JobHistoryModel();
     // d.setId(his.getId());
     // d.setName(beans.get(his.getActionId()).getActionDescriptor().getName());
@@ -879,9 +878,9 @@ public class JobServiceImpl implements JobService {
     // gb=globe.getAllSubGroupBeans().get(groupId);
     // }
     // Set<String> jobs=gb.getAllSubJobBeans().keySet();
-    // List<JobHistory> list=jobHistoryManager.findRecentRunningHistory();
-    // for(Iterator<JobHistory> it=list.iterator();it.hasNext();){
-    // JobHistory j=it.next();
+    // List<ZeusActionHistory> list=jobHistoryManager.findRecentRunningHistory();
+    // for(Iterator<ZeusActionHistory> it=list.iterator();it.hasNext();){
+    // ZeusActionHistory j=it.next();
     // if(j.getStatus()==Status.SUCCESS || j.getStatus()==Status.FAILED){
     // it.remove();
     // continue;
@@ -896,7 +895,7 @@ public class JobServiceImpl implements JobService {
     // }
     // }
     // List<JobHistoryModel> result=new ArrayList<JobHistoryModel>();
-    // for(JobHistory his:list){
+    // for(ZeusActionHistory his:list){
     // JobHistoryModel d=new JobHistoryModel();
     // d.setId(his.getId());
     // d.setName(gb.getAllSubJobBeans().get(his.getActionId()).getActionDescriptor().getName());
@@ -939,7 +938,7 @@ public class JobServiceImpl implements JobService {
                 jobs.add(beans.get(key).getJobStatus());
             }
         }
-        List<JobHistory> hiss = new ArrayList<JobHistory>();
+        List<ZeusActionHistory> hiss = new ArrayList<ZeusActionHistory>();
         for (JobStatus js : jobs) {
             if (js.getHistoryId() == null) {
                 hiss.add(jobHistoryManager.findLastHistoryByList(
@@ -948,14 +947,14 @@ public class JobServiceImpl implements JobService {
                 hiss.add(jobHistoryManager.findJobHistory(js.getHistoryId()));
             }
         }
-        for (JobHistory his : hiss) {
+        for (ZeusActionHistory his : hiss) {
             if (his != null) {
                 JobHistoryModel d = new JobHistoryModel();
                 d.setId(his.getId());
                 d.setName(gb.getAllSubJobBeans().get(his.getActionId())
-                        .getJobDescriptor().getName());
+                        .getActionDescriptor().getName());
                 d.setOwner(gb.getAllSubJobBeans().get(his.getActionId())
-                        .getJobDescriptor().getOwner());
+                        .getActionDescriptor().getOwner());
                 d.setActionId(his.getActionId());
                 d.setJobId(his.getJobId());
                 d.setStartTime(his.getStartTime());
@@ -993,9 +992,9 @@ public class JobServiceImpl implements JobService {
             gb = globe.getAllSubGroupBeans().get(groupId);
         }
         Set<String> jobs = gb.getAllSubJobBeans().keySet();
-        List<JobHistory> list = jobHistoryManager.findRecentRunningHistory();
-        for (Iterator<JobHistory> it = list.iterator(); it.hasNext(); ) {
-            JobHistory j = it.next();
+        List<ZeusActionHistory> list = jobHistoryManager.findRecentRunningHistory();
+        for (Iterator<ZeusActionHistory> it = list.iterator(); it.hasNext(); ) {
+            ZeusActionHistory j = it.next();
             if (j.getStatus() == Status.SUCCESS
                     || j.getStatus() == Status.FAILED) {
                 it.remove();
@@ -1011,14 +1010,14 @@ public class JobServiceImpl implements JobService {
             }
         }
         List<JobHistoryModel> result = new ArrayList<JobHistoryModel>();
-        for (JobHistory his : list) {
+        for (ZeusActionHistory his : list) {
             if (his != null) {
                 JobHistoryModel d = new JobHistoryModel();
                 d.setId(his.getId());
                 d.setName(gb.getAllSubJobBeans().get(his.getActionId())
-                        .getJobDescriptor().getName());
+                        .getActionDescriptor().getName());
                 d.setOwner(gb.getAllSubJobBeans().get(his.getActionId())
-                        .getJobDescriptor().getOwner());
+                        .getActionDescriptor().getOwner());
                 d.setActionId(his.getActionId());
                 d.setJobId(his.getJobId());
                 d.setStartTime(his.getStartTime());
@@ -1057,7 +1056,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public void syncScript(String jobId, String script) throws Exception {
-        JobDescriptor jd = permissionGroupManagerWithJob.getJobDescriptor(jobId)
+        ActionDescriptor jd = permissionGroupManagerWithJob.getJobDescriptor(jobId)
                 .getX();
         jd.setScript(script);
         try {
@@ -1211,7 +1210,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public void syncScriptAndHostGroupId(String jobId, String script,
                                          String hostGroupId) throws Exception {
-        JobDescriptor jd = permissionGroupManagerWithJob.getJobDescriptor(jobId)
+        ActionDescriptor jd = permissionGroupManagerWithJob.getJobDescriptor(jobId)
                 .getX();
         jd.setScript(script);
         if (hostGroupId == null) {

@@ -53,11 +53,11 @@ public class HiveOutputCheckJob extends AbstractJob {
 	public Integer run() throws Exception {
 
 		if (jobContext.getCoreExitCode() != 0) {
-			jobContext.getJobHistory().getLog()
+			jobContext.getZeusActionHistory().getLog()
 					.appendZeus("Job 运行失败，不进行产出分区大小检测");
 			return exitCode;
 		}
-		jobContext.getJobHistory().getLog()
+		jobContext.getZeusActionHistory().getLog()
 				.appendZeus("HiveOutputCheck 开始进行产出分区大小检测");
 		for (String tableName : this.tableNames) {
 
@@ -154,7 +154,7 @@ public class HiveOutputCheckJob extends AbstractJob {
 				log(" 表【" + tableName + "】 " + "产出数据检测OK");
 			} else {
 				// 超出浮动范围
-				String jobId = jobContext.getJobHistory().getActionId();
+				String jobId = jobContext.getZeusActionHistory().getActionId();
 				StringBuffer sb = new StringBuffer("jobid=" + jobId + " 表【"
 						+ tableName + "】 " + " 产出分区大小超出浮动比例 " + this.percent
 						+ "%");
@@ -199,7 +199,7 @@ public class HiveOutputCheckJob extends AbstractJob {
 	private void tableFailed(final String msg) throws Exception {
 		exitCode = -1;
 		log(msg + " 发出报警");
-		mailAlarm.alarm(jobContext.getJobHistory().getId(),
+		mailAlarm.alarm(jobContext.getZeusActionHistory().getId(),
 				"Zeus任务产出分区检查报警", msg);
 	}
 

@@ -15,7 +15,6 @@ import com.taobao.zeus.dal.model.ZeusLock;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 
 import com.taobao.zeus.schedule.mvc.ScheduleInfoLog;
 import com.taobao.zeus.socket.worker.ClientWorker;
@@ -35,13 +34,11 @@ public class DistributeLocker{
 	@Autowired
 	private HostGroupManager hostGroupManager;
 	@Autowired
-	private ApplicationContext applicationContext;
-	@Autowired
 	private ClientWorker worker;
 	@Autowired
 	private ZeusLockManager zeusLockManager;
 	
-	private ZeusSchedule zeusSchedule;
+	private MasterRole masterRole;
 	
 	private int port=9887;
 	
@@ -69,7 +66,7 @@ public class DistributeLocker{
 	 *
 	 */
 	public void init() throws Exception{
-		zeusSchedule=new ZeusSchedule(applicationContext);
+		masterRole =new MasterRole();
 		ScheduledExecutorService service=Executors.newScheduledThreadPool(3);
 		service.scheduleAtFixedRate(new Runnable() {
 			
@@ -105,7 +102,7 @@ public class DistributeLocker{
 			lock.setServerUpdate(new Date());
 			zeusLockManager.updateByPrimaryKeySelective(lock);
 			log.info("hold the locker and update time");
-			zeusSchedule.startup(port);
+			masterRole.startup(port);
 		}else{//其他服务器抢占了锁
 			log.info("not my locker");
 			//如果最近更新时间在5分钟以上，则认为抢占的Master服务器已经失去连接，属于抢占组的服务器主动进行抢占
@@ -115,9 +112,9 @@ public class DistributeLocker{
 				lock.setSubgroup(Environment.getScheduleGroup());
 				zeusLockManager.updateByPrimaryKeySelective(lock);
 				log.error("rob the locker and update");
-				zeusSchedule.startup(port);
+				masterRole.startup(port);
 			}else{//如果Master服务器没有问题，本服务器停止server角色
-				zeusSchedule.shutdown();
+				masterRole.shutdown();
 			}
 		}
 

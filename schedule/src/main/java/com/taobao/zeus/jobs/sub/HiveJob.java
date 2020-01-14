@@ -18,7 +18,6 @@ import org.springframework.context.ApplicationContext;
 
 import com.taobao.zeus.jobs.JobContext;
 import com.taobao.zeus.jobs.ProcessJob;
-import com.taobao.zeus.model.FileDescriptor;
 import com.taobao.zeus.util.Environment;
 import com.taobao.zeus.util.PropertyKeys;
 import com.taobao.zeus.util.RunningJobKeys;
@@ -76,7 +75,7 @@ public class HiveJob extends ProcessJob {
 					Charset.forName(jobContext.getProperties().getProperty("zeus.fs.encode", "utf-8")));
 			writer.write(script.replaceAll("^--.*", ""));
 		} catch (Exception e) {
-			jobContext.getJobHistory().getLog().appendZeusException(e);
+			jobContext.getZeusActionHistory().getLog().appendZeusException(e);
 		} finally {
 			IOUtils.closeQuietly(writer);
 		}
@@ -94,7 +93,7 @@ public class HiveJob extends ProcessJob {
 		String shellPrefix = "";
 		String user = "";
 		if (jobContext.getRunType() == 1 || jobContext.getRunType() == 2) {
-			user = jobContext.getJobHistory().getOperator();
+			user = jobContext.getZeusActionHistory().getOperator();
 			shellPrefix = "sudo -u " + user;
 		} else if (jobContext.getRunType() == 3) {
 			user = jobContext.getDebugHistory().getOwner();
@@ -152,7 +151,7 @@ public class HiveJob extends ProcessJob {
 					tmpWriter=new OutputStreamWriter(new FileOutputStream(tmpFile),Charset.forName(jobContext.getProperties().getProperty("zeus.fs.encode", "utf-8")));
 					tmpWriter.write("source " + localEnvFilePath + "; hive"+ sb.toString());
 				} catch (Exception e) {
-					jobContext.getJobHistory().getLog().appendZeusException(e);
+					jobContext.getZeusActionHistory().getLog().appendZeusException(e);
 				} finally{
 					IOUtils.closeQuietly(tmpWriter);
 				}

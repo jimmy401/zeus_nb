@@ -15,6 +15,7 @@ import com.taobao.zeus.dal.model.ZeusActionWithBLOBs;
 import com.taobao.zeus.dal.model.ZeusFile;
 import com.taobao.zeus.dal.model.ZeusJob;
 import com.taobao.zeus.dal.model.ZeusJobWithBLOBs;
+import com.taobao.zeus.model.*;
 import com.taobao.zeus.schedule.mvc.*;
 import com.taobao.zeus.socket.master.reqresp.MasterCancelJob;
 import com.taobao.zeus.util.*;
@@ -26,14 +27,8 @@ import org.slf4j.LoggerFactory;
 import com.taobao.zeus.broadcast.alarm.MailAlarm;
 import com.taobao.zeus.broadcast.alarm.SMSAlarm;
 import com.taobao.zeus.client.ZeusException;
-import com.taobao.zeus.model.DebugHistory;
-import com.taobao.zeus.model.FileDescriptor;
-import com.taobao.zeus.model.HostGroupCache;
-import com.taobao.zeus.model.JobDescriptor;
-import com.taobao.zeus.model.JobHistory;
-import com.taobao.zeus.model.JobStatus;
+import com.taobao.zeus.model.ZeusActionHistory;
 import com.taobao.zeus.model.JobStatus.TriggerType;
-import com.taobao.zeus.model.Profile;
 import com.taobao.zeus.mvc.Controller;
 import com.taobao.zeus.mvc.Dispatcher;
 import com.taobao.zeus.schedule.mvc.event.DebugFailEvent;
@@ -56,7 +51,7 @@ public class Master {
 
     private MasterContext context;
     private static Logger log = LoggerFactory.getLogger(Master.class);
-    private Map<Long, ZeusActionWithBLOBs> actionDetails;
+    private Map<Long, ZeusActionWithBLOBs> runActionList;
 
     public Master(final MasterContext context) {
         this.context = context;
@@ -64,27 +59,21 @@ public class Master {
 
         if (Environment.isPrePub()) {
             // 如果是预发环境，添加stop listener，阻止自动调度执行
-            context.getDispatcher().addDispatcherListener(
-                    new StopScheduleJobListener());
+            context.getDispatcher().addDispatcherListener(new StopScheduleJobListener());
         }
         log.info("add job listener");
-        context.getDispatcher().addDispatcherListener(
-                new AddJobListener(context, this));
+        context.getDispatcher().addDispatcherListener(new AddJobListener(context, this));
         log.info("add job fail listener");
-        context.getDispatcher().addDispatcherListener(
-                new JobFailListener(context));
+        context.getDispatcher().addDispatcherListener(new JobFailListener(context));
         log.info("add debug listener");
-        context.getDispatcher().addDispatcherListener(
-                new DebugListener(context));
+        context.getDispatcher().addDispatcherListener(new DebugListener(context));
         log.info("add job success listener");
-        context.getDispatcher().addDispatcherListener(
-                new JobSuccessListener(context));
+        context.getDispatcher().addDispatcherListener(new JobSuccessListener(context));
         Map<String, JobBean> allJobBeans = root.getAllSubJobBeans();
         log.info("all jobs count {}", allJobBeans.size());
         for (String id : allJobBeans.keySet()) {
             log.info("add controller {}", id);
-            context.getDispatcher().addController(
-                    new JobController(context, this, id));
+            context.getDispatcher().addController(new JobController(context, this, id));
         }
         // 初始化
         context.getDispatcher().forwardEvent(Events.Initialize);
@@ -120,7 +109,7 @@ public class Master {
                     if (dispatcher != null) {
                         ///id  20160309 152300 000 6    yyyyMMddHHmmss 000 6
                         Map<Long, ZeusActionWithBLOBs> actionDetailsNew = new HashMap<Long, ZeusActionWithBLOBs>();
-                        actionDetailsNew = actionDetails;
+                        actionDetailsNew = runActionList;
                         if (actionDetailsNew != null && actionDetailsNew.size() > 0) {
                             //增加controller，并修改event
                             List<Long> rollBackActionId = new ArrayList<Long>();
@@ -200,33 +189,29 @@ public class Master {
                             now = cal.getTime();
                         }
                         log.info("start to action, date：" + currentDateStr);
-                        List<ZeusJobWithBLOBs> jobDetails = context.getGroupManagerWithJob().getAllJobs();
-                        log.info("all jobs count ：" + jobDetails.size());
-                        Map<Long, ZeusActionWithBLOBs> actionDetailsNew = new HashMap<Long, ZeusActionWithBLOBs>();
+                        List<ZeusJobWithBLOBs> allJobs = context.getGroupManagerWithJob().getAllJobs();
+                        log.info("all jobs count ：" + allJobs.size());
+                        Map<Long, ZeusActionWithBLOBs> actionList = new HashMap<Long, ZeusActionWithBLOBs>();
                         //首先，生成当天的独立任务action
                         log.info("generate schedule jobs to action ");
-                        runScheduleJobToAction(jobDetails, now, dfDate, actionDetailsNew, currentDateStr);
+                        runScheduleJobToAction(allJobs, now, dfDate, actionList, currentDateStr);
                         //其次，生成依赖任务action
                         log.info("generate dependency jobs to action ");
-                        runDependencesJobToAction(jobDetails, actionDetailsNew, currentDateStr, 0);
+                        runDependencesJobToAction(allJobs, actionList, currentDateStr, 0);
 
                         if (execHour < 23) {
-                            actionDetails = actionDetailsNew;
+                            runActionList = actionList;
                         }
-                        log.info("run job to action ok");
-                        log.info("job to action count:" + actionDetailsNew.size());
+                        log.info("runAction job to action ok");
+                        log.info("job to action count:" + actionList.size());
                         Dispatcher dispatcher = context.getDispatcher();
                         if (dispatcher != null) {
                             //增加controller，并修改event
-                            if (actionDetailsNew.size() > 0) {
-                                for (Long id : actionDetailsNew.keySet()) {
-                                    dispatcher.addController(
-                                            new JobController(context, context.getMaster(),
-                                                    id.toString()));
+                            if (actionList.size() > 0) {
+                                for (Long id : actionList.keySet()) {
+                                    dispatcher.addController(new JobController(context, context.getMaster(),id.toString()));
                                     if (id > Long.parseLong(currentDateStr)) {
-                                        context.getDispatcher().forwardEvent(
-                                                new JobMaintenanceEvent(Events.UpdateJob,
-                                                        id.toString()));
+                                        context.getDispatcher().forwardEvent(new JobMaintenanceEvent(Events.UpdateJob,id.toString()));
                                     }
                                 }
                             }
@@ -333,8 +318,7 @@ public class Master {
                     }
                     if (isAllComplete) {
                         if (!rollBackActionId.contains(id)) {
-                            context.getDispatcher().forwardEvent(
-                                    new JobLostEvent(Events.UpdateJob, id.toString()));
+                            context.getDispatcher().forwardEvent(new JobLostEvent(Events.UpdateJob, id.toString()));
                             rollBackActionId.add(id);
 //							System.out.println("roll back lost jobID :" + id.toString());
 //							log.info("roll back lost jobID :" + id.toString());
@@ -342,8 +326,7 @@ public class Master {
                     }
                 } else {
                     if (!rollBackActionId.contains(id)) {
-                        context.getDispatcher().forwardEvent(
-                                new JobLostEvent(Events.UpdateJob, id.toString()));
+                        context.getDispatcher().forwardEvent(new JobLostEvent(Events.UpdateJob, id.toString()));
                         rollBackActionId.add(id);
 //						System.out.println("roll back lost jobID :" + id.toString());
 //						log.info("roll back lost jobID :" + id.toString());
@@ -505,7 +488,7 @@ public class Master {
 
             context.getQueue().remove(e);
 
-            runScheduleJob(selectWorker, e.getActionId());
+            assignActionToWorker(selectWorker, e.getActionId());
             log.info("HostGroupId : " + e.getHostGroupId() + ",schedule selectWorker : " + selectWorker + ",host :" + selectWorker.getHeart().host);
         }
     }
@@ -522,7 +505,7 @@ public class Master {
         final MasterWorkerHolder w = selectWorker;
         //final JobElement debugId = context.getDebugQueue().poll();
         SocketLog.info("master scan and poll debugId=" + jobID
-                + " and run!");
+                + " and runAction!");
 
         new Thread() {
             @Override
@@ -544,7 +527,7 @@ public class Master {
                 } catch (Exception e) {
                     exception = e;
                     DebugInfoLog.error(
-                            String.format("debugId:%s run failed",
+                            String.format("debugId:%s runAction failed",
                                     jobID), e);
                 }
                 boolean success = resp.getStatus() == Status.OK ? true : false;
@@ -553,13 +536,13 @@ public class Master {
                     // 运行失败，更新失败状态，发出失败消息
                     if (exception != null) {
                         exception = new ZeusException(String.format(
-                                "fileId:%s run failed ", history.getFileId()),
+                                "fileId:%s runAction failed ", history.getFileId()),
                                 exception);
                     } else {
                         exception = new ZeusException(String.format(
-                                "fileId:%s run failed ", history.getFileId()));
+                                "fileId:%s runAction failed ", history.getFileId()));
                     }
-                    DebugInfoLog.info("debugId:" + jobID + " run fail ");
+                    DebugInfoLog.info("debugId:" + jobID + " runAction fail ");
                     history = context.getDebugHistoryManager()
                             .findDebugHistory(jobID);
                     DebugFailEvent jfe = new DebugFailEvent(
@@ -567,7 +550,7 @@ public class Master {
                     context.getDispatcher().forwardEvent(jfe);
                 } else {
                     // 运行成功，发出成功消息
-                    DebugInfoLog.info("debugId:" + jobID + " run success");
+                    DebugInfoLog.info("debugId:" + jobID + " runAction success");
                     DebugSuccessEvent dse = new DebugSuccessEvent(
                             history.getFileId(), history);
                     context.getDispatcher().forwardEvent(dse);
@@ -580,11 +563,11 @@ public class Master {
         final MasterWorkerHolder w = selectWorker;
         //final JobElement historyId = context.getManualQueue().poll();
         SocketLog.info("master scan and poll historyId=" + jobID
-                + " and run!");
+                + " and runAction!");
         new Thread() {
             @Override
             public void run() {
-                JobHistory history = context.getJobHistoryManager()
+                ZeusActionHistory history = context.getJobHistoryManager()
                         .findJobHistory(jobID);
                 history.getLog().appendZeus(
                         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -607,7 +590,7 @@ public class Master {
                 } catch (Exception e) {
                     exception = e;
                     ScheduleInfoLog.error("JobId:" + history.getActionId()
-                            + " run failed", e);
+                            + " runAction failed", e);
                     jobstatus.setStatus(com.taobao.zeus.model.JobStatus.Status.FAILED);
                     context.getGroupManagerWithAction().updateActionStatus(jobstatus);
                 }
@@ -618,15 +601,15 @@ public class Master {
                     ZeusJobException jobException = null;
                     if (exception != null) {
                         jobException = new ZeusJobException(history.getActionId(),
-                                String.format("JobId:%s run failed ",
+                                String.format("JobId:%s runAction failed ",
                                         history.getActionId()), exception);
                     } else {
                         jobException = new ZeusJobException(history.getActionId(),
-                                String.format("JobId:%s run failed ",
+                                String.format("JobId:%s runAction failed ",
                                         history.getActionId()));
                     }
                     ScheduleInfoLog.info("jobId:" + history.getActionId()
-                            + " run fail ");
+                            + " runAction fail ");
                     history = context.getJobHistoryManager().findJobHistory(
                             jobID);
 
@@ -640,7 +623,7 @@ public class Master {
                 } else {
                     // 运行成功，发出成功消息
                     ScheduleInfoLog.info("manual jobId::" + history.getActionId()
-                            + " run success");
+                            + " runAction success");
                     jobstatus.setStatus(com.taobao.zeus.model.JobStatus.Status.SUCCESS);
                     JobSuccessEvent jse = new JobSuccessEvent(
                             history.getActionId(), history.getTriggerType(),
@@ -654,13 +637,13 @@ public class Master {
         }.start();
     }
 
-    private void runScheduleJob(MasterWorkerHolder selectWorker, final String jobID) {
-        final MasterWorkerHolder w = selectWorker;
+    private void assignActionToWorker(MasterWorkerHolder selectWorker, final String actionId) {
+        final MasterWorkerHolder worker = selectWorker;
         //final JobElement jobId = context.getQueue().poll();
-        SocketLog.info("master scan and poll jobId=" + jobID + " and run!");
+        SocketLog.info("master scan and poll actionId=" + actionId + " and runAction!");
 
-        QueueInfoLog.info("put runnings" + w.getRunnings().size() + "");
-        w.getRunnings().put(jobID, false);
+        QueueInfoLog.info("put runnings" + worker.getRunnings().size() + "");
+        worker.getRunnings().put(actionId, false);
         new Thread() {
             @Override
             public void run() {
@@ -668,7 +651,7 @@ public class Master {
                 int rollBackTimes = 0;
                 int rollBackWaitTime = 1;
                 try {
-                    JobDescriptor jobDes = context.getGroupManagerWithAction().getActionDescriptor(jobID).getX();
+                    ActionDescriptor jobDes = context.getGroupManagerWithAction().getActionDescriptor(actionId).getX();
                     Map<String, String> properties = jobDes.getProperties();
                     if (properties != null && properties.size() > 0) {
                         rollBackTimes = Integer.parseInt(properties.get("roll.back.times") == null ? "0" : properties.get("roll.back.times"));
@@ -679,9 +662,9 @@ public class Master {
                     rollBackWaitTime = 1;
                 }
                 try {
-                    runScheduleJobContext(w, jobID, runCount, rollBackTimes, rollBackWaitTime);
+                    runScheduleJobContext(worker, actionId, runCount, rollBackTimes, rollBackWaitTime);
                 } catch (Exception ex) {
-                    w.getRunnings().remove(jobID);
+                    worker.getRunnings().remove(actionId);
                     log.error("roll back failed job failed !", ex);
                 }
             }
@@ -689,7 +672,7 @@ public class Master {
     }
 
     //schedule任务运行，失败后重试
-    private void runScheduleJobContext(MasterWorkerHolder w, final String actionId, int runCount, final int rollBackTimes, final int rollBackWaitTime) {
+    private void runScheduleJobContext(MasterWorkerHolder workerHolder, final String actionId, int runCount, final int rollBackTimes, final int rollBackWaitTime) {
         runCount++;
         boolean isCancelJob = false;
         if (runCount > 1) {
@@ -699,102 +682,83 @@ public class Master {
                 e.printStackTrace();
             }
         }
-        // 先根据任务ID，查询出任务上次执行的历史记录（jobID->historyid->JobHistory)
-        JobHistory his = null;
+        // 先根据任务ID，查询出任务上次执行的历史记录（jobID->historyid->ZeusActionHistory)
+        ZeusActionHistory history = null;
         TriggerType type = null;
         if (runCount == 1) {
-            String historyId = context.getGroupManagerWithAction()
-                    .getActionStatus(actionId).getHistoryId();
+            String historyId = context.getGroupManagerWithAction().getActionStatus(actionId).getHistoryId();
             ScheduleInfoLog.info("actionId:" + actionId + " and historyId : " + historyId);
-            his = context.getJobHistoryManager().findJobHistory(historyId);
-            type = his.getTriggerType();
-            ScheduleInfoLog.info("actionId:" + actionId + " run start");
-            his.getLog().appendZeus(
-                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                            .format(new Date()) + " 开始运行");
+            history = context.getJobHistoryManager().findJobHistory(historyId);
+            type = history.getTriggerType();
+            ScheduleInfoLog.info("actionId:" + actionId + " runAction start");
+            history.getLog().appendZeus(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 开始运行");
         } else {
-            JobDescriptor jobDescriptor = context.getGroupManagerWithAction().getActionDescriptor(actionId).getX();
-            his = new JobHistory();
-            his.setIllustrate("失败任务重试，开始执行");
-            his.setTriggerType(TriggerType.SCHEDULE);
-            type = his.getTriggerType();
-            his.setActionId(jobDescriptor.getId());
-            his.setOperator(jobDescriptor.getOwner() == null ? null : jobDescriptor.getOwner());
-            his.setJobId(jobDescriptor.getJobId() == null ? null : jobDescriptor.getJobId());
-            his.setTimezone(jobDescriptor.getTimezone());
-            his.setStatus(com.taobao.zeus.model.JobStatus.Status.RUNNING);
-            his.setHostGroupId(jobDescriptor.getHostGroupId());
-            context.getJobHistoryManager().addJobHistory(his);
-            his.getLog().appendZeus(
-                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                            .format(new Date()) + " 第" + (runCount - 1) + "次重试运行");
+            ActionDescriptor actionDescriptor = context.getGroupManagerWithAction().getActionDescriptor(actionId).getX();
+            history = new ZeusActionHistory();
+            history.setIllustrate("失败任务重试，开始执行");
+            history.setTriggerType(TriggerType.SCHEDULE);
+            type = history.getTriggerType();
+            history.setActionId(actionDescriptor.getId());
+            history.setOperator(actionDescriptor.getOwner() == null ? null : actionDescriptor.getOwner());
+            history.setJobId(actionDescriptor.getJobId() == null ? null : actionDescriptor.getJobId());
+            history.setTimezone(actionDescriptor.getTimezone());
+            history.setStatus(com.taobao.zeus.model.JobStatus.Status.RUNNING);
+            history.setHostGroupId(actionDescriptor.getHostGroupId());
+            context.getJobHistoryManager().addJobHistory(history);
+            history.getLog().appendZeus(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 第" + (runCount - 1) + "次重试运行");
         }
-        context.getJobHistoryManager().updateJobHistoryLog(his.getId(),
-                his.getLog().getContent());
-        JobStatus jobstatus = context.getGroupManagerWithAction().getActionStatus(his.getActionId());
-        jobstatus.setHistoryId(his.getId());
+        context.getJobHistoryManager().updateJobHistoryLog(history.getId(),history.getLog().getContent());
+        JobStatus jobstatus = context.getGroupManagerWithAction().getActionStatus(history.getActionId());
+        jobstatus.setHistoryId(history.getId());
         jobstatus.setStatus(com.taobao.zeus.model.JobStatus.Status.RUNNING);
         context.getGroupManagerWithAction().updateActionStatus(jobstatus);
 
         Exception exception = null;
         Response resp = null;
         try {
-            Future<Response> f = new MasterExecuteJob().executeJob(
-                    context, w, ExecuteKind.ScheduleKind, his.getId());
+            Future<Response> f = new MasterExecuteJob().executeJob(context, workerHolder, ExecuteKind.ScheduleKind, history.getId());
             resp = f.get();
         } catch (Exception e) {
             exception = e;
-            ScheduleInfoLog.error(
-                    String.format("JobId:%s run failed", actionId), e);
+            ScheduleInfoLog.error(String.format("actionId:%s runAction failed", actionId), e);
             jobstatus.setStatus(com.taobao.zeus.model.JobStatus.Status.FAILED);
             context.getGroupManagerWithAction().updateActionStatus(jobstatus);
         }
         boolean success = resp.getStatus() == Status.OK ? true : false;
-        if (success
-                && (his.getTriggerType() == TriggerType.SCHEDULE || his
-                .getTriggerType() == TriggerType.MANUAL_RECOVER)) {
-            ScheduleInfoLog.info("actionId:" + actionId
-                    + " clear ready dependency");
+        if (success&& (history.getTriggerType() == TriggerType.SCHEDULE || history.getTriggerType() == TriggerType.MANUAL_RECOVER)) {
+            ScheduleInfoLog.info("actionId:" + actionId+ " clear ready dependency");
             jobstatus.setReadyDependency(new HashMap<String, String>());
         }
         if (!success) {
             // 运行失败，更新失败状态，发出失败消息
             ZeusJobException jobException = null;
             if (exception != null) {
-                jobException = new ZeusJobException(actionId,
-                        String.format("actionId:%s run failed ",
-                                actionId), exception);
+                jobException = new ZeusJobException(actionId,String.format("actionId:%s runAction failed ",actionId), exception);
             } else {
-                jobException = new ZeusJobException(actionId,
-                        String.format("actionId:%s run failed ",
-                                actionId));
+                jobException = new ZeusJobException(actionId,String.format("actionId:%s runAction failed ",actionId));
             }
-            ScheduleInfoLog.info("actionId:" + actionId
-                    + " run fail and dispatch the fail event");
+            ScheduleInfoLog.info("actionId:" + actionId+ " runAction fail and dispatch the fail event");
             jobstatus.setStatus(com.taobao.zeus.model.JobStatus.Status.FAILED);
-            JobHistory jobHistory = context.getJobHistoryManager().findJobHistory(his.getId());
-            JobFailedEvent jfe = new JobFailedEvent(actionId, type, jobHistory, jobException);
+            ZeusActionHistory zeusActionHistory = context.getJobHistoryManager().findJobHistory(history.getId());
+            JobFailedEvent jfe = new JobFailedEvent(actionId, type, zeusActionHistory, jobException);
             jfe.setRollBackTime(rollBackTimes);
             jfe.setRunCount(runCount);
-            if (jobHistory != null && jobHistory.getIllustrate() != null
-                    && jobHistory.getIllustrate().contains("手动取消该任务")) {
+            if (zeusActionHistory != null && zeusActionHistory.getIllustrate() != null&& zeusActionHistory.getIllustrate().contains("手动取消该任务")) {
                 isCancelJob = true;
             } else {
                 context.getDispatcher().forwardEvent(jfe);
             }
         } else {
             // 运行成功，发出成功消息
-            ScheduleInfoLog.info("actionId:" + actionId
-                    + " run success and dispatch the success event");
+            ScheduleInfoLog.info("actionId:" + actionId+ " runAction success and dispatch the success event");
             jobstatus.setStatus(com.taobao.zeus.model.JobStatus.Status.SUCCESS);
-            JobSuccessEvent jse = new JobSuccessEvent(actionId,
-                    his.getTriggerType(), his.getId());
-            jse.setStatisEndTime(his.getStatisEndTime());
+            JobSuccessEvent jse = new JobSuccessEvent(actionId,history.getTriggerType(), history.getId());
+            jse.setStatisEndTime(history.getStatisEndTime());
             context.getDispatcher().forwardEvent(jse);
         }
         context.getGroupManagerWithAction().updateActionStatus(jobstatus);
         if (runCount < (rollBackTimes + 1) && !success && !isCancelJob) {
-            runScheduleJobContext(w, actionId, runCount, rollBackTimes, rollBackWaitTime);
+            runScheduleJobContext(workerHolder, actionId, runCount, rollBackTimes, rollBackWaitTime);
         }
     }
 
@@ -854,9 +818,9 @@ public class Master {
                 continue;
             }
             String historyId = entry.getKey();
-            JobHistory his = context.getJobHistoryManager().findJobHistory(
+            ZeusActionHistory his = context.getJobHistoryManager().findJobHistory(
                     historyId);
-            JobDescriptor jd = context.getGroupManagerWithAction()
+            ActionDescriptor jd = context.getGroupManagerWithAction()
                     .getActionDescriptor(his.getActionId()).getX();
             long maxTime;
             try {
@@ -889,8 +853,7 @@ public class Master {
                 continue;
             }
             String jobId = entry.getKey();
-            JobDescriptor jd = context.getGroupManagerWithAction()
-                    .getActionDescriptor(jobId).getX();
+            ActionDescriptor jd = context.getGroupManagerWithAction().getActionDescriptor(jobId).getX();
             String maxTimeString = jd.getProperties().get("zeus.job.maxtime");
             long maxTime;
             try {
@@ -906,12 +869,10 @@ public class Master {
                 continue;
             }
 
-            JobHistory his = context.getJobHistoryManager().findJobHistory(
-                    context.getGroupManagerWithAction().getActionStatus(jobId)
-                            .getHistoryId());
+            ZeusActionHistory his = context.getJobHistoryManager().findJobHistory(
+                    context.getGroupManagerWithAction().getActionStatus(jobId).getHistoryId());
             if (his != null && his.getStartTime() != null) {
-                long runTime = (System.currentTimeMillis() - his.getStartTime()
-                        .getTime()) / 1000 / 60;
+                long runTime = (System.currentTimeMillis() - his.getStartTime().getTime()) / 1000 / 60;
                 if (runTime > maxTime) {
                     log.info("send the timeOverAlarm of job: " + jobId);
                     if (timeOverAlarm(his, null, runTime, maxTime, 0, jd)) {
@@ -926,8 +887,8 @@ public class Master {
         }
     }
 
-    private boolean timeOverAlarm(final JobHistory his, ZeusFile zeusFile,
-                                  long runTime, long maxTime, int type, JobDescriptor jd) {
+    private boolean timeOverAlarm(final ZeusActionHistory his, ZeusFile zeusFile,
+                                  long runTime, long maxTime, int type, ActionDescriptor jd) {
         final MailAlarm mailAlarm = (MailAlarm) context.getMailAlarm();
         SMSAlarm smsAlarm = (SMSAlarm) context.getSmsAlarm();
 
@@ -948,7 +909,7 @@ public class Master {
             content.append("\nJOB任务名称：").append(jd.getName());
             Map<String, String> properties = jd.getProperties();
             if (properties != null) {
-                String plevel = properties.get("run.priority.level");
+                String plevel = properties.get("runAction.priority.level");
                 if ("1".equals(plevel)) {
                     content.append("\nJob任务优先级: ").append("low");
                 } else if ("2".equals(plevel)) {
@@ -980,14 +941,14 @@ public class Master {
                                             content.toString()
                                                     .replace("\n", "<br/>"));
                         } catch (Exception e) {
-                            log.error("send run timeover mail alarm failed", e);
+                            log.error("send runAction timeover mail alarm failed", e);
                         }
                     }
                 }.start();
                 if (type == 0) {
                     String priorityLevel = "3";
                     if (jd != null) {
-                        priorityLevel = jd.getProperties().get("run.priority.level");
+                        priorityLevel = jd.getProperties().get("runAction.priority.level");
                     }
                     if (priorityLevel == null || !priorityLevel.trim().equals("1")) {
                         Calendar now = Calendar.getInstance();
@@ -1003,7 +964,7 @@ public class Master {
             }
             return true;
         } catch (Exception e) {
-            log.error("send run timeover alarm failed", e);
+            log.error("send runAction timeover alarm failed", e);
             return false;
         }
     }
@@ -1013,15 +974,12 @@ public class Master {
         if (holder != null) {
 //			SocketLog.info("worker disconnect, ip:" + channel.getRemoteAddress().toString());
             context.getWorkers().remove(channel);
-            final List<JobHistory> hiss = new ArrayList<JobHistory>();
-            Map<String, Tuple<JobDescriptor, JobStatus>> map = context
-                    .getGroupManagerWithAction().getActionDescriptor(
-                            holder.getRunnings().keySet());
+            final List<ZeusActionHistory> hiss = new ArrayList<ZeusActionHistory>();
+            Map<String, Tuple<ActionDescriptor, JobStatus>> map = context.getGroupManagerWithAction().getActionDescriptor(holder.getRunnings().keySet());
             for (String key : map.keySet()) {
                 JobStatus js = map.get(key).getY();
                 if (js.getHistoryId() != null) {
-                    JobHistory his = context.getJobHistoryManager().findJobHistory(
-                            js.getHistoryId());
+                    ZeusActionHistory his = context.getJobHistoryManager().findJobHistory(js.getHistoryId());
                     if (his != null) {
                         hiss.add(his);
                     }
@@ -1036,13 +994,13 @@ public class Master {
                         Thread.sleep(30000);
                     } catch (InterruptedException e) {
                     }
-                    for (JobHistory his : hiss) {
+                    for (ZeusActionHistory his : hiss) {
                         String jobId = his.getActionId();
                         his.setEndTime(new Date());
                         his.setStatus(com.taobao.zeus.model.JobStatus.Status.FAILED);
                         his.setIllustrate("worker断线，任务失败");
                         context.getJobHistoryManager().updateJobHistory(his);
-                        JobHistory history = new JobHistory();
+                        ZeusActionHistory history = new ZeusActionHistory();
                         history.setActionId(jobId);
                         history.setJobId(his.getJobId());
                         history.setTriggerType(his.getTriggerType());
@@ -1050,13 +1008,10 @@ public class Master {
                         history.setOperator(his.getOperator());
                         history.setHostGroupId(his.getHostGroupId());
                         context.getJobHistoryManager().addJobHistory(history);
-                        Master.this.run(history);
+                        Master.this.runAction(history);
                     }
                 }
-
-                ;
             }.start();
-
         }
     }
 
@@ -1074,13 +1029,13 @@ public class Master {
         System.out.println("offer debug queue :" + context.getDebugQueue().size() + " element :" + element.getActionId());
     }
 
-    public JobHistory run(JobHistory history) {
+    public ZeusActionHistory runAction(ZeusActionHistory history) {
         String actionId = history.getActionId();
-        log.info("run actionId: " + actionId);
+        log.info("runAction actionId: " + actionId);
         int priorityLevel = 3;
         try {
-            JobDescriptor jd = context.getGroupManagerWithAction().getActionDescriptor(actionId).getX();
-            String priorityLevelStr = jd.getProperties().get("run.priority.level");
+            ActionDescriptor jd = context.getGroupManagerWithAction().getActionDescriptor(actionId).getX();
+            String priorityLevelStr = jd.getProperties().get("runAction.priority.level");
             if (priorityLevelStr != null) {
                 priorityLevel = Integer.parseInt(priorityLevelStr);
             }
@@ -1113,16 +1068,13 @@ public class Master {
 
         if (history.getStatus() == com.taobao.zeus.model.JobStatus.Status.RUNNING) {
             history.getLog().appendZeus(
-                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                            .format(new Date()) + " 进入任务队列");
-            context.getJobHistoryManager().updateJobHistoryLog(history.getId(),
-                    history.getLog().getContent());
+                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 进入任务队列");
+            context.getJobHistoryManager().updateJobHistoryLog(history.getId(),history.getLog().getContent());
             if (history.getTriggerType() == TriggerType.MANUAL) {
                 element.setActionId(history.getId());
                 context.getManualQueue().offer(element);
             } else {
-                JobStatus js = context.getGroupManagerWithAction().getActionStatus(
-                        history.getActionId());
+                JobStatus js = context.getGroupManagerWithAction().getActionStatus(history.getActionId());
                 js.setStatus(com.taobao.zeus.model.JobStatus.Status.RUNNING);
                 js.setHistoryId(history.getId());
                 context.getGroupManagerWithAction().updateActionStatus(js);
@@ -1130,24 +1082,24 @@ public class Master {
             }
         }
         context.getJobHistoryManager().updateJobHistory(history);
-        context.getJobHistoryManager().updateJobHistoryLog(history.getId(),
-                history.getLog().getContent());
+        context.getJobHistoryManager().updateJobHistoryLog(history.getId(),history.getLog().getContent());
         return history;
     }
 
     //将当天的且执行时间在当前时间后面的，放入actionDetails； 定时任务生成action、以及没有依赖关系的周期任务生成action
-    public void runScheduleJobToAction(List<ZeusJobWithBLOBs> jobDetails, Date now, SimpleDateFormat dfDate, Map<Long, ZeusActionWithBLOBs> actionDetails, String currentDateStr) {
-        for (ZeusJobWithBLOBs jobDetail : jobDetails) {
+    public void runScheduleJobToAction(List<ZeusJobWithBLOBs> allJobs, Date now, SimpleDateFormat dfDate, Map<Long, ZeusActionWithBLOBs> actionList, String currentDateStr) {
+        for (ZeusJobWithBLOBs oneJob : allJobs) {
             //ScheduleType: 0 独立任务; 1依赖任务; 2周期任务
-            if (jobDetail.getScheduleType() != null && jobDetail.getScheduleType() == ZeusJob.ScheduleType.SCHEDULE.getValue()) {
+            if (oneJob.getScheduleType() != null && oneJob.getScheduleType() == ZeusJob.ScheduleType.SCHEDULE.getValue()) {
                 try {
-                    String jobCronExpression = jobDetail.getCronExpression();
+                    String jobCronExpression = oneJob.getCronExpression();
                     String cronDate = dfDate.format(now);
                     List<String> lTime = new ArrayList<String>();
                     if (jobCronExpression != null && jobCronExpression.trim().length() > 0) {
                         //定时调度
                         boolean isCronExp = false;
                         try {
+                            //lTime表示在当天内所有的触发实列
                             isCronExp = CronExpParser.Parser(jobCronExpression, cronDate, lTime);
                         } catch (Exception ex) {
                             isCronExp = false;
@@ -1160,56 +1112,56 @@ public class Master {
                             String actionCronExpr = ZeusDateTool.StringToDateStr(lTime.get(i), "yyyy-MM-dd HH:mm:ss", "0 m H d M") + " ?";
 
                             ZeusActionWithBLOBs actionPer = new ZeusActionWithBLOBs();
-                            actionPer.setId(Long.parseLong(actionDateStr) * 1000000 + jobDetail.getId());//update action id
-                            actionPer.setJobId(jobDetail.getId());
-                            actionPer.setAuto(jobDetail.getAuto());
-                            actionPer.setConfigs(jobDetail.getConfigs());
+                            actionPer.setId(Long.parseLong(actionDateStr) * 1000000 + oneJob.getId());//update action id
+                            actionPer.setJobId(oneJob.getId());
+                            actionPer.setAuto(oneJob.getAuto());
+                            actionPer.setConfigs(oneJob.getConfigs());
                             actionPer.setCronExpression(actionCronExpr);//update action cron expression
-                            actionPer.setCycle(jobDetail.getCycle());
-                            String jobDependencies = jobDetail.getDependencies();
+                            actionPer.setCycle(oneJob.getCycle());
+                            String jobDependencies = oneJob.getDependencies();
                             actionPer.setDependencies(jobDependencies);
                             actionPer.setJobDependencies(jobDependencies);
-                            actionPer.setDescr(jobDetail.getDescr());
-                            actionPer.setGmtCreate(jobDetail.getGmtCreate());
+                            actionPer.setDescr(oneJob.getDescr());
+                            actionPer.setGmtCreate(oneJob.getGmtCreate());
                             actionPer.setGmtModified(new Date());
-                            actionPer.setGroupId(jobDetail.getGroupId());
-                            actionPer.setHistoryId(jobDetail.getHistoryId());
-                            actionPer.setHost(jobDetail.getHost());
-                            actionPer.setHostGroupId(jobDetail.getHostGroupId());
-                            actionPer.setLastEndTime(jobDetail.getLastEndTime());
-                            actionPer.setLastResult(jobDetail.getLastResult());
-                            actionPer.setName(jobDetail.getName());
-                            actionPer.setOffset(jobDetail.getOffset());
-                            actionPer.setOwner(jobDetail.getOwner());
-                            actionPer.setPostProcessers(jobDetail.getPostProcessers());
-                            actionPer.setPreProcessers(jobDetail.getPreProcessers());
-                            actionPer.setReadyDependency(jobDetail.getReadyDependency());
-                            actionPer.setResources(jobDetail.getResources());
-                            actionPer.setRunType(jobDetail.getRunType());
-                            actionPer.setScheduleType(jobDetail.getScheduleType());
-                            /*							actionPer.setScript(jobDetail.getScript());*/
-                            actionPer.setStartTime(jobDetail.getStartTime());
-                            actionPer.setStartTimestamp(jobDetail.getStartTimestamp());
-                            actionPer.setStatisStartTime(jobDetail.getStatisStartTime());
-                            actionPer.setStatisEndTime(jobDetail.getStatisEndTime());
-                            actionPer.setStatus(jobDetail.getStatus());
-                            actionPer.setTimezone(jobDetail.getTimezone());
+                            actionPer.setGroupId(oneJob.getGroupId());
+                            actionPer.setHistoryId(oneJob.getHistoryId());
+                            actionPer.setHost(oneJob.getHost());
+                            actionPer.setHostGroupId(oneJob.getHostGroupId());
+                            actionPer.setLastEndTime(oneJob.getLastEndTime());
+                            actionPer.setLastResult(oneJob.getLastResult());
+                            actionPer.setName(oneJob.getName());
+                            actionPer.setOffset(oneJob.getOffset());
+                            actionPer.setOwner(oneJob.getOwner());
+                            actionPer.setPostProcessers(oneJob.getPostProcessers());
+                            actionPer.setPreProcessers(oneJob.getPreProcessers());
+                            actionPer.setReadyDependency(oneJob.getReadyDependency());
+                            actionPer.setResources(oneJob.getResources());
+                            actionPer.setRunType(oneJob.getRunType());
+                            actionPer.setScheduleType(oneJob.getScheduleType());
+                            /*							actionPer.setScript(oneJob.getScript());*/
+                            actionPer.setStartTime(oneJob.getStartTime());
+                            actionPer.setStartTimestamp(oneJob.getStartTimestamp());
+                            actionPer.setStatisStartTime(oneJob.getStatisStartTime());
+                            actionPer.setStatisEndTime(oneJob.getStatisEndTime());
+                            actionPer.setStatus(oneJob.getStatus());
+                            actionPer.setTimezone(oneJob.getTimezone());
                             try {
                                 if (lTime.size() == 1 || actionPer.getId() > Long.parseLong(currentDateStr)) {
-                                    actionDetails.put(actionPer.getId(), actionPer);
+                                    actionList.put(actionPer.getId(), actionPer);
                                 } else {
                                     if (actionPer.getStatus() == null || !actionPer.getStatus().equals(JobStatus.Status.SUCCESS.getId()))
                                         actionPer.setStatus(JobStatus.Status.FAILED.getId());
                                 }
 
-                                log.info("定时JobId: " + jobDetail.getId() + ";  ActionId: " + actionPer.getId() +
+                                log.info("定时JobId: " + oneJob.getId() + ";  ActionId: " + actionPer.getId() +
                                         "; Status:" + actionPer.getStatus() + "; currentDateStr:" + currentDateStr + "lTime:" + i)
                                 ;
 
                                 context.getGroupManagerWithAction().saveOrUpdateAction(actionPer);
 
                             } catch (ZeusException e) {
-                                log.error("定时任务JobId:" + jobDetail.getId() + " 生成Action" + actionPer.getId() + "失败", e);
+                                log.error("定时任务JobId:" + oneJob.getId() + " 生成Action" + actionPer.getId() + "失败", e);
                             }
                         }
                     }
@@ -1222,7 +1174,7 @@ public class Master {
     }
 
     //将依赖任务生成action
-	/*public void runDependencesJobToAction(List<ZeusJobWithBLOBs> jobDetails, Map<Long, ZeusActionWithBLOBs> actionDetails,String currentDateStr, int loopCount){
+	/*public void runDependencesJobToAction(List<ZeusJobWithBLOBs> jobDetails, Map<Long, ZeusActionWithBLOBs> runActionList,String currentDateStr, int loopCount){
 		int noCompleteCount = 0;
 		loopCount ++;
 //		System.out.println("loopCount："+loopCount);
@@ -1240,10 +1192,10 @@ public class Master {
 						String[] dependStrs = jobDependencies.split(",");
 						for(String depJobId : dependStrs){
 							List<ZeusActionWithBLOBs> dependActions = new ArrayList<ZeusActionWithBLOBs>();
-							Iterator<ZeusActionWithBLOBs> actionIt = actionDetails.values().iterator();
+							Iterator<ZeusActionWithBLOBs> actionIt = runActionList.values().iterator();
 							while(actionIt.hasNext()){
 								ZeusActionWithBLOBs action = actionIt.next();
-								if(action.getJobId().toString().equals(depJobId)){
+								if(action.getActionId().toString().equals(depJobId)){
 									dependActions.add(action);
 								}
 							}
@@ -1253,7 +1205,7 @@ public class Master {
 									if(dependActionList.get(depJobId).size()==0){
 										List<ZeusActionWithBLOBs> lastJobActions = context.getGroupManagerWithAction().getLastJobAction(depJobId);
 										if(lastJobActions != null && lastJobActions.size()>0){
-											actionDetails.put(lastJobActions.get(0).getId(),lastJobActions.get(0));
+											runActionList.put(lastJobActions.get(0).getId(),lastJobActions.get(0));
 											dependActions.add(lastJobActions.get(0));
 											dependActionList.put(depJobId, dependActions);
 										}else{
@@ -1344,7 +1296,7 @@ public class Master {
 									actionPer.setStatus(jobDetail.getStatus());
 									actionPer.setTimezone(jobDetail.getTimezone());
 									try {
-										if(!actionDetails.containsKey(actionPer.getId())){
+										if(!runActionList.containsKey(actionPer.getId())){
 											//System.out.println("依赖任务JobId: " + jobDetail.getId()+";  ActionId: " +actionPer.getId());
 											log.info("依赖任务JobId: " + jobDetail.getId()+";  ActionId: " +actionPer.getId()+"Dependencies:"+jobDetail.getDependencies());
 											//if(actionPer.getId()>Long.parseLong(currentDateStr)){
@@ -1352,7 +1304,7 @@ public class Master {
 												//System.out.println("success");
 												//log.info("success");
 											//}
-											actionDetails.put(actionPer.getId(),actionPer);
+											runActionList.put(actionPer.getId(),actionPer);
 										}
 									} catch (ZeusException e) {
 										log.error("依赖任务JobId:" + jobDetail.getId() + " 生成Action" +actionPer.getId() + "失败", e);
@@ -1367,21 +1319,21 @@ public class Master {
 			}
 		}
 		if(noCompleteCount > 0 && loopCount < 40){
-			runDependencesJobToAction(jobDetails, actionDetails, currentDateStr, loopCount);
+			runDependencesJobToAction(jobDetails, runActionList, currentDateStr, loopCount);
 		}
 	}*/
 
 
     //将依赖任务生成action
-    public void runDependencesJobToAction(List<ZeusJobWithBLOBs> jobDetails, Map<Long, ZeusActionWithBLOBs> actionDetails, String currentDateStr, int loopCount) {
+    public void runDependencesJobToAction(List<ZeusJobWithBLOBs> allJobs, Map<Long, ZeusActionWithBLOBs> actionList, String currentDateStr, int loopCount) {
         int noCompleteCount = 0;
         loopCount++;
-        for (ZeusJobWithBLOBs jobDetail : jobDetails) {
+        for (ZeusJobWithBLOBs oneJob : allJobs) {
             //ScheduleType: 0 独立任务; 1依赖任务; 2周期任务
-            if ((jobDetail.getScheduleType() != null && jobDetail.getScheduleType() == ZeusJob.ScheduleType.DEPENDENT.getValue())
-                    || (jobDetail.getScheduleType() != null && jobDetail.getScheduleType() == ZeusJob.ScheduleType.CYCLE.getValue())) {
+            if ((oneJob.getScheduleType() != null && oneJob.getScheduleType() == ZeusJob.ScheduleType.DEPENDENT.getValue())
+                    || (oneJob.getScheduleType() != null && oneJob.getScheduleType() == ZeusJob.ScheduleType.CYCLE.getValue())) {
                 try {
-                    String jobDependencies = jobDetail.getDependencies();
+                    String jobDependencies = oneJob.getDependencies();
                     String actionDependencies = "";
                     if (jobDependencies != null && jobDependencies.trim().length() > 0) {
 
@@ -1390,7 +1342,7 @@ public class Master {
                         String[] dependStrs = jobDependencies.split(",");
                         for (String depJobId : dependStrs) {
                             List<ZeusActionWithBLOBs> dependActions = new ArrayList<ZeusActionWithBLOBs>();
-                            Iterator<ZeusActionWithBLOBs> actionIt = actionDetails.values().iterator();
+                            Iterator<ZeusActionWithBLOBs> actionIt = actionList.values().iterator();
                             while (actionIt.hasNext()) {
                                 ZeusActionWithBLOBs action = actionIt.next();
                                 if (action.getJobId().toString().equals(depJobId)) {
@@ -1399,11 +1351,11 @@ public class Master {
                             }
                             dependActionList.put(depJobId, dependActions);
                             if (loopCount > 20) {
-                                if (!jobDetail.getConfigs().contains("sameday")) {
+                                if (!oneJob.getConfigs().contains("sameday")) {
                                     if (dependActionList.get(depJobId).size() == 0) {
                                         List<ZeusActionWithBLOBs> lastJobActions = context.getGroupManagerWithAction().getLastJobAction(depJobId);
                                         if (lastJobActions != null && lastJobActions.size() > 0) {
-                                            actionDetails.put(lastJobActions.get(0).getId(), lastJobActions.get(0));
+                                            actionList.put(lastJobActions.get(0).getId(), lastJobActions.get(0));
                                             dependActions.add(lastJobActions.get(0));
                                             dependActionList.put(depJobId, dependActions);
                                         } else {
@@ -1413,7 +1365,7 @@ public class Master {
                                 }
                             }
                         }
-                        //判断是否有未完成的
+                        //判断依赖的任务是否已经完成生成action
                         boolean isComplete = true;
                         String actionMostDeps = "";
                         for (String depJobId : dependStrs) {
@@ -1436,11 +1388,12 @@ public class Master {
                         if (!isComplete) {
                             continue;
                         } else {
-                            List<ZeusActionWithBLOBs> actions = dependActionList.get(actionMostDeps);
+                            List<ZeusActionWithBLOBs> relyedMostDepsActions = dependActionList.get(actionMostDeps);
 
-                            if (actions != null && actions.size() > 0 && jobDetail.getDescr() != null && jobDetail.getDescr().equalsIgnoreCase("daily_rely_hourly")) {
+                            if (relyedMostDepsActions != null && relyedMostDepsActions.size() > 0
+                                    && oneJob.getDescr() != null && oneJob.getDescr().equalsIgnoreCase("daily_rely_hourly")) {
                                 try {
-                                    Long actionMostId=actions.get(actions.size() - 1).getId();
+                                    Long actionMostId=relyedMostDepsActions.get(relyedMostDepsActions.size() - 1).getId();
                                     for (String depJobId : dependStrs) {
                                         List<ZeusActionWithBLOBs> actionItems = dependActionList.get(depJobId);
                                         Long actionId = actionItems.get(actionItems.size() - 1).getId();
@@ -1459,7 +1412,7 @@ public class Master {
                                     }
 
                                     int cycle = 3600;
-                                    for (ZeusJobWithBLOBs item : jobDetails) {
+                                    for (ZeusJobWithBLOBs item : allJobs) {
                                         if (item.getId().toString().equalsIgnoreCase(actionMostDeps)) {
                                             cycle = item.getCronExcuteCycle();
                                             break;
@@ -1467,35 +1420,35 @@ public class Master {
                                     }
                                     Date sb1 = DateUtil.string2Date(actionMostId.toString().substring(0, 12), DateUtil.yyyyMMddHHmm);
                                     Date daily = DateUtil.secondsAdd(sb1, cycle);
-                                    Long actionId=(Long.valueOf(DateUtil.date2String(daily, DateUtil.yyyyMMddHHmm)) * 1000000 + jobDetail.getId());
-                                    saveZeusAction(actionDetails, jobDetail, jobDependencies, actionDependencies, actionId);
+                                    Long actionId=(Long.valueOf(DateUtil.date2String(daily, DateUtil.yyyyMMddHHmm)) * 1000000 + oneJob.getId());
+                                    saveZeusAction(actionList, oneJob, jobDependencies, actionDependencies, actionId);
                                 } catch (Exception e) {
                                     log.error(e.toString());
                                 }
                             } else {
-                                if (actions != null && actions.size() > 0) {
-                                    for (ZeusActionWithBLOBs actionModel : actions) {
+                                if (relyedMostDepsActions != null && relyedMostDepsActions.size() > 0) {
+                                    for (ZeusActionWithBLOBs oneMostDepAction : relyedMostDepsActions) {
                                         //下面这行表示，该job的频率跟随他依赖的任务中频率最高的任务。
-                                        actionDependencies = String.valueOf(actionModel.getId());
+                                        actionDependencies = String.valueOf(oneMostDepAction.getId());
                                         for (String depJobId : dependStrs) {
                                             if (!depJobId.equals(actionMostDeps)) {
-                                                List<ZeusActionWithBLOBs> actionOthers = dependActionList.get(depJobId);
-                                                Long actionOtherId = actionOthers.get(0).getId();
-                                                for (ZeusActionWithBLOBs actionOtherModel : actionOthers) {
+                                                List<ZeusActionWithBLOBs> otherActions = dependActionList.get(depJobId);
+                                                Long otherFirstActionId = otherActions.get(0).getId();
+                                                for (ZeusActionWithBLOBs otherAction : otherActions) {
                                                     //因为dependActionList存的actionid是从小到大的顺序，下面的意思是说，从最小的actionid开始找，找到距离actionModel
                                                     //最近的actionid,就是要依赖的actionid
-                                                    if (Math.abs((actionOtherModel.getId() - actionModel.getId())) < Math.abs((actionOtherId - actionModel.getId()))) {
-                                                        actionOtherId = actionOtherModel.getId();
+                                                    if (Math.abs((otherAction.getId() - oneMostDepAction.getId())) < Math.abs((otherFirstActionId - oneMostDepAction.getId()))) {
+                                                        otherFirstActionId = otherAction.getId();
                                                     }
                                                 }
                                                 if (actionDependencies.trim().length() > 0) {
                                                     actionDependencies += ",";
                                                 }
-                                                actionDependencies += String.valueOf((actionOtherId / 1000000) * 1000000 + Long.parseLong(depJobId));
+                                                actionDependencies += String.valueOf((otherFirstActionId / 1000000) * 1000000 + Long.parseLong(depJobId));
                                             }
                                         }
                                         //保存多版本的action
-                                        saveZeusAction(actionDetails, jobDetail, jobDependencies, actionDependencies, (actionModel.getId() / 1000000) * 1000000 + jobDetail.getId());
+                                        saveZeusAction(actionList, oneJob, jobDependencies, actionDependencies, (oneMostDepAction.getId() / 1000000) * 1000000 + oneJob.getId());
                                     }
                                 }
                             }
@@ -1508,7 +1461,7 @@ public class Master {
         }
 
         if (noCompleteCount > 0 && loopCount < 40) {
-            runDependencesJobToAction(jobDetails, actionDetails, currentDateStr, loopCount);
+            runDependencesJobToAction(allJobs, actionList, currentDateStr, loopCount);
         }
     }
 

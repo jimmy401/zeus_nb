@@ -5,7 +5,7 @@ import com.taobao.zeus.dal.logic.GroupManagerWithJob;
 import com.taobao.zeus.dal.logic.JobHistoryManager;
 import com.taobao.zeus.dal.logic.impl.MysqlUserManager;
 import com.taobao.zeus.dal.model.ZeusUser;
-import com.taobao.zeus.model.JobHistory;
+import com.taobao.zeus.model.ZeusActionHistory;
 import com.taobao.zeus.model.JobStatus.TriggerType;
 import com.taobao.zeus.model.ZeusFollow;
 import com.taobao.zeus.schedule.mvc.JobFailListener.ChainException;
@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +34,7 @@ public abstract class AbstractZeusAlarm implements ZeusAlarm{
 	@Override
 	public void alarm(String historyId, String title, String content,ChainException chain)
 			throws Exception {
-		JobHistory history=jobHistoryManager.findJobHistory(historyId);
+		ZeusActionHistory history=jobHistoryManager.findJobHistory(historyId);
 		TriggerType type=history.getTriggerType();
 		//获得action_id
 		String jobId=history.getActionId();
@@ -74,7 +73,7 @@ public abstract class AbstractZeusAlarm implements ZeusAlarm{
 	@Override
 	public void alarm(String historyId, String title, String content,ChainException chain)
 			throws Exception {
-		JobHistory history=jobHistoryManager.findJobHistory(historyId);
+		ZeusActionHistory history=jobHistoryManager.findJobHistory(historyId);
 		TriggerType type=history.getTriggerType();
 		//获得action_id
 		String actionId=history.getActionId();

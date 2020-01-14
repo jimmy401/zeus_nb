@@ -144,21 +144,27 @@ public class FileController extends BaseController {
     }
 
     @RequestMapping(value = "/update_file_content", method = RequestMethod.POST)
-    public void updateFileContent(@RequestParam(value = "fileId", defaultValue = "") Long fileId,
+    public CommonResponse<String> updateFileContent(@RequestParam(value = "fileId", defaultValue = "") Long fileId,
                                   @RequestParam(value = "content", defaultValue = "") String content) {
-        ZeusFile fd = mysqlFileManager.getFile(fileId);
-        String user = CurrentUser.getUser().getUid();
-        if (Super.getSupers().contains(user) || fd.getOwner().equalsIgnoreCase(user)) {
-            if (!ADMIN.getUid().equalsIgnoreCase(user) && ContentUtil.containInvalidContent(content)) {
-                throw new RuntimeException("没有数据仓库DDL权限！");
-            } else if (!ADMIN.getUid().equalsIgnoreCase(user) && ContentUtil.containRmCnt(content) != ContentUtil.contentValidRmCnt(content, Environment.getZeusSafeDeleteDir())) {
-                throw new RuntimeException("不能使用rm删除非许可文件路径！");
+        try {
+            ZeusFile fd = mysqlFileManager.getFile(fileId);
+            String user = CurrentUser.getUser().getUid();
+            if (Super.getSupers().contains(user) || fd.getOwner().equalsIgnoreCase(user)) {
+                if (!ADMIN.getUid().equalsIgnoreCase(user) && ContentUtil.containInvalidContent(content)) {
+                    throw new RuntimeException("没有数据仓库DDL权限！");
+                } else if (!ADMIN.getUid().equalsIgnoreCase(user) && ContentUtil.containRmCnt(content) != ContentUtil.contentValidRmCnt(content, Environment.getZeusSafeDeleteDir())) {
+                    throw new RuntimeException("不能使用rm删除非许可文件路径！");
+                } else {
+                    fd.setContent(content);
+                    mysqlFileManager.update(fd);
+                }
+
+                return this.buildResponse(ReturnCode.SUCCESS,"");
             } else {
-                fd.setContent(content);
-                mysqlFileManager.update(fd);
+                return this.buildResponse(ReturnCode.INVALID_ERROR,"");
             }
-        } else {
-            throw new RuntimeException("权限不足");
+        }catch (Exception ex){
+            return this.buildResponse(ReturnCode.FAILED,"");
         }
     }
 
@@ -240,6 +246,17 @@ public class FileController extends BaseController {
             mysqlFileManager.update(fd);
         } else {
             throw new RuntimeException("权限不足");
+        }
+    }
+
+    @RequestMapping(value = "/get_file_content", method = RequestMethod.GET)
+    public CommonResponse<String> getFileContent(@RequestParam(value = "fileId", defaultValue = "") Long fileId) {
+        ZeusFile fd = mysqlFileManager.getFile(fileId);
+        String user = CurrentUser.getUser().getUid();
+        if (Super.getSupers().contains(user) || fd.getOwner().equalsIgnoreCase(user)) {
+            return this.buildResponse(ReturnCode.SUCCESS,fd.getContent());
+        } else {
+            return this.buildResponse(ReturnCode.INVALID_ERROR,"");
         }
     }
 }

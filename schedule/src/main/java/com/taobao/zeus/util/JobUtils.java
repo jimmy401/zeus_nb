@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 
 import com.taobao.zeus.dal.logic.GroupManagerWithJob;
 import com.taobao.zeus.dal.model.ZeusFile;
-import com.taobao.zeus.jobs.sub.HiveBeelineJob;
 import com.taobao.zeus.model.*;
 import org.apache.commons.lang.StringUtils;
 import org.mortbay.log.Log;
@@ -31,7 +30,7 @@ import com.taobao.zeus.jobs.sub.tool.OutputCheckJob;
 import com.taobao.zeus.jobs.sub.tool.OutputCleanJob;
 import com.taobao.zeus.jobs.sub.tool.WangWangJob;
 import com.taobao.zeus.jobs.sub.tool.ZooKeeperJob;
-import com.taobao.zeus.model.JobDescriptor.JobRunType;
+import com.taobao.zeus.model.ActionDescriptor.JobRunType;
 import com.taobao.zeus.model.processer.DownloadProcesser;
 import com.taobao.zeus.model.processer.HiveProcesser;
 import com.taobao.zeus.model.processer.JobProcesser;
@@ -93,9 +92,9 @@ public class JobUtils {
 	}
 
 	public static Job createJob(JobContext jobContext, JobBean jobBean,
-			JobHistory history, String workDir,
-			ApplicationContext applicationContext) {
-		jobContext.setJobHistory(history);
+                                ZeusActionHistory history, String workDir,
+                                ApplicationContext applicationContext) {
+		jobContext.setZeusActionHistory(history);
 		jobContext.setWorkDir(workDir);
 		HierarchyProperties hp = jobBean.getHierarchyProperties();
 		if (history.getProperties() != null
@@ -110,17 +109,17 @@ public class JobUtils {
 		jobContext.setProperties(new RenderHierarchyProperties(hp));
 		List<FileResource> resources = jobBean.getHierarchyResources();
 /*		String script = jobBean.getActionDescriptor().getScript();*/
-		String tojobId = jobBean.getJobDescriptor().getJobId();
+		String tojobId = jobBean.getActionDescriptor().getJobId();
 		GroupManagerWithJob groupManagerWithJob = (GroupManagerWithJob) applicationContext
 				.getBean("mysqlGroupManagerWithJob");
 		String script = groupManagerWithJob.getJobDescriptor(tojobId).getX().getScript();
 //		System.out.println(script);
-		///*************************update run date  2014-09-18**************
+		///*************************update runAction date  2014-09-18**************
 		String dateStr = history.getActionId().substring(0,12)+"00";
 		if(jobContext.getRunType()==JobContext.SCHEDULE_RUN){
-			System.out.println("schedule run jobId : " + history.getJobId() + ", run date :"+dateStr);
+			System.out.println("schedule runAction jobId : " + history.getJobId() + ", runAction date :"+dateStr);
 		}else {
-			System.out.println("manual run jobId : " + history.getJobId() + " run date :"+dateStr);
+			System.out.println("manual runAction jobId : " + history.getJobId() + " runAction date :"+dateStr);
 		}
 
 		if(dateStr != null && dateStr.length() == 14){
@@ -129,8 +128,8 @@ public class JobUtils {
 		}		
 		///*********************************************************
 		// 处理脚本中的 资源引用 语句
-		if (jobBean.getJobDescriptor().getJobType().equals(JobRunType.Shell)
-				|| jobBean.getJobDescriptor().getJobType()
+		if (jobBean.getActionDescriptor().getJobType().equals(JobRunType.Shell)
+				|| jobBean.getActionDescriptor().getJobType()
 						.equals(JobRunType.Hive)) {
 			script = resolvScriptResource(resources, script, applicationContext);
 /*			jobBean.getActionDescriptor().setScript(script);*/
@@ -151,20 +150,20 @@ public class JobUtils {
 */
 		// 前置处理Job创建
 		List<Job> pres = parseJobs(jobContext, applicationContext, jobBean,
-				jobBean.getJobDescriptor().getPreProcessers(), history, workDir);
+				jobBean.getActionDescriptor().getPreProcessers(), history, workDir);
 		pres.add(0, new DownloadJob(jobContext));
 		// 后置处理Job创建
 		List<Job> posts = parseJobs(jobContext, applicationContext, jobBean,
-				jobBean.getJobDescriptor().getPostProcessers(), history,
+				jobBean.getActionDescriptor().getPostProcessers(), history,
 				workDir);
 		posts.add(new ZooKeeperJob(jobContext, null, applicationContext));
 		// 核心处理Job创建
 		Job core = null;
-		if (jobBean.getJobDescriptor().getJobType() == JobRunType.MapReduce) {
+		if (jobBean.getActionDescriptor().getJobType() == JobRunType.MapReduce) {
 			core = new MapReduceJob(jobContext);
-		} else if (jobBean.getJobDescriptor().getJobType() == JobRunType.Shell) {
+		} else if (jobBean.getActionDescriptor().getJobType() == JobRunType.Shell) {
 			core = new HadoopShellJob(jobContext);
-		} else if (jobBean.getJobDescriptor().getJobType() == JobRunType.Hive) {
+		} else if (jobBean.getActionDescriptor().getJobType() == JobRunType.Hive) {
 			core = new HiveJob(jobContext, applicationContext);
 		}
 
@@ -174,7 +173,7 @@ public class JobUtils {
 		return job;
 	}
 
-	private static String replaceScript(JobHistory history, String script) {
+	private static String replaceScript(ZeusActionHistory history, String script) {
 		if (StringUtils.isEmpty(history.getStatisEndTime())
 				|| StringUtils.isEmpty(history.getTimezone())) {
 			return script;
@@ -266,8 +265,8 @@ public class JobUtils {
 	}
 
 	private static List<Job> parseJobs(JobContext jobContext,
-			ApplicationContext applicationContext, JobBean jobBean,
-			List<Processer> ps, JobHistory history, String workDir) {
+                                       ApplicationContext applicationContext, JobBean jobBean,
+                                       List<Processer> ps, ZeusActionHistory history, String workDir) {
 		List<Job> jobs = new ArrayList<Job>();
 		Map<String, String> map = jobContext.getProperties().getAllProperties();
 		Map<String, String> newmap = new HashMap<String, String>();
@@ -342,7 +341,7 @@ public class JobUtils {
 					if (jb != null) {
 						for (String key : jobProcesser.getKvConfig().keySet()) {
 							if (jobProcesser.getKvConfig().get(key) != null) {
-								jb.getJobDescriptor()
+								jb.getActionDescriptor()
 										.getProperties()
 										.put(key,
 												jobProcesser.getKvConfig().get(
@@ -361,7 +360,7 @@ public class JobUtils {
 						jobs.add(job);
 					}
 				} else {
-					jobContext.getJobHistory().getLog()
+					jobContext.getZeusActionHistory().getLog()
 							.appendZeus("递归的JobProcesser处理单元深度过大，停止递归");
 				}
 			}

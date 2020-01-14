@@ -4,13 +4,13 @@ import com.taobao.zeus.mvc.AppEvent;
 
 public class ScheduleTriggerEvent extends AppEvent{
 
-	private final String jobId;
-	public ScheduleTriggerEvent(String jobId) {
+	private final String actionId;
+	public ScheduleTriggerEvent(String actionId) {
 		super(Events.ScheduleTrigger);
-		this.jobId=jobId;
+		this.actionId=actionId;
 	}
-	public String getJobId() {
-		return jobId;
+	public String getActionId() {
+		return actionId;
 	}
 
 }

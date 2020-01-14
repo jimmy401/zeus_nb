@@ -28,8 +28,7 @@ public class MasterServer{
 	
 	public MasterServer(final ChannelHandler handler){
 		NioServerSocketChannelFactory channelFactory=
-			new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
-					Executors.newCachedThreadPool());
+			new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),Executors.newCachedThreadPool());
 		bootstrap=new ServerBootstrap(channelFactory);
 		pipelineFactory=new ChannelPipelineFactory(){
 			private final ProtobufVarint32LengthFieldPrepender frameEncoder = new ProtobufVarint32LengthFieldPrepender();

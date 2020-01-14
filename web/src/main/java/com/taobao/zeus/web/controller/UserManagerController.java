@@ -40,32 +40,32 @@ public class UserManagerController extends BaseController {
     }
 
     @RequestMapping(value = "/logon", method = RequestMethod.POST)
-    public String logon(@RequestParam(value = "username", defaultValue = "-1") String username,
+    public CommonResponse<String> logon(@RequestParam(value = "username", defaultValue = "-1") String username,
                         @RequestParam(value = "password", defaultValue = "-1") String password,
                         HttpServletRequest request, HttpServletResponse response) throws Exception {
         ZeusUser user = mysqlUserManager.findByUidFilter(username);
         if (null == user) {
-            return "null";
+            return this.buildResponse(ReturnCode.FAILED,"");
         } else {
             String ps = user.getPassword();
             if (null != ps) {
                 if (!EncryptHelper.MD5(password).toUpperCase().equals(ps.toUpperCase())) {
-                    return "error";
+                    return this.buildResponse(ReturnCode.FAILED,"");
                 }
             }
 
-            Cookie cookie = new Cookie("LOGIN_USERNAME", user.getUid());
-            cookie.setPath("/");
-            response.addCookie(cookie);
+            //Cookie cookie = new Cookie("LOGIN_USERNAME", user.getUid());
+            //cookie.setPath("/");
+            //response.addCookie(cookie);
 
             CurrentUser.setUser(user);
             LoginUser.user.set(user);
-            return user.getUid();
+            return this.buildResponse(ReturnCode.SUCCESS,"");
         }
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public String register(@RequestParam(value = "user", defaultValue = "-1") String uid,
+    public String register(@RequestParam(value = "username", defaultValue = "-1") String uid,
                            @RequestParam(value = "password", defaultValue = "-1") String password,
                            @RequestParam(value = "email", defaultValue = "-1") String email,
                            @RequestParam(value = "phone", defaultValue = "-1") String phone,
@@ -159,7 +159,7 @@ public class UserManagerController extends BaseController {
     }
 
     @RequestMapping(value = "user_manager/get_all_users_by_page", method = RequestMethod.POST)
-    public GridContent getAll(@RequestParam(value = "user", defaultValue = "") String uid,
+    public GridContent getAll(@RequestParam(value = "uid", defaultValue = "") String uid,
                               @RequestParam(value = "page", required = false) Integer page,
                               @RequestParam(value = "rows", required = false) Integer rows
     ) throws Exception {
@@ -197,6 +197,17 @@ public class UserManagerController extends BaseController {
             logger.error("user_manager/get_all_users fail", e);
         }
         return listUsers;
+    }
+
+    @RequestMapping(value = "user_manager/current_user", method = RequestMethod.GET)
+    public CommonResponse<ZeusUser> getCurrentUser() {
+        ZeusUser currentUser = null;
+        try {
+            currentUser = CurrentUser.getUser();
+        } catch (Exception e) {
+            logger.error("user_manager/current_user fail", e);
+        }
+        return buildResponse(ReturnCode.SUCCESS,currentUser);
     }
 
     @RequestMapping(value = "/user_manager/edit_user", method = RequestMethod.POST)

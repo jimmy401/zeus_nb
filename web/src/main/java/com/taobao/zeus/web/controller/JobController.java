@@ -11,6 +11,7 @@ import com.taobao.zeus.dal.tool.GroupBean;
 import com.taobao.zeus.dal.tool.JobBean;
 import com.taobao.zeus.dal.tool.ProcesserUtil;
 import com.taobao.zeus.model.*;
+import com.taobao.zeus.model.ZeusActionHistory;
 import com.taobao.zeus.model.processer.Processer;
 import com.taobao.zeus.socket.protocol.Protocol;
 import com.taobao.zeus.socket.worker.ClientWorker;
@@ -170,7 +171,7 @@ public class JobController extends BaseController {
                 }
             }
 
-            JobDescriptor jd = new JobDescriptor();
+            ActionDescriptor jd = new ActionDescriptor();
             jd.setCronExpression(cron);
             List<String> dependList = new ArrayList<>();
             if (dependencies != null && !dependencies.trim().equalsIgnoreCase("")) {
@@ -185,26 +186,26 @@ public class JobController extends BaseController {
             jd.setGroupId(groupId);
             jd.setId(jobId);
 
-            JobDescriptor.JobRunType type = null;
+            ActionDescriptor.JobRunType type = null;
             if (runType.equals(JobConfig.MapReduce)) {
-                type = JobDescriptor.JobRunType.MapReduce;
+                type = ActionDescriptor.JobRunType.MapReduce;
             } else if (runType.equals(JobConfig.SHELL)) {
-                type = JobDescriptor.JobRunType.Shell;
+                type = ActionDescriptor.JobRunType.Shell;
             } else if (runType.equals(JobConfig.HIVE)) {
-                type = JobDescriptor.JobRunType.Hive;
+                type = ActionDescriptor.JobRunType.Hive;
             }
             jd.setJobType(type);
 
-            JobDescriptor.JobScheduleType scheduleType = null;
+            ActionDescriptor.JobScheduleType scheduleType = null;
 
             if (JobModel.DEPEND_JOB.equals(scheduleTypenew)) {
-                scheduleType = JobDescriptor.JobScheduleType.Dependent;
+                scheduleType = ActionDescriptor.JobScheduleType.Dependent;
             }
             if (JobModel.INDEPEN_JOB.equals(scheduleTypenew)) {
-                scheduleType = JobDescriptor.JobScheduleType.Independent;
+                scheduleType = ActionDescriptor.JobScheduleType.Independent;
             }
             if (JobModel.CYCLE_JOB.equals(scheduleTypenew)) {
-                scheduleType = JobDescriptor.JobScheduleType.CyleJob;
+                scheduleType = ActionDescriptor.JobScheduleType.CyleJob;
             }
             jd.setName(name);
             jd.setOwner(owner);
@@ -371,7 +372,7 @@ public class JobController extends BaseController {
             int limit = rows;
             GroupBean gb = permissionGroupManagerWithAction.getDownstreamGroupBean(groupId);
             Map<String, JobBean> map = gb.getAllSubJobBeans();
-            List<Tuple<JobDescriptor, JobStatus>> allJobs = new ArrayList<Tuple<JobDescriptor, JobStatus>>();
+            List<Tuple<ActionDescriptor, JobStatus>> allJobs = new ArrayList<Tuple<ActionDescriptor, JobStatus>>();
             if (startDate != null && endDate != null) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
                 Integer startInt = Integer.parseInt(dateFormat.format(startDate));
@@ -379,8 +380,8 @@ public class JobController extends BaseController {
                 for (String key : map.keySet()) {
                     Integer subkeyInt = Integer.parseInt(key.substring(0, 8));
                     if (subkeyInt < endInt && subkeyInt >= startInt) {
-                        Tuple<JobDescriptor, JobStatus> tuple = new Tuple<JobDescriptor, JobStatus>(
-                                map.get(key).getJobDescriptor(), map.get(key)
+                        Tuple<ActionDescriptor, JobStatus> tuple = new Tuple<ActionDescriptor, JobStatus>(
+                                map.get(key).getActionDescriptor(), map.get(key)
                                 .getJobStatus());
                         allJobs.add(tuple);
                     }
@@ -388,10 +389,10 @@ public class JobController extends BaseController {
             }
             // 按名次排序
             Collections.sort(allJobs,
-                    new Comparator<Tuple<JobDescriptor, JobStatus>>() {
+                    new Comparator<Tuple<ActionDescriptor, JobStatus>>() {
                         @Override
-                        public int compare(Tuple<JobDescriptor, JobStatus> o1,
-                                           Tuple<JobDescriptor, JobStatus> o2) {
+                        public int compare(Tuple<ActionDescriptor, JobStatus> o1,
+                                           Tuple<ActionDescriptor, JobStatus> o2) {
                             return o1.getX().getName()
                                     .compareToIgnoreCase(o2.getX().getName());
                         }
@@ -405,7 +406,7 @@ public class JobController extends BaseController {
                     Math.min(start + limit, allJobs.size()));
 
             List<String> jobIds = new ArrayList<String>();
-            for (Tuple<JobDescriptor, JobStatus> tuple : allJobs) {
+            for (Tuple<ActionDescriptor, JobStatus> tuple : allJobs) {
                 jobIds.add(tuple.getX().getId());
                 if (tuple.getX().getDependencies() != null) {
                     for (String deps : tuple.getX().getDependencies()) {
@@ -415,12 +416,12 @@ public class JobController extends BaseController {
                     }
                 }
             }
-            Map<String, JobHistory> jobHisMap = jobHistoryManager
+            Map<String, ZeusActionHistory> jobHisMap = jobHistoryManager
                     .findLastHistoryByList(jobIds);
             List<JobModelAction> result = new ArrayList<JobModelAction>();
-            for (Tuple<JobDescriptor, JobStatus> job : allJobs) {
+            for (Tuple<ActionDescriptor, JobStatus> job : allJobs) {
                 JobStatus status = job.getY();
-                JobDescriptor jd = job.getX();
+                ActionDescriptor jd = job.getX();
                 JobModelAction model = new JobModelAction();
                 model.setId(status.getJobId());
                 Map<String, String> dep = new HashMap<String, String>();
@@ -445,7 +446,7 @@ public class JobController extends BaseController {
                 model.setName(jd.getName());
                 model.setAuto(jd.getAuto());
                 model.setToJobId(jd.getJobId());
-                JobHistory his = jobHisMap.get(jd.getId());
+                ZeusActionHistory his = jobHisMap.get(jd.getId());
                 if (his != null && his.getStartTime() != null) {
                     SimpleDateFormat format = new SimpleDateFormat("MM-dd HH:mm:ss");
                     model.setLastStatus(format.format(his.getStartTime())
@@ -467,17 +468,17 @@ public class JobController extends BaseController {
     public CommonResponse<JobModel> createJob(@RequestParam(value = "jobName", defaultValue = "") String jobName,
                                               @RequestParam(value = "parentGroupId", defaultValue = "") String parentGroupId,
                                               @RequestParam(value = "jobType", defaultValue = "") String jobType) {
-        JobDescriptor.JobRunType type = null;
+        ActionDescriptor.JobRunType type = null;
         JobModel model = new JobModel();
         if (JobModel.MapReduce.equals(jobType)) {
-            type = JobDescriptor.JobRunType.MapReduce;
+            type = ActionDescriptor.JobRunType.MapReduce;
         } else if (JobModel.SHELL.equals(jobType)) {
-            type = JobDescriptor.JobRunType.Shell;
+            type = ActionDescriptor.JobRunType.Shell;
         } else if (JobModel.HIVE.equals(jobType)) {
-            type = JobDescriptor.JobRunType.Hive;
+            type = ActionDescriptor.JobRunType.Hive;
         }
         try {
-            JobDescriptor jd = permissionGroupManagerWithJob.createJob(LoginUser
+            ActionDescriptor jd = permissionGroupManagerWithJob.createJob(LoginUser
                     .getUser().getUid(), jobName, parentGroupId, type);
             model = getUpstreamJobUtil(jd.getId());
             model.setDefaultTZ(DateUtil.getDefaultTZStr());
@@ -493,52 +494,52 @@ public class JobController extends BaseController {
                 .getUpstreamJobBean(jobId);
         JobModel jobModel = new JobModel();
 
-        jobModel.setCronExpression(jobBean.getJobDescriptor()
+        jobModel.setCronExpression(jobBean.getActionDescriptor()
                 .getCronExpression());
-        jobModel.setDependencies(jobBean.getJobDescriptor().getDependencies());
-        jobModel.setDesc(jobBean.getJobDescriptor().getDesc());
-        jobModel.setGroupId(jobBean.getJobDescriptor().getGroupId());
-        jobModel.setId(jobBean.getJobDescriptor().getId());
+        jobModel.setDependencies(jobBean.getActionDescriptor().getDependencies());
+        jobModel.setDesc(jobBean.getActionDescriptor().getDesc());
+        jobModel.setGroupId(jobBean.getActionDescriptor().getGroupId());
+        jobModel.setId(jobBean.getActionDescriptor().getId());
         String jobRunType = null;
-        if (jobBean.getJobDescriptor().getJobType() == JobDescriptor.JobRunType.MapReduce) {
+        if (jobBean.getActionDescriptor().getJobType() == ActionDescriptor.JobRunType.MapReduce) {
             jobRunType = JobModel.MapReduce;
-        } else if (jobBean.getJobDescriptor().getJobType() == JobDescriptor.JobRunType.Shell) {
+        } else if (jobBean.getActionDescriptor().getJobType() == ActionDescriptor.JobRunType.Shell) {
             jobRunType = JobModel.SHELL;
-        } else if (jobBean.getJobDescriptor().getJobType() == JobDescriptor.JobRunType.Hive) {
+        } else if (jobBean.getActionDescriptor().getJobType() == ActionDescriptor.JobRunType.Hive) {
             jobRunType = JobModel.HIVE;
         }
         jobModel.setJobRunType(jobRunType);
         String jobScheduleType = null;
-        if (jobBean.getJobDescriptor().getScheduleType() == JobDescriptor.JobScheduleType.Dependent) {
+        if (jobBean.getActionDescriptor().getScheduleType() == ActionDescriptor.JobScheduleType.Dependent) {
             jobScheduleType = JobModel.DEPEND_JOB;
         }
-        if (jobBean.getJobDescriptor().getScheduleType() == JobDescriptor.JobScheduleType.Independent) {
+        if (jobBean.getActionDescriptor().getScheduleType() == ActionDescriptor.JobScheduleType.Independent) {
             jobScheduleType = JobModel.INDEPEN_JOB;
         }
-        if (jobBean.getJobDescriptor().getScheduleType() == JobDescriptor.JobScheduleType.CyleJob) {
+        if (jobBean.getActionDescriptor().getScheduleType() == ActionDescriptor.JobScheduleType.CyleJob) {
             jobScheduleType = JobModel.CYCLE_JOB;
         }
         jobModel.setJobScheduleType(jobScheduleType);
-        jobModel.setLocalProperties(jobBean.getJobDescriptor().getProperties());
-        jobModel.setName(jobBean.getJobDescriptor().getName());
-        jobModel.setOwner(jobBean.getJobDescriptor().getOwner());
+        jobModel.setLocalProperties(jobBean.getActionDescriptor().getProperties());
+        jobModel.setName(jobBean.getActionDescriptor().getName());
+        jobModel.setOwner(jobBean.getActionDescriptor().getOwner());
         String ownerName = userManager.findByUid(jobModel.getOwner()).getName();
         if (ownerName == null || "".equals(ownerName.trim())
                 || "null".equals(ownerName)) {
             ownerName = jobModel.getOwner();
         }
         jobModel.setOwnerName(ownerName);
-        jobModel.setLocalResources(jobBean.getJobDescriptor().getResources());
+        jobModel.setLocalResources(jobBean.getActionDescriptor().getResources());
         jobModel.setAllProperties(jobBean.getHierarchyProperties()
                 .getAllProperties());
         jobModel.setAllResources(jobBean.getHierarchyResources());
 
-        jobModel.setAuto(jobBean.getJobDescriptor().getAuto());
-        jobModel.setScript(jobBean.getJobDescriptor().getScript());
+        jobModel.setAuto(jobBean.getActionDescriptor().getAuto());
+        jobModel.setScript(jobBean.getActionDescriptor().getScript());
 
         List<String> preList = new ArrayList<String>();
-        if (!jobBean.getJobDescriptor().getPreProcessers().isEmpty()) {
-            for (Processer p : jobBean.getJobDescriptor().getPreProcessers()) {
+        if (!jobBean.getActionDescriptor().getPreProcessers().isEmpty()) {
+            for (Processer p : jobBean.getActionDescriptor().getPreProcessers()) {
                 JSONObject o = new JSONObject();
                 o.put("id", p.getId());
                 o.put("config", p.getConfig());
@@ -548,8 +549,8 @@ public class JobController extends BaseController {
         jobModel.setPreProcessers(preList);
 
         List<String> postList = new ArrayList<String>();
-        if (!jobBean.getJobDescriptor().getPostProcessers().isEmpty()) {
-            for (Processer p : jobBean.getJobDescriptor().getPostProcessers()) {
+        if (!jobBean.getActionDescriptor().getPostProcessers().isEmpty()) {
+            for (Processer p : jobBean.getActionDescriptor().getPostProcessers()) {
                 JSONObject o = new JSONObject();
                 o.put("id", p.getId());
                 o.put("config", p.getConfig());
@@ -587,7 +588,7 @@ public class JobController extends BaseController {
 
 
         List<String> owners = new ArrayList<String>();
-        owners.add(jobBean.getJobDescriptor().getOwner());
+        owners.add(jobBean.getActionDescriptor().getOwner());
         GroupBean parent = jobBean.getGroupBean();
         while (parent != null) {
             if (!owners.contains(parent.getGroupDescriptor().getOwner())) {
@@ -648,16 +649,16 @@ public class JobController extends BaseController {
                 jobModel.setScript("脚本已加密,如需查看请联系相关负责人分配权限");
             }
         }
-        if (jobBean.getJobDescriptor().getTimezone() == null
-                || "".equals(jobBean.getJobDescriptor().getTimezone())) {
+        if (jobBean.getActionDescriptor().getTimezone() == null
+                || "".equals(jobBean.getActionDescriptor().getTimezone())) {
             jobModel.setDefaultTZ(DateUtil.getDefaultTZStr());
         } else {
-            jobModel.setDefaultTZ(jobBean.getJobDescriptor().getTimezone());
+            jobModel.setDefaultTZ(jobBean.getActionDescriptor().getTimezone());
         }
-        jobModel.setOffRaw(jobBean.getJobDescriptor().getOffRaw());
-        jobModel.setJobCycle(jobBean.getJobDescriptor().getCycle());
-        jobModel.setHost(jobBean.getJobDescriptor().getHost());
-        jobModel.setHostGroupId(jobBean.getJobDescriptor().getHostGroupId());
+        jobModel.setOffRaw(jobBean.getActionDescriptor().getOffRaw());
+        jobModel.setJobCycle(jobBean.getActionDescriptor().getCycle());
+        jobModel.setHost(jobBean.getActionDescriptor().getHost());
+        jobModel.setHostGroupId(jobBean.getActionDescriptor().getHostGroupId());
         return jobModel;
     }
 
@@ -669,13 +670,13 @@ public class JobController extends BaseController {
         try {
             int start = (page - 1) * rows;
             int limit = rows;
-            List<JobHistory> list = jobHistoryManager.pagingList(jobId, start, limit);
+            List<ZeusActionHistory> list = jobHistoryManager.pagingList(jobId, start, limit);
             int total = jobHistoryManager.pagingTotal(jobId);
 
             gridcontent.rows = list;
             gridcontent.total = total;
         } catch (Exception e) {
-            log.error("get job run log failed.", e);
+            log.error("get job runAction log failed.", e);
         }
         return gridcontent;
     }
@@ -683,7 +684,7 @@ public class JobController extends BaseController {
     @RequestMapping(value = "/get_job_history_by_id", method = RequestMethod.GET)
     public CommonResponse<JobHistoryModel> getJobHistory(@RequestParam(value = "id", defaultValue = "") String id) {
         try {
-            JobHistory his = jobHistoryManager.findJobHistory(id);
+            ZeusActionHistory his = jobHistoryManager.findJobHistory(id);
             JobHistoryModel d = new JobHistoryModel();
             d.setId(his.getId());
             d.setActionId(his.getActionId());
@@ -711,14 +712,14 @@ public class JobController extends BaseController {
 
             return this.buildResponse(d);
         } catch (Exception e) {
-            log.error("get job run log by id failed.", e);
+            log.error("get job runAction log by id failed.", e);
             return this.buildResponse(ReturnCode.SYSTEM_ERROR, null);
         }
     }
 
     @RequestMapping(value = "/cancel", method = RequestMethod.GET)
     public CommonResponse<Void> cancel(@RequestParam(value = "id", defaultValue = "") String id) {
-        JobHistory history = jobHistoryManager.findJobHistory(id);
+        ZeusActionHistory history = jobHistoryManager.findJobHistory(id);
         if (!permissionManager.hasActionPermission(CurrentUser.getUser().getUid(), history.getActionId())) {
             return this.buildResponse(ReturnCode.INVALID_ERROR);
         }
@@ -747,7 +748,7 @@ public class JobController extends BaseController {
     public CommonResponse<Void> handleRun(@RequestParam(value = "actionId", defaultValue = "") String actionId,
                                           @RequestParam(value = "type", defaultValue = "") int type) {
         JobStatus.TriggerType triggerType = null;
-        JobDescriptor jobDescriptor = null;
+        ActionDescriptor actionDescriptor = null;
         Protocol.ExecuteKind kind = null;
         if (type == 1) {
             triggerType = JobStatus.TriggerType.MANUAL;
@@ -778,20 +779,20 @@ public class JobController extends BaseController {
             }
         }*/
         try {
-            Tuple<JobDescriptor, JobStatus> job = permissionGroupManagerWithAction.getActionDescriptor(actionId);
-            jobDescriptor = job.getX();
-            JobHistory history = new JobHistory();
+            Tuple<ActionDescriptor, JobStatus> job = permissionGroupManagerWithAction.getActionDescriptor(actionId);
+            actionDescriptor = job.getX();
+            ZeusActionHistory history = new ZeusActionHistory();
             history.setActionId(actionId);
-            history.setJobId(jobDescriptor.getJobId());
+            history.setJobId(actionDescriptor.getJobId());
             history.setTriggerType(triggerType);
             history.setOperator(CurrentUser.getUser().getUid());
-            //history.setOperator(jobDescriptor.getOwner());
+            //history.setOperator(actionDescriptor.getOwner());
             history.setIllustrate("触发人：" + CurrentUser.getUser().getUid());
             history.setStatus(JobStatus.Status.RUNNING);
-            history.setStatisEndTime(jobDescriptor.getStatisEndTime());
-            history.setTimezone(jobDescriptor.getTimezone());
-//		history.setExecuteHost(jobDescriptor.getHost());
-            history.setHostGroupId(jobDescriptor.getHostGroupId());
+            history.setStatisEndTime(actionDescriptor.getStatisEndTime());
+            history.setTimezone(actionDescriptor.getTimezone());
+//		history.setExecuteHost(actionDescriptor.getHost());
+            history.setHostGroupId(actionDescriptor.getHostGroupId());
             jobHistoryManager.addJobHistory(history);
 
 
@@ -813,12 +814,12 @@ public class JobController extends BaseController {
     @RequestMapping(value = "/open_or_close", method = RequestMethod.GET)
     public CommonResponse<String> openOrClose(@RequestParam(value = "jobId", defaultValue = "") String jobId,
                                             @RequestParam(value = "auto", defaultValue = "") Boolean auto) {
-        Tuple<JobDescriptor, JobStatus> job = permissionGroupManagerWithJob.getJobDescriptor(jobId);
-        JobDescriptor jd = job.getX();
+        Tuple<ActionDescriptor, JobStatus> job = permissionGroupManagerWithJob.getJobDescriptor(jobId);
+        ActionDescriptor jd = job.getX();
         // 如果是周期任务，在开启自动调度时，需要计算下一次任务执行时间
         // 2 代表周期调度
 
-        if (auto&& jd.getScheduleType() == JobDescriptor.JobScheduleType.CyleJob) {
+        if (auto&& jd.getScheduleType() == ActionDescriptor.JobScheduleType.CyleJob) {
             String tz = jd.getTimezone();
             // 小时任务，计算下一个小时的开始时间
             if (jd.getCycle().equals("hour")) {
@@ -870,8 +871,8 @@ public class JobController extends BaseController {
                 boolean canChange = true;
                 List<String> depdidlst = permissionGroupManagerWithJob.getAllDependencied(jobId);
                 if (depdidlst != null && depdidlst.size() != 0) {
-                    Map<String, Tuple<JobDescriptor, JobStatus>> depdlst = permissionGroupManagerWithJob.getJobDescriptor(depdidlst);
-                    for (Map.Entry<String, Tuple<JobDescriptor, JobStatus>> entry : depdlst.entrySet()) {
+                    Map<String, Tuple<ActionDescriptor, JobStatus>> depdlst = permissionGroupManagerWithJob.getJobDescriptor(depdidlst);
+                    for (Map.Entry<String, Tuple<ActionDescriptor, JobStatus>> entry : depdlst.entrySet()) {
                         if (entry.getValue().getX().getAuto()) {
                             canNotCloseList.add(entry.getValue().getX().getId());
                             canChange = false;
@@ -889,8 +890,8 @@ public class JobController extends BaseController {
                 boolean canChange = true;
                 List<String> depidlst = permissionGroupManagerWithJob.getAllDependencies(jobId);
                 if (depidlst != null && depidlst.size() != 0) {
-                    Map<String, Tuple<JobDescriptor, JobStatus>> deplst = permissionGroupManagerWithJob.getJobDescriptor(depidlst);
-                    for (Map.Entry<String, Tuple<JobDescriptor, JobStatus>> entry : deplst.entrySet()) {
+                    Map<String, Tuple<ActionDescriptor, JobStatus>> deplst = permissionGroupManagerWithJob.getJobDescriptor(depidlst);
+                    for (Map.Entry<String, Tuple<ActionDescriptor, JobStatus>> entry : deplst.entrySet()) {
                         if (!entry.getValue().getX().getAuto()) {
                             canNotOpenList.add(entry.getValue().getX().getId());
                             canChange = false;
@@ -936,7 +937,7 @@ public class JobController extends BaseController {
         return this.buildResponse(ReturnCode.SUCCESS,"ok");
     }
 
-    private void ChangeAuto(Boolean auto, JobDescriptor jd){
+    private void ChangeAuto(Boolean auto, ActionDescriptor jd){
         jd.setAuto(auto);
         try {
             permissionGroupManagerWithJob.updateJob(CurrentUser.getUser().getUid(),jd);

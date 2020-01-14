@@ -8,7 +8,7 @@ import java.util.Map;
 
 import com.taobao.zeus.model.processer.Processer;
 
-public class JobDescriptor implements Serializable {
+public class ActionDescriptor implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private Map<String, String> properties = new HashMap<String, String>();
@@ -49,34 +49,34 @@ public class JobDescriptor implements Serializable {
 	
 	private String hostGroupId;
 
-	public JobDescriptor getCopy() {
-		JobDescriptor jobDescriptor = new JobDescriptor();
-		jobDescriptor.setAuto(this.getAuto());
-		jobDescriptor.setCronExpression(this.getCronExpression());
-		jobDescriptor.setCycle(this.getCycle());
-		jobDescriptor.setDepdCycleJob(this.getDepdCycleJob());
-		jobDescriptor.setDependencies(this.getDependencies());
-		jobDescriptor.setDesc(this.getDesc());
-		jobDescriptor.setGroupId(this.getGroupId());
-		jobDescriptor.setId(this.getId());
-		jobDescriptor.setJobId(this.getJobId());
-		jobDescriptor.setJobType(this.getJobType());
-		jobDescriptor.setName(this.getName());
-		jobDescriptor.setOffRaw(this.getOffRaw());
-		jobDescriptor.setOwner(this.getOwner());
-		jobDescriptor.setPostProcessers(this.getPostProcessers());
-		jobDescriptor.setPreProcessers(this.getPreProcessers());
-		jobDescriptor.setProperties(this.getProperties());
-		jobDescriptor.setResources(this.getResources());
-		jobDescriptor.setScheduleType(this.getScheduleType());
-		jobDescriptor.setScript(this.getScript());
-		jobDescriptor.setStartTime(this.getStartTime());
-		jobDescriptor.setStartTimestamp(this.getStartTimestamp());
-		jobDescriptor.setStatisEndTime(this.getStatisEndTime());
-		jobDescriptor.setStatisStartTime(this.getStatisStartTime());
-		jobDescriptor.setTimezone(this.getTimezone());
-		jobDescriptor.setHostGroupId(this.getHostGroupId());
-		return jobDescriptor;
+	public ActionDescriptor getCopy() {
+		ActionDescriptor actionDescriptor = new ActionDescriptor();
+		actionDescriptor.setAuto(this.getAuto());
+		actionDescriptor.setCronExpression(this.getCronExpression());
+		actionDescriptor.setCycle(this.getCycle());
+		actionDescriptor.setDepdCycleJob(this.getDepdCycleJob());
+		actionDescriptor.setDependencies(this.getDependencies());
+		actionDescriptor.setDesc(this.getDesc());
+		actionDescriptor.setGroupId(this.getGroupId());
+		actionDescriptor.setId(this.getId());
+		actionDescriptor.setJobId(this.getJobId());
+		actionDescriptor.setJobType(this.getJobType());
+		actionDescriptor.setName(this.getName());
+		actionDescriptor.setOffRaw(this.getOffRaw());
+		actionDescriptor.setOwner(this.getOwner());
+		actionDescriptor.setPostProcessers(this.getPostProcessers());
+		actionDescriptor.setPreProcessers(this.getPreProcessers());
+		actionDescriptor.setProperties(this.getProperties());
+		actionDescriptor.setResources(this.getResources());
+		actionDescriptor.setScheduleType(this.getScheduleType());
+		actionDescriptor.setScript(this.getScript());
+		actionDescriptor.setStartTime(this.getStartTime());
+		actionDescriptor.setStartTimestamp(this.getStartTimestamp());
+		actionDescriptor.setStatisEndTime(this.getStatisEndTime());
+		actionDescriptor.setStatisStartTime(this.getStatisStartTime());
+		actionDescriptor.setTimezone(this.getTimezone());
+		actionDescriptor.setHostGroupId(this.getHostGroupId());
+		return actionDescriptor;
 	}
 
 	public String getJobId() {

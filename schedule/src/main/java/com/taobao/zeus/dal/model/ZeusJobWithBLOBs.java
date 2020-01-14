@@ -29,7 +29,7 @@ public class ZeusJobWithBLOBs extends ZeusJob {
 
     public Integer getRunPriorityLevel() {
         JSONObject jsonObject = JSON.parseObject(getConfigs());
-        return jsonObject.getInteger("run.priority.level");
+        return jsonObject.getInteger("runAction.priority.level");
     }
 
     public boolean getZeusSecretScript() {

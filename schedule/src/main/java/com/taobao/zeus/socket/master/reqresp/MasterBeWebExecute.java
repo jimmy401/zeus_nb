@@ -1,7 +1,7 @@
 package com.taobao.zeus.socket.master.reqresp;
 
 import com.taobao.zeus.model.DebugHistory;
-import com.taobao.zeus.model.JobHistory;
+import com.taobao.zeus.model.ZeusActionHistory;
 import com.taobao.zeus.socket.SocketLog;
 import com.taobao.zeus.socket.master.MasterContext;
 import com.taobao.zeus.socket.protocol.Protocol.ExecuteKind;
@@ -14,9 +14,9 @@ public class MasterBeWebExecute {
 	public WebResponse beWebExecute(MasterContext context,WebRequest req) {
 		if(req.getEk()==ExecuteKind.ManualKind || req.getEk()==ExecuteKind.ScheduleKind){
 			String historyId=req.getId();
-			JobHistory history=context.getJobHistoryManager().findJobHistory(historyId);
+			ZeusActionHistory history=context.getJobHistoryManager().findJobHistory(historyId);
 			String jobId=history.getActionId();
-			context.getMaster().run(history);
+			context.getMaster().runAction(history);
 			
 			WebResponse resp=WebResponse.newBuilder().setRid(req.getRid()).setOperate(WebOperate.ExecuteJob)
 				.setStatus(Status.OK).build();

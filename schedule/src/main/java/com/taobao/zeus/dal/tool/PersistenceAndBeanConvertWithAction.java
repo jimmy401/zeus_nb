@@ -3,10 +3,11 @@ package com.taobao.zeus.dal.tool;
 import com.alibaba.fastjson.JSON;
 import com.taobao.zeus.dal.model.*;
 import com.taobao.zeus.model.*;
-import com.taobao.zeus.model.JobDescriptor.JobRunType;
-import com.taobao.zeus.model.JobDescriptor.JobScheduleType;
+import com.taobao.zeus.model.ActionDescriptor.JobRunType;
+import com.taobao.zeus.model.ActionDescriptor.JobScheduleType;
 import com.taobao.zeus.model.JobStatus.Status;
 import com.taobao.zeus.model.JobStatus.TriggerType;
+import com.taobao.zeus.model.ZeusActionHistory;
 import com.taobao.zeus.model.processer.Processer;
 import com.taobao.zeus.util.DateUtil;
 import com.taobao.zeus.util.Environment;
@@ -55,7 +56,7 @@ public class PersistenceAndBeanConvertWithAction {
 		return persiste;
 	}
 
-	public static ZeusActionWithBLOBs convert(Tuple<JobDescriptor, JobStatus> job) {
+	public static ZeusActionWithBLOBs convert(Tuple<ActionDescriptor, JobStatus> job) {
 		if (job == null) {
 			return null;
 		}
@@ -67,11 +68,11 @@ public class PersistenceAndBeanConvertWithAction {
 		return persist;
 	}
 
-	public static Tuple<JobDescriptor, JobStatus> convert(ZeusActionWithBLOBs persist) {
+	public static Tuple<ActionDescriptor, JobStatus> convert(ZeusActionWithBLOBs persist) {
 		if (persist == null) {
 			return null;
 		}
-		JobDescriptor jd = new JobDescriptor();
+		ActionDescriptor jd = new ActionDescriptor();
 		jd.setId(String.valueOf(persist.getId()));
 		jd.setJobId(String.valueOf(persist.getJobId() == null ? null : persist.getJobId()));
 		jd.setName(persist.getName());
@@ -158,7 +159,7 @@ public class PersistenceAndBeanConvertWithAction {
 						o.getString(key.toString()));
 			}
 		}
-		return new Tuple<JobDescriptor, JobStatus>(jd, status);
+		return new Tuple<ActionDescriptor, JobStatus>(jd, status);
 	}
 
 	public static ZeusActionWithBLOBs convert(JobStatus jobStatus) {
@@ -179,7 +180,7 @@ public class PersistenceAndBeanConvertWithAction {
 		return persist;
 	}
 
-	public static ZeusActionWithBLOBs convert(JobDescriptor jd) {
+	public static ZeusActionWithBLOBs convert(ActionDescriptor jd) {
 		if (jd == null) {
 			return null;
 		}
@@ -311,11 +312,11 @@ public class PersistenceAndBeanConvertWithAction {
 		return persist;
 	}
 
-	public static JobHistory convert(ZeusActionHistory persist) {
+	public static ZeusActionHistory convert(com.taobao.zeus.dal.model.ZeusActionHistory persist) {
 		if (persist == null) {
 			return null;
 		}
-		JobHistory history = new JobHistory();
+		ZeusActionHistory history = new ZeusActionHistory();
 		history.setId(String.valueOf(persist.getId()));
 		history.setActionId(String.valueOf(persist.getActionId()));
 		history.setJobId(String.valueOf(persist.getJobId() == null ? null : persist.getJobId()));
@@ -347,11 +348,11 @@ public class PersistenceAndBeanConvertWithAction {
 		return history;
 	}
 
-	public static ZeusActionHistory convert(JobHistory history) {
+	public static com.taobao.zeus.dal.model.ZeusActionHistory convert(ZeusActionHistory history) {
 		if (history == null) {
 			return null;
 		}
-		ZeusActionHistory persist = new ZeusActionHistory();
+		com.taobao.zeus.dal.model.ZeusActionHistory persist = new com.taobao.zeus.dal.model.ZeusActionHistory();
 		persist.setEndTime(history.getEndTime());
 		persist.setExecuteHost(history.getExecuteHost());
 		persist.setId(history.getId() == null ? null : Long.valueOf(history

@@ -2,9 +2,9 @@ package com.taobao.zeus.dal.tool;
 
 import com.taobao.zeus.client.ZeusException;
 import com.taobao.zeus.dal.logic.impl.ReadOnlyGroupManagerWithAction;
-import com.taobao.zeus.model.JobDescriptor;
-import com.taobao.zeus.model.JobDescriptor.JobRunType;
-import com.taobao.zeus.model.JobDescriptor.JobScheduleType;
+import com.taobao.zeus.model.ActionDescriptor;
+import com.taobao.zeus.model.ActionDescriptor.JobRunType;
+import com.taobao.zeus.model.ActionDescriptor.JobScheduleType;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.CronTrigger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ public class JobValidate {
 	@Autowired
 	private ReadOnlyGroupManagerWithAction readOnlyGroupManager;
 
-	public boolean valide(JobDescriptor job) throws ZeusException{
+	public boolean valide(ActionDescriptor job) throws ZeusException{
 		if(job.getJobType()==null){
 			throw new ZeusException("任务类型必须填写");
 		}
@@ -89,10 +89,10 @@ public class JobValidate {
 	//判断死循环问题
 	private void check(String parentJobId,Set<JobBean> deps) throws ZeusException{
 		for(JobBean job:deps){
-			if(job.getJobDescriptor().getId().equals(parentJobId)){
+			if(job.getActionDescriptor().getId().equals(parentJobId)){
 				throw new ZeusException("存在死循环依赖，请检查JobId: " + parentJobId);
 			}
-			if(job.getJobDescriptor().getScheduleType()==JobScheduleType.Dependent){
+			if(job.getActionDescriptor().getScheduleType()==JobScheduleType.Dependent){
 				check(parentJobId,job.getDependee());
 			}
 		}
@@ -101,10 +101,10 @@ public class JobValidate {
 	 * 周期任务无法依赖不同周期，且小时任务无法依赖天的任务
 	 * @author YangFei
 	 */
-	public void checkCycleJob(JobDescriptor job,List<JobDescriptor> jobs) throws ZeusException{
+	public void checkCycleJob(ActionDescriptor job, List<ActionDescriptor> jobs) throws ZeusException{
 		if(jobs!=null&&jobs.size()!=0){
-			JobDescriptor tmp=jobs.get(0);
-			for(JobDescriptor j:jobs){
+			ActionDescriptor tmp=jobs.get(0);
+			for(ActionDescriptor j:jobs){
 				if(StringUtils.isNotEmpty(tmp.getCycle())&&StringUtils.isNotEmpty(j.getCycle())&&!tmp.getCycle().equals(j.getCycle())){
 					throw new ZeusException("周期任务不能依赖不同的周期，请检查!");
 				}

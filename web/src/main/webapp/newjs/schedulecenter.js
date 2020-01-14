@@ -524,7 +524,7 @@ function addGroupAdminsConfirm() {
 
     $.ajax({
         type: "GET",
-        url: "group/add_group_admins",
+        url: "group/add_group_admin",
         data: postData,
         success: function (ret) {
             if (ret != null) {
@@ -554,7 +554,7 @@ function deleteGroupAdminsConfirm() {
 
     $.ajax({
         type: "GET",
-        url: "group/delete_group_admins",
+        url: "group/delete_group_admin",
         data: postData,
         success: function (ret) {
             if (ret != null) {

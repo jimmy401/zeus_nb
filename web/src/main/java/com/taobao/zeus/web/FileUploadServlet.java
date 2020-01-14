@@ -28,7 +28,7 @@ import org.apache.log4j.Logger;
 import com.taobao.zeus.client.ZeusException;
 import com.taobao.zeus.jobs.JobContext;
 import com.taobao.zeus.jobs.sub.tool.UploadHdfsFileJob;
-import com.taobao.zeus.model.JobHistory;
+import com.taobao.zeus.model.ZeusActionHistory;
 
 public class FileUploadServlet extends HttpServlet{
 
@@ -94,10 +94,10 @@ public class FileUploadServlet extends HttpServlet{
 					IOUtils.closeQuietly(out);
 				}
 				
-				JobHistory history=new JobHistory();
+				ZeusActionHistory history=new ZeusActionHistory();
 				JobContext jobContext=new JobContext();
 				jobContext.setWorkDir(temp.getParent());
-				jobContext.setJobHistory(history);
+				jobContext.setZeusActionHistory(history);
 				jobContext.setProperties(new HierarchyProperties(new HashMap<String, String>()));
 				UploadHdfsFileJob job=new UploadHdfsFileJob(jobContext, temp.getAbsolutePath(), hdfsLibPath);
 				Integer exitCode=job.run();

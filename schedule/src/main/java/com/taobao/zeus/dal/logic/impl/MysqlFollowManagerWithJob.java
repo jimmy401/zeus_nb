@@ -154,14 +154,14 @@ public class MysqlFollowManagerWithJob implements FollowManagerWithJob {
 		List<String> groupIds=new ArrayList<String>();
 		GroupBean gb=jobBean.getGroupBean();
 		while(gb!=null){
-			groupIds.add(gb.getGroupDescriptor().getId());
+			groupIds.add(gb.getGroupDescriptor().getId().toString());
 			gb=gb.getParentGroupBean();
 		}
 		List<ZeusFollow> groupFollows=findGroupFollowers(groupIds);
 
 		List<String> follows=new ArrayList<String>();
 		//任务创建人自动纳入消息通知人员名单
-		follows.add(jobBean.getJobDescriptor().getOwner());
+		follows.add(jobBean.getActionDescriptor().getOwner());
 		for(ZeusFollow zf:jobFollows){
 			if(!follows.contains(zf.getUid())){
 				follows.add(zf.getUid());
@@ -183,7 +183,7 @@ public class MysqlFollowManagerWithJob implements FollowManagerWithJob {
 		List<String> groupIds=new ArrayList<String>();
 		GroupBean gb=jobBean.getGroupBean();
 		while(gb!=null){
-			groupIds.add(gb.getGroupDescriptor().getId());
+			groupIds.add(gb.getGroupDescriptor().getId().toString());
 			gb=gb.getParentGroupBean();
 		}
 		List<ZeusFollow> groupFollows=findGroupFollowers(groupIds);

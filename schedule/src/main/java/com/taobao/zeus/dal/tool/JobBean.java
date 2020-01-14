@@ -1,10 +1,8 @@
 package com.taobao.zeus.dal.tool;
 
+import com.taobao.zeus.model.ActionDescriptor;
 import com.taobao.zeus.model.FileResource;
-import com.taobao.zeus.model.JobDescriptor;
 import com.taobao.zeus.model.JobStatus;
-import com.taobao.zeus.dal.tool.GroupBean;
-import com.taobao.zeus.dal.tool.HierarchyProperties;
 
 import java.util.*;
 
@@ -13,15 +11,15 @@ import java.util.*;
  * @author zhoufang
  */
 public class JobBean {
-	private final JobDescriptor jobDescriptor;
+	private final ActionDescriptor actionDescriptor;
 	private final JobStatus jobStatus;
 	private GroupBean groupBean;
 
 	private Set<JobBean> dependee = new HashSet<JobBean>();
 	private Set<JobBean> depender = new HashSet<JobBean>();
 	
-	public JobBean(JobDescriptor jd, JobStatus jobStatus){
-		this.jobDescriptor=jd;
+	public JobBean(ActionDescriptor jd, JobStatus jobStatus){
+		this.actionDescriptor =jd;
 		this.jobStatus=jobStatus;
 	}
 	/**
@@ -44,15 +42,15 @@ public class JobBean {
 	 */
 	public HierarchyProperties getHierarchyProperties(){
 		if(groupBean!=null){
-			return new HierarchyProperties(groupBean.getHierarchyProperties(), jobDescriptor.getProperties());
+			return new HierarchyProperties(groupBean.getHierarchyProperties(), actionDescriptor.getProperties());
 		}
-		return new HierarchyProperties(jobDescriptor.getProperties());
+		return new HierarchyProperties(actionDescriptor.getProperties());
 	}
 	
 	public List<FileResource> getHierarchyResources(){
 		List<String> existList=new ArrayList<String>();
 		List<FileResource> local = new ArrayList<>();
-		/*List<Map<String, String>> local=new ArrayList<Map<String,String>>(jobDescriptor.getResources());
+		/*List<Map<String, String>> local=new ArrayList<Map<String,String>>(actionDescriptor.getResources());
 		if(local==null){
 			local=new ArrayList<Map<String,String>>();
 		}
@@ -100,8 +98,8 @@ public class JobBean {
 		return groupBean;
 	}
 	
-	public JobDescriptor getJobDescriptor(){
-		return jobDescriptor;
+	public ActionDescriptor getActionDescriptor(){
+		return actionDescriptor;
 	}
 	public void setGroupBean(GroupBean groupBean) {
 		this.groupBean = groupBean;

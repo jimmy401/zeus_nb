@@ -34,8 +34,8 @@ public abstract class AbstractJob implements Job {
 	}
 
 	protected void logConsole(String log){
-		if(jobContext.getJobHistory()!=null){
-			jobContext.getJobHistory().getLog().appendConsole(log);
+		if(jobContext.getZeusActionHistory()!=null){
+			jobContext.getZeusActionHistory().getLog().appendConsole(log);
 		}
 		if(jobContext.getDebugHistory()!=null){
 			jobContext.getDebugHistory().getLog().appendConsole(log);
@@ -43,16 +43,16 @@ public abstract class AbstractJob implements Job {
 	}
 
 	protected void log(String log){
-		if(jobContext.getJobHistory()!=null){
-			jobContext.getJobHistory().getLog().appendZeus(log);
+		if(jobContext.getZeusActionHistory()!=null){
+			jobContext.getZeusActionHistory().getLog().appendZeus(log);
 		}
 		if(jobContext.getDebugHistory()!=null){
 			jobContext.getDebugHistory().getLog().appendZeus(log);
 		}
 	}
 	protected void log(Exception e){
-		if(jobContext.getJobHistory()!=null){
-			jobContext.getJobHistory().getLog().appendZeusException(e);
+		if(jobContext.getZeusActionHistory()!=null){
+			jobContext.getZeusActionHistory().getLog().appendZeusException(e);
 		}
 		if(jobContext.getDebugHistory()!=null){
 			jobContext.getDebugHistory().getLog().appendZeusException(e);

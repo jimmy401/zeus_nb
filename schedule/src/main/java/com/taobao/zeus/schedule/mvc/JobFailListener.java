@@ -9,7 +9,7 @@ import com.taobao.zeus.dal.logic.impl.ReadOnlyGroupManagerWithAction;
 import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.dal.tool.GroupBean;
 import com.taobao.zeus.dal.tool.JobBean;
-import com.taobao.zeus.model.JobDescriptor;
+import com.taobao.zeus.model.ActionDescriptor;
 import com.taobao.zeus.model.JobStatus.TriggerType;
 import com.taobao.zeus.mvc.DispatcherListener;
 import com.taobao.zeus.mvc.MvcEvent;
@@ -36,12 +36,12 @@ public class JobFailListener extends DispatcherListener{
 	private MailAlarm mailAlarm;
 	private SMSAlarm smsAlarm;
 	public JobFailListener(MasterContext context){
-		groupManager=(GroupManagerWithAction) context.getGroupManagerWithAction();
-		readOnlyGroupManager=(ReadOnlyGroupManagerWithAction)context.getReadOnlyGroupManagerWithAction();
-		userManager=(UserManager)context.getMysqlUserManager();
-		jobHistoryManager=(JobHistoryManager)context.getJobHistoryManager();
-		mailAlarm=(MailAlarm) context.getMailAlarm();
-		smsAlarm=(SMSAlarm) context.getSmsAlarm();
+		groupManager=context.getGroupManagerWithAction();
+		readOnlyGroupManager=context.getReadOnlyGroupManagerWithAction();
+		userManager=context.getMysqlUserManager();
+		jobHistoryManager=context.getJobHistoryManager();
+		mailAlarm=context.getMailAlarm();
+		smsAlarm=context.getSmsAlarm();
 	}
 	//private ThreadLocal<ChainException> chainLocal=new ThreadLocal<ChainException>();
 	public static class ChainException{
@@ -72,19 +72,19 @@ public class JobFailListener extends DispatcherListener{
 //				}
 //				final ChainException chain=chainLocal.get();
 //				final JobBean jobBean=chain.gb.getAllSubJobBeans().get(jobId);
-				final JobDescriptor jobDescriptor = groupManager.getActionDescriptor(jobId).getX();
-				final ZeusUser owner=userManager.findByUid(jobDescriptor.getOwner());
+				final ActionDescriptor actionDescriptor = groupManager.getActionDescriptor(jobId).getX();
+				final ZeusUser owner=userManager.findByUid(actionDescriptor.getOwner());
 				//延迟6秒发送邮件，保证日志已经输出到数据库
 				new Thread(){
 					public void run() {
 						try {
 							Thread.sleep(6000);
 							StringBuffer sb=new StringBuffer();
-							sb.append("Job任务(").append(jobId).append(")").append(jobDescriptor.getName()).append("运行失败");
+							sb.append("Job任务(").append(jobId).append(")").append(actionDescriptor.getName()).append("运行失败");
 							sb.append("<br/>");
-							Map<String, String> properties=jobDescriptor.getProperties();
+							Map<String, String> properties= actionDescriptor.getProperties();
 							if(properties!=null){
-								String plevel=properties.get("run.priority.level");
+								String plevel=properties.get("runAction.priority.level");
 								if("1".equals(plevel)){
 									sb.append("Job任务优先级: ").append("low").append("，");
 								}else if("2".equals(plevel)){
@@ -93,7 +93,7 @@ public class JobFailListener extends DispatcherListener{
 									sb.append("Job任务优先级: ").append("high").append("，");
 								}
 							}
-							String owner=jobDescriptor.getOwner();
+							String owner= actionDescriptor.getOwner();
 							sb.append("Job任务owner: ").append(owner);
 							sb.append("<br/>");
 							String type="";
@@ -107,7 +107,7 @@ public class JobFailListener extends DispatcherListener{
 							sb.append("Job任务的触发类型为:"+type).append("<br/>");
 							if(event.getHistory()!=null){
 								sb.append("失败原因:<br/>"+jobHistoryManager.findJobHistory(event.getHistory().getId()).getLog().getContent().replaceAll("\\n", "<br/>"));
-								String msg= "Zeus报警 JobId:"+jobId+" ("+jobDescriptor.getName()+") 任务运行失败";
+								String msg= "Zeus报警 JobId:"+jobId+" ("+ actionDescriptor.getName()+") 任务运行失败";
 								int runCount = event.getRunCount();
 							    int rollBackTime = event.getRollBackTime();
 							    if (runCount > rollBackTime) {
@@ -133,9 +133,9 @@ public class JobFailListener extends DispatcherListener{
 				new Thread(){
 					@Override
 					public void run(){
-						String msg="Job任务("+jobId+"-"+owner.getName()+"):" + jobDescriptor.getName()+" 运行失败";
+						String msg="Job任务("+jobId+"-"+owner.getName()+"):" + actionDescriptor.getName()+" 运行失败";
 						//优先级低的不NOC告警
-						String priorityLevel = jobDescriptor.getProperties().get("run.priority.level");
+						String priorityLevel = actionDescriptor.getProperties().get("runAction.priority.level");
 						if(priorityLevel == null || !priorityLevel.trim().equals("1")){
 							//手机报警
 							//最后一次重试的时候发送

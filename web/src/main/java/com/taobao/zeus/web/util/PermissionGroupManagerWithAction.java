@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.taobao.zeus.dal.model.ZeusActionWithBLOBs;
+import com.taobao.zeus.dal.model.ZeusGroupWithBLOBs;
 import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.dal.model.ZeusWorker;
+import com.taobao.zeus.model.ActionDescriptor;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.taobao.zeus.client.ZeusException;
 import com.taobao.zeus.model.GroupDescriptor;
-import com.taobao.zeus.model.JobDescriptor;
-import com.taobao.zeus.model.JobDescriptor.JobRunType;
+import com.taobao.zeus.model.ActionDescriptor.JobRunType;
 import com.taobao.zeus.model.JobStatus;
 import com.taobao.zeus.model.processer.JobProcesser;
 import com.taobao.zeus.model.processer.Processer;
@@ -49,7 +50,7 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 	private UserManager userManager;
    //new class method begin
 	@Override
-	public Tuple<JobDescriptor,JobStatus> getActionDescriptor(String jobId) {
+	public Tuple<ActionDescriptor,JobStatus> getActionDescriptor(String jobId) {
 		return groupManager.getActionDescriptor(jobId);
 	}
 	@Override
@@ -80,7 +81,7 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 	}
 	private Boolean isJobOwner(String uid,String jobId){
 		JobBean jb=groupManager.getUpstreamJobBean(jobId);
-		if(jb.getJobDescriptor().getOwner().equalsIgnoreCase(uid)){
+		if(jb.getActionDescriptor().getOwner().equalsIgnoreCase(uid)){
 			return true;
 		}
 		return isGroupOwner(uid, jb.getGroupBean());
@@ -99,8 +100,7 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 		return permissionManager.hasJobPermission(uid, jobId);
 	}
 	@Override
-	public GroupDescriptor createGroup(String user, String groupName,
-			String parentGroup, boolean isDirectory) throws ZeusException {
+	public ZeusGroupWithBLOBs createGroup(String user, String groupName,String parentGroup, boolean isDirectory) throws ZeusException {
 		if(hasGroupPermission(user, parentGroup)){
 			return groupManager.createGroup(user, groupName, parentGroup, isDirectory);
 		}else{
@@ -109,8 +109,7 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 	}
 
 	@Override
-	public JobDescriptor createAction(String user, String jobName,
-									  String parentGroup, JobRunType jobType) throws ZeusException {
+	public ActionDescriptor createAction(String user, String jobName,String parentGroup, JobRunType jobType) throws ZeusException {
 		if(hasGroupPermission(user, parentGroup)){
 			return groupManager.createAction(user, jobName, parentGroup, jobType);
 		}else{
@@ -121,7 +120,7 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 	@Override
 	public void deleteGroup(String user, String groupId) throws ZeusException {
 		if(hasGroupPermission(user, groupId)){
-			GroupDescriptor gd=groupManager.getGroupDescriptor(groupId);
+			ZeusGroupWithBLOBs gd=groupManager.getGroupDescriptor(groupId);
 			if(gd!=null && gd.getOwner().equals(user)){
 				groupManager.deleteGroup(user, groupId);
 			}
@@ -134,7 +133,7 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 	@Override
 	public void deleteAction(String user, String jobId) throws ZeusException {
 		if(hasJobPermission(user, jobId)){
-			Tuple<JobDescriptor, JobStatus> job=groupManager.getActionDescriptor(jobId);
+			Tuple<ActionDescriptor, JobStatus> job=groupManager.getActionDescriptor(jobId);
 			if(job!=null){
 				groupManager.deleteAction(user, jobId);
 			}
@@ -149,7 +148,7 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 	}
 
 	@Override
-	public GroupDescriptor getGroupDescriptor(String groupId) {
+	public ZeusGroupWithBLOBs getGroupDescriptor(String groupId) {
 		return groupManager.getGroupDescriptor(groupId);
 	}
 
@@ -169,10 +168,10 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 	}
 
 	@Override
-	public void updateGroup(String user, GroupDescriptor group)
+	public void updateGroup(String user, ZeusGroupWithBLOBs group)
 			throws ZeusException {
-		if(hasGroupPermission(user, group.getId())){
-			GroupDescriptor gd=groupManager.getGroupDescriptor(group.getId());
+		if(hasGroupPermission(user, group.getId().toString())){
+			ZeusGroupWithBLOBs gd=groupManager.getGroupDescriptor(group.getId().toString());
 			if(gd!=null){
 				groupManager.updateGroup(user, group);
 			}
@@ -183,9 +182,9 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 	}
 
 	@Override
-	public void updateAction(String user, JobDescriptor job) throws ZeusException {
+	public void updateAction(String user, ActionDescriptor job) throws ZeusException {
 		if(hasJobPermission(user, job.getId())){
-			Tuple<JobDescriptor, JobStatus> old=groupManager.getActionDescriptor(job.getId());
+			Tuple<ActionDescriptor, JobStatus> old=groupManager.getActionDescriptor(job.getId());
 			if(old!=null ){
 				List<JobProcesser> hasadd=new ArrayList<JobProcesser>();
 				for(Processer p:old.getX().getPreProcessers()){
@@ -233,7 +232,7 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 	}
 
 	@Override
-	public Map<String, Tuple<JobDescriptor,JobStatus>> getActionDescriptor(Collection<String> jobIds) {
+	public Map<String, Tuple<ActionDescriptor,JobStatus>> getActionDescriptor(Collection<String> jobIds) {
 		return groupManager.getActionDescriptor(jobIds);
 	}
 	@Override
@@ -279,7 +278,7 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 		}
 		JobBean jb=groupManager.getUpstreamJobBean(jobId);
 		List<String> owners=new ArrayList<String>();
-		owners.add(jb.getJobDescriptor().getOwner());
+		owners.add(jb.getActionDescriptor().getOwner());
 		GroupBean gb=jb.getGroupBean();
 		while(gb!=null){
 			if(!owners.contains(gb.getGroupDescriptor().getOwner())){
@@ -330,11 +329,11 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 	}
 
 	@Override
-	public List<GroupDescriptor> getChildrenGroup(String groupId) {
+	public List<ZeusGroupWithBLOBs> getChildrenGroup(String groupId) {
 		return groupManager.getChildrenGroup(groupId);
 	}
 	@Override
-	public List<Tuple<JobDescriptor, JobStatus>> getChildrenAction(String groupId) {
+	public List<Tuple<ActionDescriptor, JobStatus>> getChildrenAction(String groupId) {
 		return groupManager.getChildrenAction(groupId);
 	}
 	@Override
@@ -384,11 +383,11 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 		return groupManager.getLastJobAction(jobId);
 	}
 	@Override
-	public void updateAction(JobDescriptor actionPer) throws ZeusException {
+	public void updateAction(ActionDescriptor actionPer) throws ZeusException {
 		groupManager.updateAction(actionPer);
 	}
 	@Override
-	public List<Tuple<JobDescriptor, JobStatus>> getActionList(String jobId) {
+	public List<Tuple<ActionDescriptor, JobStatus>> getActionList(String jobId) {
 		return groupManager.getActionList(jobId);
 	}
 	@Override

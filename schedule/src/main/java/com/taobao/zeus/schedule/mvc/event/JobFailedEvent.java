@@ -1,6 +1,6 @@
 package com.taobao.zeus.schedule.mvc.event;
 
-import com.taobao.zeus.model.JobHistory;
+import com.taobao.zeus.model.ZeusActionHistory;
 import com.taobao.zeus.model.JobStatus.TriggerType;
 import com.taobao.zeus.mvc.AppEvent;
 import com.taobao.zeus.schedule.mvc.ZeusJobException;
@@ -13,7 +13,7 @@ import com.taobao.zeus.schedule.mvc.ZeusJobException;
  */
 public class JobFailedEvent extends AppEvent {
 
-	private final JobHistory history;
+	private final ZeusActionHistory history;
 	private final String jobId;
 	private TriggerType triggerType;
 	private final ZeusJobException jobException;
@@ -25,7 +25,7 @@ public class JobFailedEvent extends AppEvent {
 	}
 
 	public JobFailedEvent(String jobId, TriggerType triggerType,
-			JobHistory history, ZeusJobException t) {
+                          ZeusActionHistory history, ZeusJobException t) {
 		super(Events.JobFailed);
 		this.jobId = jobId;
 		this.triggerType = triggerType;
@@ -41,7 +41,7 @@ public class JobFailedEvent extends AppEvent {
 		return triggerType;
 	}
 
-	public JobHistory getHistory() {
+	public ZeusActionHistory getHistory() {
 		return history;
 	}
 

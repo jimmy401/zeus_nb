@@ -2,7 +2,7 @@ package com.taobao.zeus.client.operate;
 
 import java.util.Map;
 
-import com.taobao.zeus.model.JobHistory;
+import com.taobao.zeus.model.ZeusActionHistory;
 
 public interface ZeusHelperService {
 	/**
@@ -17,6 +17,6 @@ public interface ZeusHelperService {
 	 * @param historyId
 	 * @return
 	 */
-	public JobHistory getJobHistory(String historyId);
+	public ZeusActionHistory getJobHistory(String historyId);
 	
 }

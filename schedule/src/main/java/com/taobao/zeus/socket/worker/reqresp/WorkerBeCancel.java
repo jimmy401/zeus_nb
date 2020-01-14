@@ -6,7 +6,7 @@ import java.util.concurrent.Future;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.taobao.zeus.model.DebugHistory;
-import com.taobao.zeus.model.JobHistory;
+import com.taobao.zeus.model.ZeusActionHistory;
 import com.taobao.zeus.socket.SocketLog;
 import com.taobao.zeus.socket.protocol.Protocol.CancelMessage;
 import com.taobao.zeus.socket.protocol.Protocol.ExecuteKind;
@@ -36,7 +36,7 @@ public class WorkerBeCancel {
 	public Future<Response> cancelManual(final WorkerContext context,final Request req,final String historyId){
 		// 查找该job是否在运行中，如果不在，响应ERROR
 		// 如果在，执行取消操作，等待操作结束后，响应OK
-		JobHistory history=context.getJobHistoryManager().findJobHistory(historyId);
+		ZeusActionHistory history=context.getJobHistoryManager().findJobHistory(historyId);
 		final String jobId=history.getActionId();
 		SocketLog.info("receive master cancel request,rid="+req.getRid()+",jobId="+jobId);
 		if(!context.getManualRunnings().containsKey(historyId)){
@@ -59,7 +59,7 @@ public class WorkerBeCancel {
 	public Future<Response> cancelSchedule(final WorkerContext context,final Request req,final String historyId){
 		// 查找该job是否在运行中，如果不在，响应ERROR
 		// 如果在，执行取消操作，等待操作结束后，响应OK
-		JobHistory history=context.getJobHistoryManager().findJobHistory(historyId);
+		ZeusActionHistory history=context.getJobHistoryManager().findJobHistory(historyId);
 		final String jobId=history.getActionId();
 		SocketLog.info("receive master cancel request,rid="+req.getRid()+",jobId="+jobId);
 		if(!context.getRunnings().containsKey(jobId)){

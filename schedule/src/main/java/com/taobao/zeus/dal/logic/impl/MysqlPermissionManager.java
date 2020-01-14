@@ -46,7 +46,7 @@ public class MysqlPermissionManager implements PermissionManager {
 			return true;
 		}
 		while(gb!=null){
-			groups.add(gb.getGroupDescriptor().getId());
+			groups.add(gb.getGroupDescriptor().getId().toString());
 			gb=gb.getParentGroupBean();
 		}
 		Set<String> users=new HashSet<String>();
@@ -146,13 +146,13 @@ public class MysqlPermissionManager implements PermissionManager {
 		}
 		Set<String> groups=new HashSet<String>();
 		JobBean jobBean=groupManagerWithJob.getUpstreamJobBean(jobId);
-		if(user.equals(jobBean.getJobDescriptor().getOwner())){
+		if(user.equals(jobBean.getActionDescriptor().getOwner())){
 			//任务所有人
 			return true;
 		}
 		GroupBean gb=jobBean.getGroupBean();
 		while(gb!=null){
-			groups.add(gb.getGroupDescriptor().getId());
+			groups.add(gb.getGroupDescriptor().getId().toString());
 			gb=gb.getParentGroupBean();
 		}
 		Set<String> users=new HashSet<String>();
@@ -171,17 +171,17 @@ public class MysqlPermissionManager implements PermissionManager {
 		}
 		Set<String> groups=new HashSet<String>();
 		JobBean jobBean=groupManagerWithAction.getUpstreamJobBean(jobId);
-		if(user.equals(jobBean.getJobDescriptor().getOwner())){
+		if(user.equals(jobBean.getActionDescriptor().getOwner())){
 			//任务所有人
 			return true;
 		}
 		GroupBean gb=jobBean.getGroupBean();
 		while(gb!=null){
-			groups.add(gb.getGroupDescriptor().getId());
+			groups.add(gb.getGroupDescriptor().getId().toString());
 			gb=gb.getParentGroupBean();
 		}
 		Set<String> users=new HashSet<String>();
-		users.addAll(getJobAdmins(jobBean.getJobDescriptor().getJobId()));
+		users.addAll(getJobAdmins(jobBean.getActionDescriptor().getJobId()));
 		for(String g:groups){
 			users.addAll(getGroupAdmins(g));
 		}

@@ -90,14 +90,14 @@ public class MavenDownloadJob extends AbstractJob {
 						+ mc.getArtifact() + "-" + mc.getVersion() + ".jar";
 			}
 			try {
-				jobContext.getJobHistory().getLog()
+				jobContext.getZeusActionHistory().getLog()
 						.appendZeus("开始下载maven配置文件:" + downloadUrl);
 				download(downloadUrl, jobContext.getWorkDir() + File.separator
 						+ downloadUrl.substring(downloadUrl.lastIndexOf("/")));
-				jobContext.getJobHistory().getLog()
+				jobContext.getZeusActionHistory().getLog()
 						.appendZeus("下载maven配置文件 ：" + downloadUrl + " 成功");
 			} catch (Exception e) {
-				jobContext.getJobHistory().getLog().appendZeusException(e);
+				jobContext.getZeusActionHistory().getLog().appendZeusException(e);
 				exitCode = -1;
 			}
 		}

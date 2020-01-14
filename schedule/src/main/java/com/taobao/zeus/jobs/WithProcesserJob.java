@@ -33,8 +33,8 @@ public class WithProcesserJob extends AbstractJob{
 			isDebug = true;
 			zeusFile = fileManager.getFile(jobContext.getDebugHistory().getFileId());
 		}else {
-			jobId=jobContext.getJobHistory().getActionId();
-			historyId = jobContext.getJobHistory().getId();
+			jobId=jobContext.getZeusActionHistory().getActionId();
+			historyId = jobContext.getZeusActionHistory().getId();
 		}
 		//前置任务执行
 		Integer preExitCode=-1;

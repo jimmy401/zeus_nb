@@ -30,11 +30,11 @@ public class OutputCheckJob extends AbstractJob {
 	@Override
 	public Integer run() throws Exception {
 		if (jobContext.getCoreExitCode() != 0) {
-			jobContext.getJobHistory().getLog()
+			jobContext.getZeusActionHistory().getLog()
 					.appendZeus("Job 运行失败，不进行产出数据大小检测");
 			return 0;
 		}
-		jobContext.getJobHistory().getLog()
+		jobContext.getZeusActionHistory().getLog()
 				.appendZeus("OutputCheck 开始进行产出数据大小检测");
 		String upperPath = path;
 		if (upperPath.endsWith("/")) {
@@ -70,14 +70,14 @@ public class OutputCheckJob extends AbstractJob {
 		}
 		ava = total / valid.size();
 
-		jobContext.getJobHistory().getLog().appendZeus("产出数据上层路径：" + upperPath);
-		jobContext.getJobHistory().getLog()
+		jobContext.getZeusActionHistory().getLog().appendZeus("产出数据上层路径：" + upperPath);
+		jobContext.getZeusActionHistory().getLog()
 				.appendZeus("有效的参考文件夹个数：" + valid.size());
-		jobContext.getJobHistory().getLog().appendZeus("平均产出数据大小：" + ava);
+		jobContext.getZeusActionHistory().getLog().appendZeus("平均产出数据大小：" + ava);
 
-		jobContext.getJobHistory().getLog()
+		jobContext.getZeusActionHistory().getLog()
 				.appendZeus("设定数据大小浮动百分比：" + ocp.getPercent() + "%");
-		jobContext.getJobHistory().getLog().appendZeus("当前任务产出数据路径：" + path);
+		jobContext.getZeusActionHistory().getLog().appendZeus("当前任务产出数据路径：" + path);
 
 		ContentSummary current = null;
 		try {
@@ -87,7 +87,7 @@ public class OutputCheckJob extends AbstractJob {
 			log(e);
 		}
 		if (current != null) {
-			jobContext.getJobHistory().getLog()
+			jobContext.getZeusActionHistory().getLog()
 					.appendZeus("本次job产出数据大小：" + current.getLength());
 		} else {
 			return -1;
@@ -97,15 +97,15 @@ public class OutputCheckJob extends AbstractJob {
 			double rate = Math.abs(current.getLength() - ava) / ava;
 			if (rate > (ocp.getPercent() / 100.0)) {
 				// 超出浮动范围
-				jobContext.getJobHistory().getLog().appendZeus("超出设定浮动比例，发出报警");
-				String jobId = jobContext.getJobHistory().getActionId();
+				jobContext.getZeusActionHistory().getLog().appendZeus("超出设定浮动比例，发出报警");
+				String jobId = jobContext.getZeusActionHistory().getActionId();
 				StringBuffer sb = new StringBuffer("jobid=" + jobId
 						+ " 产出数据大小超出浮动比例 " + ocp.getPercent() + "%");
 				sb.append("\n平均产出数据大小为：" + ava);
 				sb.append("\n本次产出数据大小为：" + current.getLength());
 			}
 		} else {
-			jobContext.getJobHistory().getLog().appendZeus("产出数据检测OK");
+			jobContext.getZeusActionHistory().getLog().appendZeus("产出数据检测OK");
 		}
 		return 0;
 	}

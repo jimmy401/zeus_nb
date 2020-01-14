@@ -6,10 +6,10 @@ import java.util.HashSet;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import com.taobao.zeus.model.ZeusActionHistory;
 import org.jboss.netty.channel.Channel;
 
 import com.taobao.zeus.model.DebugHistory;
-import com.taobao.zeus.model.JobHistory;
 import com.taobao.zeus.model.JobStatus;
 import com.taobao.zeus.model.JobStatus.TriggerType;
 import com.taobao.zeus.socket.SocketLog;
@@ -41,7 +41,7 @@ public class MasterBeWebCancel {
                                             WebRequest req) {
         WebResponse ret = null;
         String historyId = req.getId();
-        JobHistory history = context.getJobHistoryManager().findJobHistory(
+        ZeusActionHistory history = context.getJobHistoryManager().findJobHistory(
                 historyId);
         SocketLog.info("receive web cancel request,rid=" + req.getRid()
                 + ",jobId=" + history.getActionId());
@@ -152,7 +152,7 @@ public class MasterBeWebCancel {
                                               WebRequest req) {
         WebResponse ret = null;
         String historyId = req.getId();
-        JobHistory history = context.getJobHistoryManager().findJobHistory(
+        ZeusActionHistory history = context.getJobHistoryManager().findJobHistory(
                 historyId);
         SocketLog.info("receive web cancel request,rid=" + req.getRid()
                 + ",jobId=" + history.getActionId());

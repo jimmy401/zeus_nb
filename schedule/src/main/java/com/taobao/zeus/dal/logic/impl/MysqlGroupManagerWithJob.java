@@ -9,8 +9,8 @@ import com.taobao.zeus.dal.mapper.ZeusJobMapper;
 import com.taobao.zeus.dal.mapper.ZeusWorkerMapper;
 import com.taobao.zeus.dal.model.*;
 import com.taobao.zeus.dal.tool.*;
+import com.taobao.zeus.model.ActionDescriptor;
 import com.taobao.zeus.model.GroupDescriptor;
-import com.taobao.zeus.model.JobDescriptor;
 import com.taobao.zeus.model.JobStatus;
 import com.taobao.zeus.model.processer.DownloadProcesser;
 import com.taobao.zeus.model.processer.Processer;
@@ -82,7 +82,7 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
         if (!job.getDepender().isEmpty()) {
             List<String> deps = new ArrayList<String>();
             for (JobBean jb : job.getDepender()) {
-                deps.add(jb.getJobDescriptor().getId());
+                deps.add(jb.getActionDescriptor().getId());
             }
             throw new ZeusException("该任务被其他任务依赖 " + deps.toString()+ " 不能删除!");
         }
@@ -92,7 +92,7 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
 
     @Override
     public GroupBean getDownstreamGroupBean(String groupId) {
-        GroupDescriptor group = getGroupDescriptor(groupId);
+        ZeusGroupWithBLOBs group = getZeusGroupById(groupId);
         GroupBean result = new GroupBean(group);
         return getDownstreamGroupBean(result);
     }
@@ -100,18 +100,16 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
     @Override
     public GroupBean getDownstreamGroupBean(GroupBean parent) {
         if (parent.isDirectory()) {
-            List<GroupDescriptor> children = getChildrenGroup(parent
-                    .getGroupDescriptor().getId());
-            for (GroupDescriptor child : children) {
+            List<ZeusGroupWithBLOBs> children = getChildrenGroup(parent.getGroupDescriptor().getId().toString());
+            for (ZeusGroupWithBLOBs child : children) {
                 GroupBean childBean = new GroupBean(child);
                 getDownstreamGroupBean(childBean);
                 childBean.setParentGroupBean(parent);
                 parent.getChildrenGroupBeans().add(childBean);
             }
         } else {
-            List<Tuple<JobDescriptor, JobStatus>> jobs = getChildrenJob(parent
-                    .getGroupDescriptor().getId());
-            for (Tuple<JobDescriptor, JobStatus> tuple : jobs) {
+            List<Tuple<ActionDescriptor, JobStatus>> jobs = getChildrenJob(parent.getGroupDescriptor().getId().toString());
+            for (Tuple<ActionDescriptor, JobStatus> tuple : jobs) {
                 JobBean JobBeanOld = new JobBean(tuple.getX(), tuple.getY());
                 JobBeanOld.setGroupBean(parent);
                 parent.getJobBeans().put(tuple.getX().getId(), JobBeanOld);
@@ -123,7 +121,7 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
 
     @Override
     public GroupBean getGlobeGroupBean() {
-        return GroupManagerToolWithJob.buildGlobeGroupBean(this);
+        return GroupManagerWithJobTool.buildGlobeGroupBean(this);
     }
 
     /**
@@ -133,11 +131,11 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
      * @return
      */
     @Override
-    public List<Tuple<JobDescriptor, JobStatus>> getChildrenJob(String groupId) {
+    public List<Tuple<ActionDescriptor, JobStatus>> getChildrenJob(String groupId) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("groupId", groupId);
         List<ZeusJobWithBLOBs> list = zeusJobMapper.selectByParams(params);
-        List<Tuple<JobDescriptor, JobStatus>> result = new ArrayList<Tuple<JobDescriptor, JobStatus>>();
+        List<Tuple<ActionDescriptor, JobStatus>> result = new ArrayList<Tuple<ActionDescriptor, JobStatus>>();
         if (list != null) {
             for (ZeusJobWithBLOBs j : list) {
                 result.add(PersistenceAndBeanConvertWithJob.convert(j));
@@ -153,39 +151,30 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
      * @return
      */
     @Override
-    public List<GroupDescriptor> getChildrenGroup(String groupId) {
+    public List<ZeusGroupWithBLOBs> getChildrenGroup(String groupId) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("parent", groupId);
         List<ZeusGroupWithBLOBs> list = zeusGroupMapper.findByParent(params);
-        List<GroupDescriptor> result = new ArrayList<GroupDescriptor>();
-        if (list != null) {
-            for (ZeusGroupWithBLOBs p : list) {
-                result.add(PersistenceAndBeanConvertWithJob.convert(p));
-            }
-        }
-        return result;
+        return list;
     }
 
     @Override
-    public GroupDescriptor getGroupDescriptor(String groupId) {
+    public ZeusGroupWithBLOBs getZeusGroupById(String groupId) {
         ZeusGroupWithBLOBs persist = zeusGroupMapper.selectByPrimaryKey(Integer.valueOf(groupId));
-        if (persist != null) {
-            return PersistenceAndBeanConvertWithJob.convert(persist);
-        }
-        return null;
+        return persist;
     }
 
     @Override
-    public Tuple<JobDescriptor, JobStatus> getJobDescriptor(String jobId) {
+    public Tuple<ActionDescriptor, JobStatus> getJobDescriptor(String jobId) {
         ZeusJobWithBLOBs persist = getJobPersistence(jobId);
         if (persist == null) {
             return null;
         }
-        Tuple<JobDescriptor, JobStatus> t = PersistenceAndBeanConvertWithJob
+        Tuple<ActionDescriptor, JobStatus> t = PersistenceAndBeanConvertWithJob
                 .convert(persist);
-        JobDescriptor jd = t.getX();
+        ActionDescriptor jd = t.getX();
         // 如果是周期任务，并且依赖不为空，则需要封装周期任务的依赖
-        if (jd.getScheduleType() == JobDescriptor.JobScheduleType.CyleJob
+        if (jd.getScheduleType() == ActionDescriptor.JobScheduleType.CyleJob
                 && jd.getDependencies() != null) {
             ZeusJobWithBLOBs jp = null;
             for (String jobID : jd.getDependencies()) {
@@ -229,28 +218,25 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
 
     @Override
     public GroupBean getUpstreamGroupBean(String groupId) {
-        return GroupManagerToolWithJob.getUpstreamGroupBean(groupId, this);
+        return GroupManagerWithJobTool.getUpstreamGroupBean(groupId, this);
     }
 
     @Override
     public JobBean getUpstreamJobBean(String jobId) {
-        return GroupManagerToolWithJob.getUpstreamJobBean(jobId, this);
+        return GroupManagerWithJobTool.getUpstreamJobBean(jobId, this);
     }
 
     @Override
-    public void updateGroup(String user, GroupDescriptor group)
+    public void updateGroup(String user, ZeusGroupWithBLOBs group)
             throws ZeusException {
         ZeusGroupWithBLOBs old = zeusGroupMapper.selectByPrimaryKey(Integer.valueOf(group.getId()));
         updateGroup(user, group, old.getOwner(), old.getParent() == null ? null
                 : old.getParent().toString());
     }
 
-    public void updateGroup(String user, GroupDescriptor group, String owner,
-                            String parent) throws ZeusException {
+    public void updateGroup(String user, ZeusGroupWithBLOBs persist, String owner,String parent) throws ZeusException {
 
-        ZeusGroupWithBLOBs old = zeusGroupMapper.selectByPrimaryKey(Integer.valueOf(group.getId()));
-
-        ZeusGroupWithBLOBs persist = PersistenceAndBeanConvertWithJob.convert(group);
+        ZeusGroupWithBLOBs old = zeusGroupMapper.selectByPrimaryKey(Integer.valueOf(persist.getId()));
 
         persist.setOwner(owner);
         if (parent != null) {
@@ -267,18 +253,18 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
     }
 
     @Override
-    public void updateJob(String user, JobDescriptor job) throws ZeusException {
+    public void updateJob(String user, ActionDescriptor job) throws ZeusException {
         ZeusJobWithBLOBs orgPersist = zeusJobMapper.selectByPrimaryKey(Long.valueOf(job.getId()));
         updateJob(user, job, orgPersist.getOwner(), orgPersist.getGroupId()
                 .toString());
     }
 
-    public void updateJob(String user, JobDescriptor job, String owner,
+    public void updateJob(String user, ActionDescriptor job, String owner,
                           String groupId) throws ZeusException {
         ZeusJobWithBLOBs orgPersist = zeusJobMapper.selectByPrimaryKey(Long.valueOf(job.getId()));
-        if (job.getScheduleType() == JobDescriptor.JobScheduleType.Independent) {
+        if (job.getScheduleType() == ActionDescriptor.JobScheduleType.Independent) {
             job.setDependencies(new ArrayList<String>());
-        } else if (job.getScheduleType() == JobDescriptor.JobScheduleType.Dependent) {
+        } else if (job.getScheduleType() == ActionDescriptor.JobScheduleType.Dependent) {
             job.setCronExpression("");
         }
         job.setOwner(owner);
@@ -308,10 +294,10 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
         }
 
         // 如果是周期任务，则许检查依赖周期是否正确
-        if (JobDescriptor.JobScheduleType.CyleJob.equals(job.getScheduleType())
+        if (ActionDescriptor.JobScheduleType.CyleJob.equals(job.getScheduleType())
                 && job.getDependencies() != null
                 && job.getDependencies().size() != 0) {
-            List<JobDescriptor> list = this.getJobDescriptors(job
+            List<ActionDescriptor> list = this.getJobDescriptors(job
                     .getDependencies());
             jobValidateWithJob.checkCycleJob(job, list);
         }
@@ -324,25 +310,23 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
 
 
     @Override
-    public GroupDescriptor createGroup(String user, String groupName,
-                                       String parentGroup, boolean isDirectory) throws ZeusException {
+    public ZeusGroupWithBLOBs createGroup(String user, String groupName,String parentGroup, boolean isDirectory) throws ZeusException {
         if (parentGroup == null) {
             throw new ZeusException("parent group may not be null");
         }
-        GroupDescriptor group = new GroupDescriptor();
+        ZeusGroupWithBLOBs group = new ZeusGroupWithBLOBs();
         group.setOwner(user);
         group.setName(groupName);
-        group.setParent(parentGroup);
-        group.setDirectory(isDirectory);
+        group.setParent(Integer.valueOf(parentGroup));
+        group.setDirectory(isDirectory?0:1);
 
         GroupValidate.valide(group);
 
-        ZeusGroupWithBLOBs persist = PersistenceAndBeanConvertWithJob.convert(group);
         Date now = new Date();
-        persist.setGmtCreate(now);
-        persist.setGmtModified(now);
-        persist.setExisted(1);
-        zeusGroupMapper.insertSelective(persist);
+        group.setGmtCreate(now);
+        group.setGmtModified(now);
+        group.setExisted(1);
+        zeusGroupMapper.insertSelective(group);
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("owner", user);
         params.put("name", groupName);
@@ -350,17 +334,17 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
         params.put("directory", isDirectory ? 0 : 1);
         params.put("existed", 1);
         List<ZeusGroupWithBLOBs> result = zeusGroupMapper.selectByParams(params);
-        return PersistenceAndBeanConvertWithJob.convert(result.get(0));
+        return result.get(0);
     }
 
     @Override
-    public JobDescriptor createJob(String user, String jobName,
-                                   String parentGroup, JobDescriptor.JobRunType jobType) throws ZeusException {
-        GroupDescriptor parent = getGroupDescriptor(parentGroup);
-        if (parent.isDirectory()) {
+    public ActionDescriptor createJob(String user, String jobName,
+                                      String parentGroup, ActionDescriptor.JobRunType jobType) throws ZeusException {
+        ZeusGroupWithBLOBs parent = getZeusGroupById(parentGroup);
+        if (parent.getbDirectory()) {
             throw new ZeusException("目录组下不得创建Job");
         }
-        JobDescriptor job = new JobDescriptor();
+        ActionDescriptor job = new ActionDescriptor();
         job.setOwner(user);
         job.setName(jobName);
         job.setGroupId(parentGroup);
@@ -380,14 +364,14 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
     }
 
     @Override
-    public Map<String, Tuple<JobDescriptor, JobStatus>> getJobDescriptor(
+    public Map<String, Tuple<ActionDescriptor, JobStatus>> getJobDescriptor(
             final Collection<String> jobIds) {
         List<Long> ids = new ArrayList<Long>();
         for (String i : jobIds) {
             ids.add(Long.valueOf(i));
         }
         List<ZeusJobWithBLOBs> list = zeusJobMapper.findJobWithIds(ids);
-        List<Tuple<JobDescriptor, JobStatus>> result = new ArrayList<Tuple<JobDescriptor, JobStatus>>();
+        List<Tuple<ActionDescriptor, JobStatus>> result = new ArrayList<Tuple<ActionDescriptor, JobStatus>>();
         if (list != null && !list.isEmpty()) {
             for (ZeusJobWithBLOBs persist : list) {
                 result.add(PersistenceAndBeanConvertWithJob
@@ -395,14 +379,14 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
             }
         }
 
-        Map<String, Tuple<JobDescriptor, JobStatus>> map = new HashMap<String, Tuple<JobDescriptor, JobStatus>>();
-        for (Tuple<JobDescriptor, JobStatus> jd : result) {
+        Map<String, Tuple<ActionDescriptor, JobStatus>> map = new HashMap<String, Tuple<ActionDescriptor, JobStatus>>();
+        for (Tuple<ActionDescriptor, JobStatus> jd : result) {
             map.put(jd.getX().getId(), jd);
         }
         return map;
     }
 
-    public List<JobDescriptor> getJobDescriptors(final Collection<String> jobIds) {
+    public List<ActionDescriptor> getJobDescriptors(final Collection<String> jobIds) {
         List<Long> ids = new ArrayList<Long>();
         for (String i : jobIds) {
             if (StringUtils.isNotEmpty(i)) {
@@ -410,7 +394,7 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
             }
         }
         List<ZeusJobWithBLOBs> list = zeusJobMapper.findJobWithIds(ids);
-        List<JobDescriptor> result = new ArrayList<JobDescriptor>();
+        List<ActionDescriptor> result = new ArrayList<ActionDescriptor>();
         if (result != null && !result.isEmpty()) {
             for (ZeusJobWithBLOBs persist : list) {
                 result.add(PersistenceAndBeanConvertWithJob.convert(
@@ -436,7 +420,7 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
 
     @Override
     public JobStatus getJobStatus(String jobId) {
-        Tuple<JobDescriptor, JobStatus> tuple = getJobDescriptor(jobId);
+        Tuple<ActionDescriptor, JobStatus> tuple = getJobDescriptor(jobId);
         if (tuple == null) {
             return null;
         }
@@ -446,16 +430,16 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
     @Override
     public void grantGroupOwner(String granter, String uid, String groupId)
             throws ZeusException {
-        GroupDescriptor gd = getGroupDescriptor(groupId);
+        ZeusGroupWithBLOBs gd = getZeusGroupById(groupId);
         if (gd != null) {
-            updateGroup(granter, gd, uid, gd.getParent());
+            updateGroup(granter, gd, uid, gd.getParent().toString());
         }
     }
 
     @Override
     public void grantJobOwner(String granter, String uid, String jobId)
             throws ZeusException {
-        Tuple<JobDescriptor, JobStatus> job = getJobDescriptor(jobId);
+        Tuple<ActionDescriptor, JobStatus> job = getJobDescriptor(jobId);
         if (job != null) {
             job.getX().setOwner(uid);
             updateJob(granter, job.getX(), uid, job.getX().getGroupId());
@@ -463,22 +447,20 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
     }
 
     @Override
-    public void moveJob(String uid, String jobId, String groupId)
-            throws ZeusException {
-        JobDescriptor jd = getJobDescriptor(jobId).getX();
-        GroupDescriptor gd = getGroupDescriptor(groupId);
-        if (gd.isDirectory()) {
+    public void moveJob(String uid, String jobId, String groupId)throws ZeusException {
+        ActionDescriptor jd = getJobDescriptor(jobId).getX();
+        ZeusGroupWithBLOBs gd = getZeusGroupById(groupId);
+        if (gd.getbDirectory()) {
             throw new ZeusException("非法操作");
         }
         updateJob(uid, jd, jd.getOwner(), groupId);
     }
 
     @Override
-    public void moveGroup(String uid, String groupId, String newParentGroupId)
-            throws ZeusException {
-        GroupDescriptor gd = getGroupDescriptor(groupId);
-        GroupDescriptor parent = getGroupDescriptor(newParentGroupId);
-        if (!parent.isDirectory()) {
+    public void moveGroup(String uid, String groupId, String newParentGroupId)throws ZeusException {
+        ZeusGroupWithBLOBs gd = getZeusGroupById(groupId);
+        ZeusGroupWithBLOBs parent = getZeusGroupById(newParentGroupId);
+        if (!parent.getbDirectory()) {
             throw new ZeusException("非法操作");
         }
         updateGroup(uid, gd, gd.getOwner(), newParentGroupId);
@@ -537,7 +519,7 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
         if (jobs == null || jobs.size() == 0) return null;
         Map<String, List<String>> allJobDependencied = new HashMap<String, List<String>>();
         for (ZeusJobWithBLOBs job : jobs) {
-            JobDescriptor jobd = PersistenceAndBeanConvertWithJob.convert(job).getX();
+            ActionDescriptor jobd = PersistenceAndBeanConvertWithJob.convert(job).getX();
             if (jobd != null && jobd.hasDependencies()) {
                 List<String> deps = jobd.getDependencies();
                 for (String dep : deps) {
@@ -574,7 +556,7 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
 
     @Override
     public List<String> getAllDependencies(String jobID) {
-        JobDescriptor job = getJobDescriptor(jobID).getX();
+        ActionDescriptor job = getJobDescriptor(jobID).getX();
         if (job == null || !job.hasDependencies()) return null;
         List<String> dependencies = new ArrayList<String>();
         Set<String> visited = new HashSet<String>();
@@ -583,7 +565,7 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
         visited.add(jobID);
         while (!idQueue.isEmpty()) {
             String id = idQueue.poll();
-            JobDescriptor jb = getJobDescriptor(id).getX();
+            ActionDescriptor jb = getJobDescriptor(id).getX();
             if (jb != null && jb.hasDependencies()) {
                 List<String> deps = jb.getDependencies();
                 if (deps != null && deps.size() != 0) {
@@ -601,7 +583,7 @@ public class MysqlGroupManagerWithJob implements GroupManagerWithJob {
     }
 
     @Override
-    public void updateActionList(JobDescriptor job) {
+    public void updateActionList(ActionDescriptor job) {
         ZeusJobWithBLOBs persist = PersistenceAndBeanConvertWithJob.convert(job);
         Long jobId = persist.getId();
         /*		String script = persist.getScript();*/
