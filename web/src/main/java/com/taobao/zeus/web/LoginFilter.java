@@ -40,52 +40,52 @@ public class LoginFilter implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
 
-		HttpServletRequest httpRequest=(HttpServletRequest) request;
-		HttpServletResponse httpResponse=(HttpServletResponse)response;
-		httpResponse.setCharacterEncoding("utf-8");
-		String uri=httpRequest.getRequestURI();
-        log.info("request url : " + uri);
-		//线上服务器检测
-
-		if(uri.equals("/zeus.check")){
-			response.getWriter().write("success");
-			return;
-		}
-
-		ZeusUser zeusUser=null;
-
-		if(uri.endsWith(".js") || uri.endsWith(".css") || uri.endsWith(".gif") ||
-				uri.endsWith(".jpg") || uri.endsWith(".png") || uri.endsWith(".jsp")||
-				uri.endsWith(".ico")||uri.endsWith("logon")||uri.endsWith("login")){
-			chain.doFilter(request, response);
-			return;
-		}
-
-		if(null!=CurrentUser.getUser()){//如果存在session
-			Boolean check = false;
-			Cookie[] cookies = httpRequest.getCookies();
-			String uid= CurrentUser.getUser().getUid();
-            for(Cookie c :cookies ){
-            	if(c.getName().equals("LOGIN_USERNAME")){
-            		if(c.getValue().equals(uid)){
-            			zeusUser=new ZeusUser();
-            			zeusUser.setUid(uid);
-            			check = true;
-            			//userManager.addOrUpdateUser(zeusUser);
-            			LoginUser.user.set(zeusUser);
-            		}
-            	}
-
-            }
-           if(!check){
-			   httpResponse.sendRedirect("/zeus-web/login");
-        	   return;
-           }
-
-		}else{//不存在user
-			 httpResponse.sendRedirect("/zeus-web/login");
-			 return;
-		}
+//		HttpServletRequest httpRequest=(HttpServletRequest) request;
+//		HttpServletResponse httpResponse=(HttpServletResponse)response;
+//		httpResponse.setCharacterEncoding("utf-8");
+//		String uri=httpRequest.getRequestURI();
+//        log.info("request url : " + uri);
+//		//线上服务器检测
+//
+//		if(uri.equals("/zeus.check")){
+//			response.getWriter().write("success");
+//			return;
+//		}
+//
+//		ZeusUser zeusUser=null;
+//
+//		if(uri.endsWith(".js") || uri.endsWith(".css") || uri.endsWith(".gif") ||
+//				uri.endsWith(".jpg") || uri.endsWith(".png") || uri.endsWith(".jsp")||
+//				uri.endsWith(".ico")||uri.endsWith("logon")||uri.endsWith("login")){
+//			chain.doFilter(request, response);
+//			return;
+//		}
+//
+//		if(null!=CurrentUser.getUser()){//如果存在session
+//			Boolean check = false;
+//			Cookie[] cookies = httpRequest.getCookies();
+//			String uid= CurrentUser.getUser().getUid();
+//            for(Cookie c :cookies ){
+//            	if(c.getName().equals("LOGIN_USERNAME")){
+//            		if(c.getValue().equals(uid)){
+//            			zeusUser=new ZeusUser();
+//            			zeusUser.setUid(uid);
+//            			check = true;
+//            			//userManager.addOrUpdateUser(zeusUser);
+//            			LoginUser.user.set(zeusUser);
+//            		}
+//            	}
+//
+//            }
+//           if(!check){
+//			   httpResponse.sendRedirect("/zeus-web/login");
+//        	   return;
+//           }
+//
+//		}else{//不存在user
+//			 httpResponse.sendRedirect("/zeus-web/login");
+//			 return;
+//		}
 
 		chain.doFilter(request, response);
 	}

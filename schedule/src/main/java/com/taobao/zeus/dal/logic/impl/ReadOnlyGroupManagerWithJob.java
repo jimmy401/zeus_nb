@@ -354,11 +354,7 @@ public class ReadOnlyGroupManagerWithJob{
 		@Override
 		public List<ZeusGroupWithBLOBs> getChildrenGroup(String groupId) {
 			List<ZeusGroupWithBLOBs> list= groupManager.getChildrenGroup(groupId);
-			List<ZeusGroupWithBLOBs> result=new ArrayList<ZeusGroupWithBLOBs>();
-			for(ZeusGroupWithBLOBs gd:list){
-				result.add(new ReadOnlyGroupDescriptor(gd));
-			}
-			return result;
+			return list;
 		}
 
 		@Override
@@ -375,14 +371,8 @@ public class ReadOnlyGroupManagerWithJob{
 
 		@Override
 		public GroupBean getDownstreamGroupBean(String groupId) {
-			ReadOnlyGroupDescriptor readGd=null;
 			ZeusGroupWithBLOBs group=getGroupDescriptor(groupId);
-			if(group instanceof ReadOnlyGroupDescriptor){
-				readGd=(ReadOnlyGroupDescriptor) group;
-			}else{
-				readGd=new ReadOnlyGroupDescriptor(group);
-			}
-			GroupBean result=new GroupBean(readGd);
+			GroupBean result=new GroupBean(group);
 			return getDownstreamGroupBean(result);
 		}
 
@@ -410,13 +400,7 @@ public class ReadOnlyGroupManagerWithJob{
 						List<ZeusGroupWithBLOBs> children=getChildrenGroup(parent.getGroupDescriptor().getId().toString());
 						ArrayList<Future<GroupBean>> futures = new ArrayList<Future<GroupBean>>(children.size());
 						for(ZeusGroupWithBLOBs child:children){
-							ReadOnlyGroupDescriptor readGd=null;
-							if(child instanceof ReadOnlyGroupDescriptor){
-								readGd=(ReadOnlyGroupDescriptor) child;
-							}else{
-								readGd=new ReadOnlyGroupDescriptor(child);
-							}
-							GroupBean childBean=new GroupBean(readGd);
+							GroupBean childBean=new GroupBean(child);
 							if(pool.getActiveCount()<15) {
 								futures.add(getDownstreamGroupBean(childBean, 99));
 							}else{
@@ -469,7 +453,7 @@ public class ReadOnlyGroupManagerWithJob{
 		}
 
 		public ZeusGroupWithBLOBs getGroupDescriptor(String groupId) {
-			return new ReadOnlyGroupDescriptor(groupManager.getZeusGroupById(groupId));
+			return groupManager.getZeusGroupById(groupId);
 		}
 
 		@Override
@@ -575,68 +559,7 @@ public class ReadOnlyGroupManagerWithJob{
 			
 		}
 	}
-	
-	/**
-	 * 不可变的GroupDescriptor类
-	 * @author zhoufang
-	 *
-	 */
-	public class ReadOnlyGroupDescriptor extends ZeusGroupWithBLOBs {
-		private static final long serialVersionUID = 1L;
-		private ZeusGroupWithBLOBs gd;
-		public ReadOnlyGroupDescriptor(ZeusGroupWithBLOBs gd){
-			this.gd=gd;
-		}
-		public String getDesc() {
-			return gd.getDescr();
-		}
-		
-		public boolean isExisted(){
-			return gd.getbExisted();
-		}
 
-		public boolean isDirectory() {
-			return gd.getbDirectory();
-		}
-
-		public void setDesc(String desc) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void setName(String name) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void setOwner(String owner) {
-			throw new UnsupportedOperationException();
-		}
-
-		public void setParent(String parent) {
-			throw new UnsupportedOperationException();
-		}
-
-		public void setId(String id) {
-			throw new UnsupportedOperationException();
-		}
-
-		public void setDirectory(boolean directory) {
-			throw new UnsupportedOperationException();
-		}
-
-
-		@Override
-		public Map<String, String> getProperties() {
-			return new HashMap<String, String>(gd.getProperties());
-		}
-
-		@Override
-		public void setProperties(Map<String, String> properties) {
-			throw new UnsupportedOperationException();
-		}
-		
-	}
 	/**
 	 * 不可变JobDescriptor类
 	 * @author zhoufang
