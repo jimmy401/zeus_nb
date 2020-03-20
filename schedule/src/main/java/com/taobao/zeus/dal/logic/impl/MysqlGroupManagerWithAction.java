@@ -2,7 +2,6 @@ package com.taobao.zeus.dal.logic.impl;
 
 import com.taobao.zeus.client.ZeusException;
 import com.taobao.zeus.dal.logic.GroupManagerWithAction;
-import com.taobao.zeus.dal.logic.PermissionManager;
 import com.taobao.zeus.dal.logic.UserManager;
 import com.taobao.zeus.dal.mapper.ZeusActionMapper;
 import com.taobao.zeus.dal.mapper.ZeusGroupMapper;
@@ -11,7 +10,6 @@ import com.taobao.zeus.dal.mapper.ZeusWorkerMapper;
 import com.taobao.zeus.dal.model.*;
 import com.taobao.zeus.dal.tool.*;
 import com.taobao.zeus.model.ActionDescriptor;
-import com.taobao.zeus.model.GroupDescriptor;
 import com.taobao.zeus.model.ActionDescriptor.JobRunType;
 import com.taobao.zeus.model.ActionDescriptor.JobScheduleType;
 import com.taobao.zeus.model.JobStatus;
@@ -33,9 +31,6 @@ import java.util.*;
 @Repository("mysqlGroupManagerWithAction")
 public class MysqlGroupManagerWithAction implements GroupManagerWithAction {
     private static Logger log = LoggerFactory.getLogger(MysqlGroupManagerWithAction.class);
-
-    @Autowired
-    private PermissionManager permissionManager;
 
     @Autowired
     ZeusGroupMapper zeusGroupMapper;
@@ -129,7 +124,7 @@ public class MysqlGroupManagerWithAction implements GroupManagerWithAction {
 
     @Override
     public GroupBean getGlobeGroupBean() {
-        return GroupManagerToolWithAction.buildGlobeGroupBean(this);
+        return GroupManagerWithActionTool.buildGlobeGroupBean(this);
     }
 
     /**
@@ -227,12 +222,12 @@ public class MysqlGroupManagerWithAction implements GroupManagerWithAction {
 
     @Override
     public GroupBean getUpstreamGroupBean(String groupId) {
-        return GroupManagerToolWithAction.getUpstreamGroupBean(groupId, this);
+        return GroupManagerWithActionTool.getUpstreamGroupBean(groupId, this);
     }
 
     @Override
     public JobBean getUpstreamJobBean(String jobId) {
-        return GroupManagerToolWithAction.getUpstreamJobBean(jobId, this);
+        return GroupManagerWithActionTool.getUpstreamJobBean(jobId, this);
     }
 
     @Override

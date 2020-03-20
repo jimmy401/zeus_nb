@@ -2,7 +2,6 @@ package com.taobao.zeus.dal.tool;
 
 import com.taobao.zeus.dal.logic.GroupManagerWithAction;
 import com.taobao.zeus.dal.model.ZeusGroupWithBLOBs;
-import com.taobao.zeus.model.GroupDescriptor;
 import com.taobao.zeus.model.ActionDescriptor;
 import com.taobao.zeus.model.ActionDescriptor.JobScheduleType;
 import com.taobao.zeus.model.JobStatus;
@@ -13,9 +12,9 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 
-public class GroupManagerToolWithAction {
+public class GroupManagerWithActionTool {
 
-	private static Logger log = LoggerFactory.getLogger(GroupManagerToolWithAction.class);
+	private static Logger log = LoggerFactory.getLogger(GroupManagerWithActionTool.class);
 
 	public static GroupBean getUpstreamGroupBean(String groupId,GroupManagerWithAction groupManager) {
 		ZeusGroupWithBLOBs group=groupManager.getGroupDescriptor(groupId);
@@ -53,15 +52,7 @@ public class GroupManagerToolWithAction {
 		}
 		return root;
 	}
-	/**
-	 * 构建一个树形节点网络，不包含Job之间的依赖关系对象引用
-	 * @param groupManager
-	 * @return
-	 */
-	public static GroupBean buildGlobeGroupBeanWithoutDepend(GroupManagerWithAction groupManager) {
-		GroupBean root=groupManager.getDownstreamGroupBean(groupManager.getRootGroupId());
-		return root;
-	}
+
 	public static GroupBean getDownstreamGroupBean(String groupId,GroupManagerWithAction groupManager) {
 		ZeusGroupWithBLOBs group=groupManager.getGroupDescriptor(groupId);
 		GroupBean result=new GroupBean(group);

@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.taobao.zeus.client.ZeusException;
 import com.taobao.zeus.dal.logic.*;
 import com.taobao.zeus.dal.logic.impl.MysqlLogManager;
-import com.taobao.zeus.dal.logic.impl.ReadOnlyGroupManagerWithJob;
 import com.taobao.zeus.dal.mapper.ZeusJobMapper;
 import com.taobao.zeus.dal.model.*;
 import com.taobao.zeus.dal.tool.GroupBean;
@@ -52,8 +51,6 @@ import static com.taobao.zeus.dal.model.ZeusUser.ADMIN;
 public class JobController extends BaseController {
     private static final Logger log = LoggerFactory.getLogger(JobController.class);
 
-    @Autowired
-    private ReadOnlyGroupManagerWithJob readOnlyGroupManagerWithJob;
     @Autowired
     private FollowManagerWithJob followManagerWithJob;
     @Autowired

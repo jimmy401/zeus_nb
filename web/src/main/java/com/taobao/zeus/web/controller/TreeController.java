@@ -1,10 +1,11 @@
 package com.taobao.zeus.web.controller;
 
+import com.taobao.zeus.client.ZeusException;
 import com.taobao.zeus.dal.logic.FollowManagerWithJob;
 import com.taobao.zeus.dal.logic.JobHistoryManager;
 import com.taobao.zeus.dal.logic.PermissionManager;
 import com.taobao.zeus.dal.logic.UserManager;
-import com.taobao.zeus.dal.logic.impl.ReadOnlyGroupManagerWithJob;
+import com.taobao.zeus.dal.logic.impl.TreeViewService;
 import com.taobao.zeus.dal.tool.GroupBean;
 import com.taobao.zeus.dal.tool.JobBean;
 import com.taobao.zeus.model.ZeusActionHistory;
@@ -35,8 +36,6 @@ public class TreeController extends BaseController {
     private static final Logger log = LoggerFactory.getLogger(TreeController.class);
 
     @Autowired
-    private ReadOnlyGroupManagerWithJob readOnlyGroupManagerWithJob;
-    @Autowired
     private FollowManagerWithJob followManagerWithJob;
     @Autowired
     private JobHistoryManager jobHistoryManager;
@@ -50,11 +49,14 @@ public class TreeController extends BaseController {
     @Autowired
     private PermissionManager permissionManager;
 
+    @Autowired
+    private TreeViewService treeViewService;
+
     @RequestMapping(value = "/my_tree_data", method = RequestMethod.GET)
     public CommonResponse<List<GroupJobTreeModel>> getMyTreeData(HttpServletResponse response) throws Exception {
         try {
             String uid = LoginUser.getUser().getUid();
-            GroupBean rootGroup = readOnlyGroupManagerWithJob.getGlobeGroupBeanForTreeDisplay(true);
+            GroupBean rootGroup = treeViewService.buildGlobeGroupBean();
             Map<String, JobBean> allJobs = rootGroup.getAllSubJobBeans();
             for (String key : allJobs.keySet()) {
                 JobBean bean = allJobs.get(key);
@@ -89,7 +91,7 @@ public class TreeController extends BaseController {
     @RequestMapping(value = "/all_tree_data", method = RequestMethod.GET)
     public CommonResponse<List<GroupJobTreeModel>> getTreeData() {
         try {
-            GroupBean globe = readOnlyGroupManagerWithJob.getGlobeGroupBeanForTreeDisplay(false);
+            GroupBean globe = treeViewService.buildGlobeGroupBean();
             GroupJobTreeModel item = getTreeData(globe);
             List<GroupJobTreeModel> ret = new ArrayList<>();
             ret.add(item);
@@ -254,7 +256,7 @@ public class TreeController extends BaseController {
     }
 
     public GroupJobTreeModel getDependeeTree(String jobId) {
-        GroupBean globe = readOnlyGroupManagerWithJob.getGlobeGroupBean();
+        GroupBean globe = treeViewService.buildGlobeGroupBeanWithRelation();
         JobBean jb = globe.getAllSubJobBeans().get(jobId);
         if (jb != null) {
             GroupJobTreeModel root = new GroupJobTreeModel();
@@ -272,7 +274,7 @@ public class TreeController extends BaseController {
     }
 
     public GroupJobTreeModel getDependerTree(String jobId) {
-        GroupBean globe = readOnlyGroupManagerWithJob.getGlobeGroupBean();
+        GroupBean globe = treeViewService.buildGlobeGroupBeanWithRelation();
         JobBean jb = globe.getAllSubJobBeans().get(jobId);
         if (jb != null) {
             GroupJobTreeModel root = new GroupJobTreeModel();
@@ -311,6 +313,28 @@ public class TreeController extends BaseController {
             if (!childs.isEmpty()) {
                 setJob(job, childs, dependee);
             }
+        }
+    }
+
+    @RequestMapping(value = "/move_job", method = RequestMethod.GET)
+    public void moveJob(String jobId, String newGroupId) throws Exception {
+        try {
+            permissionGroupManagerWithJob.moveJob(LoginUser.getUser().getUid(),
+                    jobId, newGroupId);
+        } catch (ZeusException e) {
+            log.error("move", e);
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    @RequestMapping(value = "/move_group", method = RequestMethod.GET)
+    public void moveGroup(String jobId, String newGroupId) throws Exception {
+        try {
+            permissionGroupManagerWithJob.moveJob(LoginUser.getUser().getUid(),
+                    jobId, newGroupId);
+        } catch (ZeusException e) {
+            log.error("move", e);
+            throw new Exception(e.getMessage());
         }
     }
 }

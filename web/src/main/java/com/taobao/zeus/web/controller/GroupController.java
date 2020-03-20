@@ -5,11 +5,9 @@ import com.taobao.zeus.dal.logic.FollowManagerWithJob;
 import com.taobao.zeus.dal.logic.GroupManagerWithJob;
 import com.taobao.zeus.dal.logic.PermissionManager;
 import com.taobao.zeus.dal.logic.UserManager;
-import com.taobao.zeus.dal.logic.impl.ReadOnlyGroupManagerWithJob;
 import com.taobao.zeus.dal.model.ZeusGroupWithBLOBs;
 import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.dal.tool.GroupBean;
-import com.taobao.zeus.model.GroupDescriptor;
 import com.taobao.zeus.model.ZeusFollow;
 import com.taobao.zeus.web.common.CurrentUser;
 import com.taobao.zeus.web.controller.response.CommonResponse;
@@ -71,7 +69,7 @@ public class GroupController extends BaseController{
                 ownerName = gd.getOwner();
             }
             model.setOwnerName(ownerName);
-            model.setParent(gd.getParent().toString());
+            model.setParent(gd.getParent()==null?"":gd.getParent().toString());
             model.setAllProperties(bean.getHierarchyProperties().getAllProperties());
             model.setAdmin(permissionGroupManagerWithJob.hasGroupPermission(CurrentUser.getUser().getUid(), groupId));
             List<ZeusFollow> follows = followManager.findGroupFollowers(Arrays.asList(groupId));

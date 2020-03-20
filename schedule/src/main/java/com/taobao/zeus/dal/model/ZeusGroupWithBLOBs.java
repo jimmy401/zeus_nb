@@ -42,6 +42,14 @@ public class ZeusGroupWithBLOBs extends ZeusGroup {
         return getDirectory() == 0 ? true : false;
     }
 
+    public Boolean isBigGroup(){
+        return getDirectory() == 0 ? true : false;
+    }
+
+    public Boolean isSmallGroup(){
+        return getDirectory() == 1 ? true : false;
+    }
+
     public void setbDirectory(Boolean bDirectory) {
         this.bDirectory = bDirectory;
     }

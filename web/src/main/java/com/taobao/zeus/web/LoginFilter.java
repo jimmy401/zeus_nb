@@ -39,6 +39,13 @@ public class LoginFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
+		HttpServletResponse httpResponse = (HttpServletResponse) response;
+		HttpServletRequest httpRequest = (HttpServletRequest) request;
+		httpResponse.setHeader("Access-Control-Allow-Origin", httpRequest.getHeader("Origin"));
+		httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
+		httpResponse.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+		httpResponse.setHeader("Access-Control-Max-Age", "3600");
+		httpResponse.setHeader("Access-Control-Allow-Headers", "x-requested-with,content-type");
 
 //		HttpServletRequest httpRequest=(HttpServletRequest) request;
 //		HttpServletResponse httpResponse=(HttpServletResponse)response;

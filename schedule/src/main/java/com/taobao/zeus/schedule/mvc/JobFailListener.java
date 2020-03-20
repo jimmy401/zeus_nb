@@ -5,7 +5,6 @@ import com.taobao.zeus.broadcast.alarm.SMSAlarm;
 import com.taobao.zeus.dal.logic.GroupManagerWithAction;
 import com.taobao.zeus.dal.logic.JobHistoryManager;
 import com.taobao.zeus.dal.logic.UserManager;
-import com.taobao.zeus.dal.logic.impl.ReadOnlyGroupManagerWithAction;
 import com.taobao.zeus.dal.model.ZeusUser;
 import com.taobao.zeus.dal.tool.GroupBean;
 import com.taobao.zeus.dal.tool.JobBean;
@@ -30,14 +29,12 @@ import java.util.Map;
 public class JobFailListener extends DispatcherListener{
 	private static Logger log=LogManager.getLogger(JobFailListener.class);
 	private GroupManagerWithAction groupManager;
-	private ReadOnlyGroupManagerWithAction readOnlyGroupManager;
 	private UserManager userManager;
 	private JobHistoryManager jobHistoryManager;
 	private MailAlarm mailAlarm;
 	private SMSAlarm smsAlarm;
 	public JobFailListener(MasterContext context){
 		groupManager=context.getGroupManagerWithAction();
-		readOnlyGroupManager=context.getReadOnlyGroupManagerWithAction();
 		userManager=context.getMysqlUserManager();
 		jobHistoryManager=context.getJobHistoryManager();
 		mailAlarm=context.getMailAlarm();

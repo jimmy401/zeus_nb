@@ -1,7 +1,7 @@
 package com.taobao.zeus.dal.tool;
 
 import com.taobao.zeus.client.ZeusException;
-import com.taobao.zeus.dal.logic.impl.ReadOnlyGroupManagerWithAction;
+import com.taobao.zeus.dal.logic.impl.TreeViewService;
 import com.taobao.zeus.model.ActionDescriptor;
 import com.taobao.zeus.model.ActionDescriptor.JobRunType;
 import com.taobao.zeus.model.ActionDescriptor.JobScheduleType;
@@ -16,7 +16,7 @@ import java.util.*;
 @Repository
 public class JobValidate {
 	@Autowired
-	private ReadOnlyGroupManagerWithAction readOnlyGroupManager;
+	private TreeViewService treeViewService;
 
 	public boolean valide(ActionDescriptor job) throws ZeusException{
 		if(job.getJobType()==null){
@@ -72,7 +72,7 @@ public class JobValidate {
 		}
 		
 		//检查依赖的死循环问题
-		GroupBean root=readOnlyGroupManager.getGlobeGroupBean();
+		GroupBean root= treeViewService.buildGlobeGroupBeanWithRelation();
 		Map<String, JobBean> allJobBeans=root.getAllSubJobBeans();
 		Set<JobBean> deps=new HashSet<JobBean>();
 		if(job.getScheduleType()==JobScheduleType.Dependent){

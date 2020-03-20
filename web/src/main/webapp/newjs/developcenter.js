@@ -403,7 +403,7 @@ function getDebugLog(debugId) {
     };
 
     $.ajax({
-        type: "POST",
+        type: "GET",
         url: "develop_center/get_log",
         data: postData,
         success: function (ret) {

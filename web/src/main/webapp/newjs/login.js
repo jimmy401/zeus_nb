@@ -59,7 +59,7 @@ $(function() {
 //								console.log(response);
                 if (response == "null") {
                     alert("用户名不存在");
-                } else if (response == "error") {
+                } else if (response.msg == "failed") {
                     alert("账户错误");
                 } else {
                     window.location.href = '/zeus-web/homepage.jsp';

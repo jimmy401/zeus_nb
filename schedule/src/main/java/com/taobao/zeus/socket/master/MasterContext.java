@@ -43,8 +43,6 @@ public class MasterContext {
 	@Autowired
 	public MysqlGroupManagerWithAction mysqlGroupManagerWithAction;
 	@Autowired
-	public ReadOnlyGroupManagerWithAction readOnlyGroupManagerWithAction;
-	@Autowired
 	public MysqlUserManager mysqlUserManager;
 	@Autowired
 	public MailAlarm mailAlarm;
@@ -166,9 +164,6 @@ public class MasterContext {
 	}
 	public GroupManagerWithAction getGroupManagerWithAction() {
 		return this.mysqlGroupManagerWithAction;
-	}
-	public ReadOnlyGroupManagerWithAction getReadOnlyGroupManagerWithAction() {
-		return this.readOnlyGroupManagerWithAction;
 	}
 	public UserManager getMysqlUserManager() {
 		return this.mysqlUserManager;

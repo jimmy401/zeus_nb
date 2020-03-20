@@ -89,7 +89,7 @@ public class DevelopCenterController extends BaseController {
         return this.buildResponse(ReturnCode.SUCCESS, debugId);
     }
 
-    @RequestMapping(value = "/get_log", method = RequestMethod.POST)
+    @RequestMapping(value = "/get_log", method = RequestMethod.GET)
     public CommonResponse<DebugHistoryModel> getHistoryModel(@RequestParam(value = "debugId", defaultValue = "") String debugId) {
         DebugHistory his = debugHistoryManager.findDebugHistory(debugId);
         DebugHistoryModel model = convert(his);

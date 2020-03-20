@@ -3,7 +3,6 @@ package com.taobao.zeus.dal.tool;
 import com.taobao.zeus.dal.logic.GroupManagerWithJob;
 import com.taobao.zeus.dal.model.ZeusGroupWithBLOBs;
 import com.taobao.zeus.model.ActionDescriptor;
-import com.taobao.zeus.model.GroupDescriptor;
 import com.taobao.zeus.model.JobStatus;
 import com.taobao.zeus.util.Tuple;
 import org.slf4j.Logger;
@@ -52,15 +51,7 @@ public class GroupManagerWithJobTool {
 		}
 		return root;
 	}
-	/**
-	 * 构建一个树形节点网络，不包含Job之间的依赖关系对象引用
-	 * @param
-	 * @return
-	 */
-	public static GroupBean buildGlobeGroupBeanWithoutDepend(GroupManagerWithJob groupManagerWithJob) {
-		GroupBean root=groupManagerWithJob.getDownstreamGroupBean(groupManagerWithJob.getRootGroupId());
-		return root;
-	}
+
 	public static GroupBean getDownstreamGroupBean(String groupId,GroupManagerWithJob groupManagerWithJob) {
 		ZeusGroupWithBLOBs group=groupManagerWithJob.getZeusGroupById(groupId);
 		GroupBean result=new GroupBean(group);

@@ -8,7 +8,6 @@ import java.util.Map;
 import com.taobao.zeus.dal.model.ZeusActionWithBLOBs;
 import com.taobao.zeus.dal.model.ZeusGroupWithBLOBs;
 import com.taobao.zeus.dal.model.ZeusUser;
-import com.taobao.zeus.dal.model.ZeusWorker;
 import com.taobao.zeus.model.ActionDescriptor;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -16,13 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.taobao.zeus.client.ZeusException;
-import com.taobao.zeus.model.GroupDescriptor;
 import com.taobao.zeus.model.ActionDescriptor.JobRunType;
 import com.taobao.zeus.model.JobStatus;
 import com.taobao.zeus.model.processer.JobProcesser;
 import com.taobao.zeus.model.processer.Processer;
 import com.taobao.zeus.dal.tool.GroupBean;
-import com.taobao.zeus.dal.logic.GroupManagerWithAction;
 import com.taobao.zeus.dal.tool.JobBean;
 import com.taobao.zeus.dal.logic.PermissionManager;
 import com.taobao.zeus.dal.logic.UserManager;
@@ -35,12 +32,12 @@ import org.springframework.stereotype.Repository;
  *
  */
 @Repository
-public class PermissionGroupManagerWithAction implements GroupManagerWithAction {
+public class PermissionGroupManagerWithAction{
 	private Logger log=LogManager.getLogger(PermissionGroupManagerWithAction.class);
 
 	@Autowired
 	@Qualifier("scheduleGroupManagerWithAction")
-    GroupManagerWithAction groupManager;
+	ScheduleGroupManagerWithAction scheduleGroupManagerWithAction;
 
 	@Autowired
 	@Qualifier("mysqlPermissionManager")
@@ -49,13 +46,11 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 	@Qualifier("mysqlUserManager")
 	private UserManager userManager;
    //new class method begin
-	@Override
 	public Tuple<ActionDescriptor,JobStatus> getActionDescriptor(String jobId) {
-		return groupManager.getActionDescriptor(jobId);
+		return scheduleGroupManagerWithAction.getActionDescriptor(jobId);
 	}
-	@Override
 	public GroupBean getDownstreamGroupBean(String groupId) {
-		return groupManager.getDownstreamGroupBean(groupId);
+		return scheduleGroupManagerWithAction.getDownstreamGroupBean(groupId);
 	}
 
 	public List<Long> getJobACtion(String jobId) {
@@ -77,10 +72,10 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 		return false;
 	}
 	private Boolean isGroupOwner(String uid,String groupId){
-		return isGroupOwner(uid, groupManager.getUpstreamGroupBean(groupId));
+		return isGroupOwner(uid, scheduleGroupManagerWithAction.getUpstreamGroupBean(groupId));
 	}
 	private Boolean isJobOwner(String uid,String jobId){
-		JobBean jb=groupManager.getUpstreamJobBean(jobId);
+		JobBean jb=scheduleGroupManagerWithAction.getUpstreamJobBean(jobId);
 		if(jb.getActionDescriptor().getOwner().equalsIgnoreCase(uid)){
 			return true;
 		}
@@ -99,30 +94,27 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 		}
 		return permissionManager.hasJobPermission(uid, jobId);
 	}
-	@Override
 	public ZeusGroupWithBLOBs createGroup(String user, String groupName,String parentGroup, boolean isDirectory) throws ZeusException {
 		if(hasGroupPermission(user, parentGroup)){
-			return groupManager.createGroup(user, groupName, parentGroup, isDirectory);
+			return scheduleGroupManagerWithAction.createGroup(user, groupName, parentGroup, isDirectory);
 		}else{
 			throw new ZeusException("您无权操作");
 		}
 	}
 
-	@Override
 	public ActionDescriptor createAction(String user, String jobName,String parentGroup, JobRunType jobType) throws ZeusException {
 		if(hasGroupPermission(user, parentGroup)){
-			return groupManager.createAction(user, jobName, parentGroup, jobType);
+			return scheduleGroupManagerWithAction.createAction(user, jobName, parentGroup, jobType);
 		}else{
 			throw new ZeusException("您无权操作");
 		}
 	}
 
-	@Override
 	public void deleteGroup(String user, String groupId) throws ZeusException {
 		if(hasGroupPermission(user, groupId)){
-			ZeusGroupWithBLOBs gd=groupManager.getGroupDescriptor(groupId);
+			ZeusGroupWithBLOBs gd=scheduleGroupManagerWithAction.getGroupDescriptor(groupId);
 			if(gd!=null && gd.getOwner().equals(user)){
-				groupManager.deleteGroup(user, groupId);
+				scheduleGroupManagerWithAction.deleteGroup(user, groupId);
 			}
 		}else{
 			throw new ZeusException("您无权操作");
@@ -130,50 +122,43 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 		
 	}
 
-	@Override
 	public void deleteAction(String user, String jobId) throws ZeusException {
 		if(hasJobPermission(user, jobId)){
-			Tuple<ActionDescriptor, JobStatus> job=groupManager.getActionDescriptor(jobId);
+			Tuple<ActionDescriptor, JobStatus> job=scheduleGroupManagerWithAction.getActionDescriptor(jobId);
 			if(job!=null){
-				groupManager.deleteAction(user, jobId);
+				scheduleGroupManagerWithAction.deleteAction(user, jobId);
 			}
 		}else{
 			throw new ZeusException("没有删除的权限");
 		}
 	}
 
-	@Override
 	public GroupBean getGlobeGroupBean() {
-		return groupManager.getGlobeGroupBean();
+		return scheduleGroupManagerWithAction.getGlobeGroupBean();
 	}
 
-	@Override
 	public ZeusGroupWithBLOBs getGroupDescriptor(String groupId) {
-		return groupManager.getGroupDescriptor(groupId);
+		return scheduleGroupManagerWithAction.getGroupDescriptor(groupId);
 	}
 
-	@Override
 	public String getRootGroupId() {
-		return groupManager.getRootGroupId();
+		return scheduleGroupManagerWithAction.getRootGroupId();
 	}
 
-	@Override
 	public GroupBean getUpstreamGroupBean(String groupId) {
-		return groupManager.getUpstreamGroupBean(groupId);
+		return scheduleGroupManagerWithAction.getUpstreamGroupBean(groupId);
 	}
 
-	@Override
 	public JobBean getUpstreamJobBean(String jobId) {
-		return groupManager.getUpstreamJobBean(jobId);
+		return scheduleGroupManagerWithAction.getUpstreamJobBean(jobId);
 	}
 
-	@Override
 	public void updateGroup(String user, ZeusGroupWithBLOBs group)
 			throws ZeusException {
 		if(hasGroupPermission(user, group.getId().toString())){
-			ZeusGroupWithBLOBs gd=groupManager.getGroupDescriptor(group.getId().toString());
+			ZeusGroupWithBLOBs gd=scheduleGroupManagerWithAction.getGroupDescriptor(group.getId().toString());
 			if(gd!=null){
-				groupManager.updateGroup(user, group);
+				scheduleGroupManagerWithAction.updateGroup(user, group);
 			}
 		}else{
 			throw new ZeusException("没有更新的权限");
@@ -181,10 +166,9 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 		
 	}
 
-	@Override
 	public void updateAction(String user, ActionDescriptor job) throws ZeusException {
 		if(hasJobPermission(user, job.getId())){
-			Tuple<ActionDescriptor, JobStatus> old=groupManager.getActionDescriptor(job.getId());
+			Tuple<ActionDescriptor, JobStatus> old=scheduleGroupManagerWithAction.getActionDescriptor(job.getId());
 			if(old!=null ){
 				List<JobProcesser> hasadd=new ArrayList<JobProcesser>();
 				for(Processer p:old.getX().getPreProcessers()){
@@ -223,7 +207,7 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 						throw new ZeusException("您没有权限将Job："+jp.getJobId() +" 添加到处理单元中");
 					}
 				}
-				groupManager.updateAction(user, job);
+				scheduleGroupManagerWithAction.updateAction(user, job);
 			}
 		}else{
 			throw new ZeusException("没有更新的权限");
@@ -231,19 +215,15 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 		
 	}
 
-	@Override
 	public Map<String, Tuple<ActionDescriptor,JobStatus>> getActionDescriptor(Collection<String> jobIds) {
-		return groupManager.getActionDescriptor(jobIds);
+		return scheduleGroupManagerWithAction.getActionDescriptor(jobIds);
 	}
-	@Override
 	public void updateActionStatus(JobStatus jobStatus) {
 		throw new UnsupportedOperationException("PermissionGroupManager 不支持此操作");
 	}
-	@Override
 	public JobStatus getActionStatus(String jobId) {
-		return groupManager.getActionStatus(jobId);
+		return scheduleGroupManagerWithAction.getActionStatus(jobId);
 	}
-	@Override
 	public void grantGroupOwner(String granter, String uid, String groupId) throws ZeusException{
 		ZeusUser nextUser = userManager.findByUidFilter(uid);
 		//if (nextUser.getUserType() != 0) {
@@ -252,7 +232,7 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 		if (nextUser.getIsEffective() != 1) {
 			throw new ZeusException("请转给有效用户");
 		}
-		GroupBean gb=groupManager.getUpstreamGroupBean(groupId);
+		GroupBean gb=scheduleGroupManagerWithAction.getUpstreamGroupBean(groupId);
 		List<String> owners=new ArrayList<String>();
 		while(gb!=null){
 			if(!owners.contains(gb.getGroupDescriptor().getOwner())){
@@ -261,13 +241,12 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 			gb=gb.getParentGroupBean();
 		}
 		if(owners.contains(granter)){
-			groupManager.grantGroupOwner(granter, uid, groupId);
+			scheduleGroupManagerWithAction.grantGroupOwner(granter, uid, groupId);
 		}else{
 			throw new ZeusException("您无权操作");
 		}
 	}
 
-	@Override
 	public void grantJobOwner(String granter, String uid, String jobId) throws ZeusException{
 		ZeusUser nextUser = userManager.findByUidFilter(uid);
 		//if (nextUser.getUserType() != 0) {
@@ -276,7 +255,7 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 		if (nextUser.getIsEffective() != 1) {
 			throw new ZeusException("请转给有效用户");
 		}
-		JobBean jb=groupManager.getUpstreamJobBean(jobId);
+		JobBean jb=scheduleGroupManagerWithAction.getUpstreamJobBean(jobId);
 		List<String> owners=new ArrayList<String>();
 		owners.add(jb.getActionDescriptor().getOwner());
 		GroupBean gb=jb.getGroupBean();
@@ -287,7 +266,7 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 			gb=gb.getParentGroupBean();
 		}
 		if(owners.contains(granter)){
-			groupManager.grantJobOwner(granter, uid, jobId);
+			scheduleGroupManagerWithAction.grantJobOwner(granter, uid, jobId);
 		}else{
 			throw new ZeusException("您无权操作");
 		}
@@ -328,75 +307,49 @@ public class PermissionGroupManagerWithAction implements GroupManagerWithAction 
 		return userManager.findListByUid(permissionManager.getJobAdmins(jobId));
 	}
 
-	@Override
 	public List<ZeusGroupWithBLOBs> getChildrenGroup(String groupId) {
-		return groupManager.getChildrenGroup(groupId);
+		return scheduleGroupManagerWithAction.getChildrenGroup(groupId);
 	}
-	@Override
 	public List<Tuple<ActionDescriptor, JobStatus>> getChildrenAction(String groupId) {
-		return groupManager.getChildrenAction(groupId);
+		return scheduleGroupManagerWithAction.getChildrenAction(groupId);
 	}
-	@Override
 	public GroupBean getDownstreamGroupBean(GroupBean parent) {
-		return groupManager.getDownstreamGroupBean(parent);
+		return scheduleGroupManagerWithAction.getDownstreamGroupBean(parent);
 	}
-	@Override
 	public void moveJob(String uid, String jobId, String groupId)
 			throws ZeusException {
 		if(!permissionManager.hasGroupPermission(uid, groupId) || !permissionManager.hasJobPermission(uid, jobId)){
 			throw new ZeusException("您无权操作");
 		}
-		groupManager.moveJob(uid, jobId, groupId);
+		scheduleGroupManagerWithAction.moveJob(uid, jobId, groupId);
 	}
-	@Override
 	public void moveGroup(String uid, String groupId, String newParentGroupId)
 			throws ZeusException {
 		if(!permissionManager.hasGroupPermission(uid, groupId) ||
 				!permissionManager.hasGroupPermission(uid, newParentGroupId)){
 			throw new ZeusException("您无权操作");
 		}
-		groupManager.moveGroup(uid, groupId, newParentGroupId);
-	}
-	@Override
-	public List<String> getHosts() throws ZeusException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public void replaceWorker(ZeusWorker worker) throws ZeusException {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public void removeWorker(String host) throws ZeusException {
-		// TODO Auto-generated method stub
-		
+		scheduleGroupManagerWithAction.moveGroup(uid, groupId, newParentGroupId);
 	}
 
-	@Override
 	public void saveOrUpdateAction(ZeusActionWithBLOBs actionPer) throws ZeusException {
-		groupManager.saveOrUpdateAction(actionPer);
+		scheduleGroupManagerWithAction.saveOrUpdateAction(actionPer);
 		
 	}
-	@Override
 	public List<ZeusActionWithBLOBs> getLastJobAction(String jobId) {
-		return groupManager.getLastJobAction(jobId);
+		return scheduleGroupManagerWithAction.getLastJobAction(jobId);
 	}
-	@Override
 	public void updateAction(ActionDescriptor actionPer) throws ZeusException {
-		groupManager.updateAction(actionPer);
+		scheduleGroupManagerWithAction.updateAction(actionPer);
 	}
-	@Override
 	public List<Tuple<ActionDescriptor, JobStatus>> getActionList(String jobId) {
-		return groupManager.getActionList(jobId);
+		return scheduleGroupManagerWithAction.getActionList(jobId);
 	}
-	@Override
 	public void removeAction(Long actionId) throws ZeusException {
-		groupManager.removeAction(actionId);
+		scheduleGroupManagerWithAction.removeAction(actionId);
 		
 	}
-	@Override
 	public boolean IsExistedBelowRootGroup(String GroupName) {
-		return groupManager.IsExistedBelowRootGroup(GroupName);
+		return scheduleGroupManagerWithAction.IsExistedBelowRootGroup(GroupName);
 	}
 }

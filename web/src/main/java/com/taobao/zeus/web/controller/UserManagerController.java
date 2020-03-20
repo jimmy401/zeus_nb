@@ -239,7 +239,7 @@ public class UserManagerController extends BaseController {
             ZeusUser curUser = CurrentUser.getUser();
             if (curUser.getUserType() == 0) {//组用户的情况下，匹配所有用户
                 ZeusUser aUser = mysqlUserManager.findByUid(uid);
-                aUser.setIsEffective(1);
+                aUser.setIsEffective(ZeusUser.UserStatus.CHECK_SUCCESS.value());
                 mysqlUserManager.update(aUser);
             }
 
@@ -257,7 +257,7 @@ public class UserManagerController extends BaseController {
             ZeusUser curUser = CurrentUser.getUser();
             if (curUser.getUserType() == 0) {//组用户的情况下，匹配所有用户
                 ZeusUser aUser = mysqlUserManager.findByUid(uid);
-                aUser.setIsEffective(0);
+                aUser.setIsEffective(ZeusUser.UserStatus.CHECK_FAILED.value());
                 mysqlUserManager.update(aUser);
             }
 
