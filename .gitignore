@@ -21,6 +21,7 @@ web/.settings
 /web/src/main/webapp/zeus_platform
 /web/src/main/webapp/gwt-unitCache
 /web/.gwt
+web/src/main/filter
 zeus_platform
 .gwt
 /web/*.log
