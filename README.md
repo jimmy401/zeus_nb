@@ -49,8 +49,9 @@ zeus操作起来更加方便。对被阿里抛弃的zeus，感觉很可惜。决
   * 修改web工程下filter里的prod.properties里的数据库连接，hadoop,hive等配置。<br/>
   * hadoop.home=/usr/lib/hadoop 可以不改变，在对应linux服务器上建软连接的方式指向真正的hadoop lib路径。<br><br/>
    * ln -s /opt/cloudera/parcels/CDH-5.10.0-1.cdh5.10.0.p0.41/lib/hadoop /usr/lib/hadoop
-  * hive.home=/usr/lib/hive配置参考这个方法。<br>
+  * hive.home=/usr/lib/hive配置参考这个方法。ln -s /opt/cloudera/parcels/CDH-5.14.0-1.cdh5.14.0.p0.24/lib/hive /usr/lib <br>
   * zeus的每个节点都需要有这个配置。
+   * 如果有Kerberos认证的话，请在prod.properties中打开kerberos.auth=true
   
 6.把web项目下的war上传到A,B,C三台机器上。放在tomcat的部署目录下，tomcat内存配置要大，看任务个数吧。因为zeus的很吃内存的。<br/>
   首先启动A,接着B,C，最先启动会作为master。<br/>

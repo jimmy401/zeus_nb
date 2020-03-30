@@ -3,6 +3,8 @@ package com.taobao.zeus;
 import com.taobao.zeus.util.DateUtil;
 
 import java.text.ParseException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by lowry on 16/3/9.
@@ -10,21 +12,32 @@ import java.text.ParseException;
 public class Test
 {
     public static void main (String []args) throws ParseException {
-            String tz="GMT+0800";
-           long ts =  DateUtil.string2Timestamp(
-                    DateUtil.getDayEndTime(0, tz), null);
+        String s = "Mem:         128717        7819      109799          97       11098      120077";
+        Pattern pattern=Pattern.compile("\\d+");
+        String line=s.substring(s.indexOf("Mem:"));
+        Matcher matcher=pattern.matcher(line);
+        double used=0d;
+        double free=0d;
+        int num=0;
+        while(matcher.find()){
+            if(num==0){
+                num++;
+                continue;
+            }else
+            if(num==1){
+                used=Double.valueOf(matcher.group());
+                num++;
+                continue;
+            }
+            if(num==2){
+                free=Double.valueOf(matcher.group());
+                break;
+            }
+        }
 
-        System.out.println(ts);
+        System.out.println(used);
 
-            String dt =  DateUtil.getTimeStrByTimestamp(ts,
-                DateUtil.getDefaultTZStr());
-
-        System.out.println(dt);
-
-
-        System.out.println("day start time :" +DateUtil.getDayStartTime(0, tz));
-
-        System.out.println("day end time :" +DateUtil.getDayEndTime(0, tz));
+        System.out.println(used/(used+free));
 
     }
 }

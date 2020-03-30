@@ -14,7 +14,7 @@ public class MemUseRateJob extends ShellJob{
 
 	private double rate;
 	public MemUseRateJob(JobContext jobContext,double rate) {
-		super(jobContext,"free -m | grep buffers/cache");
+		super(jobContext,"free -m | grep Mem:");
 		/**
 		 * 添加一个表示是否为心跳的标示符
 		 */
@@ -36,19 +36,23 @@ public class MemUseRateJob extends ShellJob{
 		if(exitCode==0){
 			String[] content=getJobContext().getJobHistory().getLog().getContent().split("\n");
 			for(String s:content){
-				if(s.contains("buffers/cache")){
-					String line=s.substring(s.indexOf("buffers/cache:"));
+				if(s.contains("Mem:")){
+					String line=s.substring(s.indexOf("Mem:"));
 					Matcher matcher=pattern.matcher(line);
 					double used=0d;
 					double free=0d;
 					int num=0;
 					while(matcher.find()){
 						if(num==0){
+							num++;
+							continue;
+						}else
+						if(num==1){
 							used=Double.valueOf(matcher.group());
 							num++;
 							continue;
 						}
-						if(num==1){
+						if(num==2){
 							free=Double.valueOf(matcher.group());
 							break;
 						}
